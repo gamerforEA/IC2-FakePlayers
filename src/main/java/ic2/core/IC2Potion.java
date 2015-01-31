@@ -29,13 +29,11 @@ public class IC2Potion extends Potion
 	@Override
 	public void performEffect(EntityLivingBase entity, int amplifier)
 	{
-		// TODO gamerforEA code start
-		if (amplifier != 0) return;
-		// TODO gamerforEA code end
+		/* TODO gamerforEA code clear:
 		if (this.id == radiation.id)
 		{
 			entity.attackEntityFrom(IC2DamageSource.radiation, (float) (amplifier / 100) + 0.5F);
-		}
+		} */
 	}
 
 	@Override

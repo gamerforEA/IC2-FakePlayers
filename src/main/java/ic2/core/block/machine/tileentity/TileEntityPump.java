@@ -142,7 +142,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		{
 			super.markDirty();
 		}
-
 	}
 
 	@Override
@@ -537,11 +536,11 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	@Override
 	public List<ItemStack> getCompatibleUpgradeList()
 	{
-		List<ItemStack> list = new ArrayList();
-		list.add(Ic2Items.transformerUpgrade);
-		list.add(Ic2Items.energyStorageUpgrade);
-		list.add(Ic2Items.ejectorUpgrade);
-		list.add(Ic2Items.fluidEjectorUpgrade);
-		return list;
+		ArrayList itemstack = new ArrayList();
+		itemstack.add(Ic2Items.transformerUpgrade);
+		itemstack.add(Ic2Items.energyStorageUpgrade);
+		itemstack.add(Ic2Items.ejectorUpgrade);
+		itemstack.add(Ic2Items.fluidEjectorUpgrade);
+		return itemstack;
 	}
 }

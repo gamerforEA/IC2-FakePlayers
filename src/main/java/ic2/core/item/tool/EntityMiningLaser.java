@@ -1,7 +1,6 @@
 package ic2.core.item.tool;
 
 import ic2.api.event.LaserEvent;
-import ic2.core.ExplosionIC2;
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
 import ic2.core.block.MaterialIC2TNT;
@@ -13,14 +12,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.mojang.authlib.GameProfile;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -28,7 +23,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -39,6 +33,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+
+import com.mojang.authlib.GameProfile;
+
 import cpw.mods.fml.common.registry.IThrowableEntity;
 
 public class EntityMiningLaser extends Entity implements IThrowableEntity
@@ -47,7 +44,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	public float power;
 	public int blockBreaks;
 	public boolean explosive;
-	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(new Block[] { Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock) }));;
+	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(new Block[] { Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock) }));
 	public static final double laserSpeed = 1.0D;
 	public EntityLivingBase owner;
 	public boolean headingSet;
@@ -158,11 +155,11 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			++this.ticksInAir;
 			Vec3 oldPosition = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
 			Vec3 newPosition = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-			MovingObjectPosition movingobjectposition = this.worldObj.func_147447_a(oldPosition, newPosition, false, true, false);
+			MovingObjectPosition mop = this.worldObj.func_147447_a(oldPosition, newPosition, false, true, false);
 			oldPosition = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-			if (movingobjectposition != null)
+			if (mop != null)
 			{
-				newPosition = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+				newPosition = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
 			}
 			else
 			{
@@ -170,22 +167,24 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			}
 
 			Entity entity = null;
+			List<Entity> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
 			double d = 0.0D;
-			float resis;
 
-			for (Entity entity1 : (List<Entity>) this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D)))
+			float resis;
+			for (int i = 0; i < list.size(); ++i)
 			{
-				if (entity1.canBeCollidedWith() && (entity1 != this.owner || this.ticksInAir >= 5))
+				Entity tBlock = list.get(i);
+				if (tBlock.canBeCollidedWith() && (tBlock != this.owner || this.ticksInAir >= 5))
 				{
 					resis = 0.3F;
-					AxisAlignedBB axis = entity1.boundingBox.expand((double) resis, (double) resis, (double) resis);
-					MovingObjectPosition isa = axis.calculateIntercept(oldPosition, newPosition);
-					if (isa != null)
+					AxisAlignedBB axis = tBlock.boundingBox.expand((double) resis, (double) resis, (double) resis);
+					MovingObjectPosition mop1 = axis.calculateIntercept(oldPosition, newPosition);
+					if (mop1 != null)
 					{
-						double is = oldPosition.distanceTo(isa.hitVec);
+						double is = oldPosition.distanceTo(mop1.hitVec);
 						if (is < d || d == 0.0D)
 						{
-							entity = entity1;
+							entity = tBlock;
 							d = is;
 						}
 					}
@@ -194,10 +193,10 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 			if (entity != null)
 			{
-				movingobjectposition = new MovingObjectPosition(entity);
+				mop = new MovingObjectPosition(entity);
 			}
 
-			if (movingobjectposition != null && IC2.platform.isSimulating())
+			if (mop != null && IC2.platform.isSimulating())
 			{
 				if (this.explosive)
 				{
@@ -206,13 +205,11 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 					return;
 				}
 
-				if (movingobjectposition.entityHit != null)
+				if (mop.entityHit != null)
 				{
-					LaserEvent.LaserHitsEntityEvent event = new LaserEvent.LaserHitsEntityEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, movingobjectposition.entityHit);
+					/* TODO gamerforEA code replace:
+					LaserEvent.LaserHitsEntityEvent event = new LaserEvent.LaserHitsEntityEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, mop.entityHit);
 					MinecraftForge.EVENT_BUS.post(event);
-					// TODO gamerforEA code start
-					event.setCanceled(true);
-					// TODO gamerforEA code end
 					if (this.takeDataFromEvent(event))
 					{
 						int power = (int) this.power;
@@ -230,11 +227,13 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 						}
 
 						this.setDead();
-					}
+					} */
+					this.setDead();
+					// TODO gamerforEA code end
 				}
 				else
 				{
-					LaserEvent.LaserHitsBlockEvent event = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ, movingobjectposition.sideHit, 0.9F, true, true);
+					LaserEvent.LaserHitsBlockEvent event = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit, 0.9F, true, true);
 					MinecraftForge.EVENT_BUS.post(event);
 					// TODO gamerforEA code start
 					EntityPlayer player = null;
@@ -254,7 +253,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 					if (player != null)
 					{
-						BreakEvent breakEvent = new BreakEvent(movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ, this.worldObj, this.worldObj.getBlock(movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ), this.worldObj.getBlockMetadata(movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ), player);
+						BreakEvent breakEvent = new BreakEvent(mop.blockX, mop.blockY, mop.blockZ, this.worldObj, this.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ), this.worldObj.getBlockMetadata(mop.blockX, mop.blockY, mop.blockZ), player);
 						MinecraftForge.EVENT_BUS.post(breakEvent);
 						cancel = breakEvent.isCanceled();
 					}
@@ -262,7 +261,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 					if (!notNull || cancel) this.setDead();
 					// TODO gamerforEA code end
-					if (this.takeDataFromEvent(event) && notNull && !cancel)
+					if (this.takeDataFromEvent(event) && !this.isDead) // TODO gamerforEA code replace, old code: if (this.takeDataFromEvent(event))
 					{
 						Block block = this.worldObj.getBlock(event.x, event.y, event.z);
 						if (block != null && block != Blocks.glass && block != Blocks.glass_pane && !StackUtil.equals(block, Ic2Items.reinforcedGlass))
@@ -288,26 +287,28 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 											}
 											else
 											{
-												for (ItemStack stack : block.getDrops(this.worldObj, event.x, event.y, event.z, this.worldObj.getBlockMetadata(event.x, event.y, event.z), 0))
+												List<ItemStack> list1 = block.getDrops(this.worldObj, event.x, event.y, event.z, this.worldObj.getBlockMetadata(event.x, event.y, event.z), 0);
+
+												for (ItemStack stack : list1)
 												{
-													ItemStack stackResult = FurnaceRecipes.smelting().getSmeltingResult(stack);
-													if (stackResult != null)
+													ItemStack result = FurnaceRecipes.smelting().getSmeltingResult(stack);
+													if (result != null)
 													{
-														Block newBlock = StackUtil.getBlock(stackResult);
+														Block newBlock = StackUtil.getBlock(result);
 														if (newBlock != null && newBlock != block)
 														{
 															event.removeBlock = false;
 															event.dropBlock = false;
-															this.worldObj.setBlock(event.x, event.y, event.z, newBlock, stackResult.getItemDamage(), 7);
+															this.worldObj.setBlock(event.x, event.y, event.z, newBlock, result.getItemDamage(), 7);
 														}
 														else
 														{
 															event.dropBlock = false;
-															float f = 0.7F;
-															double d1 = (double) (this.worldObj.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-															double d2 = (double) (this.worldObj.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-															double d3 = (double) (this.worldObj.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-															EntityItem item = new EntityItem(this.worldObj, (double) event.x + d1, (double) event.y + d2, (double) event.z + d3, stackResult.copy());
+															float var6 = 0.7F;
+															double dx = (double) (this.worldObj.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
+															double dy = (double) (this.worldObj.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
+															double dz = (double) (this.worldObj.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
+															EntityItem item = new EntityItem(this.worldObj, (double) event.x + dx, (double) event.y + dy, (double) event.z + dz, result.copy());
 															item.delayBeforeCanPickup = 10;
 															this.worldObj.spawnEntityInWorld(item);
 														}
@@ -395,19 +396,17 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 	public void explode()
 	{
-		// TODO gamerforEA code start
-		if (this.worldObj != null) return;
-		// TODO gamerforEA code end
+		/* TODO gamerforEA code clear:
 		if (IC2.platform.isSimulating())
 		{
 			LaserEvent.LaserExplodesEvent event = new LaserEvent.LaserExplodesEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, 5.0F, 0.85F, 0.55F);
 			MinecraftForge.EVENT_BUS.post(event);
 			if (this.takeDataFromEvent(event))
 			{
-				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.posX, this.posY, this.posZ, event.explosionpower, event.explosiondroprate);
+				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, null, this.posX, this.posY, this.posZ, event.explosionpower, event.explosiondroprate);
 				explosion.doExplosion();
 			}
-		}
+		} */
 	}
 
 	public boolean canMine(Block block)

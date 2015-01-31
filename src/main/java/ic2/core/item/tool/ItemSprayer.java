@@ -12,7 +12,6 @@ import ic2.core.util.LiquidUtil;
 import ic2.core.util.StackUtil;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
 
 import net.minecraft.block.Block;
@@ -68,31 +67,31 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		}
 		else
 		{
-			MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(world, player, true);
-			if (movingobjectposition == null)
+			MovingObjectPosition mop = this.getMovingObjectPositionFromPlayer(world, player, true);
+			if (mop == null)
 			{
 				return false;
 			}
 			else
 			{
 				int maxFoamBlocks;
-				if (movingobjectposition.typeOfHit == MovingObjectType.BLOCK)
+				if (mop.typeOfHit == MovingObjectType.BLOCK)
 				{
-					maxFoamBlocks = movingobjectposition.blockX;
-					int y1 = movingobjectposition.blockY;
-					int z1 = movingobjectposition.blockZ;
-					Block block = world.getBlock(maxFoamBlocks, y1, z1);
-					if (block instanceof IFluidBlock)
+					maxFoamBlocks = mop.blockX;
+					int fluid = mop.blockY;
+					int pack = mop.blockZ;
+					Block pos = world.getBlock(maxFoamBlocks, fluid, pack);
+					if (pos instanceof IFluidBlock)
 					{
-						IFluidBlock target = (IFluidBlock) block;
-						if (target.canDrain(world, maxFoamBlocks, y1, z1))
+						IFluidBlock target = (IFluidBlock) pos;
+						if (target.canDrain(world, maxFoamBlocks, fluid, pack))
 						{
-							FluidStack amount = target.drain(world, maxFoamBlocks, y1, z1, false);
+							FluidStack amount = target.drain(world, maxFoamBlocks, fluid, pack, false);
 							int amount1 = LiquidUtil.fillContainerStack(stack, player, amount, true);
 							if (amount1 == amount.amount)
 							{
 								LiquidUtil.fillContainerStack(stack, player, amount, false);
-								target.drain(world, maxFoamBlocks, y1, z1, true);
+								target.drain(world, maxFoamBlocks, fluid, pack, true);
 								return true;
 							}
 						}
@@ -106,22 +105,22 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 					maxFoamBlocks += fluid.amount / this.getFluidPerFoam();
 				}
 
-				ItemStack stack1 = player.inventory.armorInventory[2];
-				if (stack1 != null && stack1.getItem() == Ic2Items.cfPack.getItem())
+				ItemStack armor = player.inventory.armorInventory[2];
+				if (armor != null && armor.getItem() == Ic2Items.cfPack.getItem())
 				{
-					fluid = ((ItemArmorCFPack) stack1.getItem()).getFluid(stack1);
+					fluid = ((ItemArmorCFPack) armor.getItem()).getFluid(armor);
 					if (fluid != null && fluid.amount > 0)
 					{
 						maxFoamBlocks += fluid.amount / this.getFluidPerFoam();
 					}
 					else
 					{
-						stack1 = null;
+						armor = null;
 					}
 				}
 				else
 				{
-					stack1 = null;
+					armor = null;
 				}
 
 				if (maxFoamBlocks == 0)
@@ -170,19 +169,20 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 						target = Target.Any;
 					}
 
-					int i = this.sprayFoam(world, x, y, z, calculateDirectionsFromPlayer(player), target, maxFoamBlocks, player);
-					i *= this.getFluidPerFoam();
-					if (i > 0)
+					// TODO gamerforEA code replace, old code: int foam = this.sprayFoam(world, x, y, z, calculateDirectionsFromPlayer(player), target, maxFoamBlocks);
+					int foam = this.sprayFoam(world, x, y, z, calculateDirectionsFromPlayer(player), target, maxFoamBlocks, player);
+					foam *= this.getFluidPerFoam();
+					if (foam > 0)
 					{
-						if (stack1 != null)
+						if (armor != null)
 						{
-							fluid = ((ItemArmorCFPack) stack1.getItem()).drainfromCFpack(player, stack1, i);
-							i -= fluid.amount;
+							fluid = ((ItemArmorCFPack) armor.getItem()).drainfromCFpack(player, armor, foam);
+							foam -= fluid.amount;
 						}
 
-						if (i > 0)
+						if (foam > 0)
 						{
-							this.drain(stack, i, true);
+							this.drain(stack, foam, true);
 						}
 
 						return true;
@@ -247,7 +247,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		}
 		else
 		{
-			ArrayList<ChunkPosition> check = new ArrayList<ChunkPosition>();
+			ArrayList<ChunkPosition> check = new ArrayList();
 			ArrayList<ChunkPosition> place = new ArrayList();
 			int foamBlocks = 0;
 			check.add(new ChunkPosition(x, y, z));

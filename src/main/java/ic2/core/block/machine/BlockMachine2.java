@@ -85,33 +85,59 @@ public class BlockMachine2 extends BlockMultiID
 		GameRegistry.registerTileEntity(TileEntityCondenser.class, "Condenser");
 	}
 
+	@Override
 	public String getTextureFolder(int id)
 	{
 		return "machine";
 	}
 
+	@Override
 	public Item getItemDropped(int meta, Random random, int fortune)
 	{
 		switch (meta)
 		{
+			case 0:
+			case 6:
+			case 7:
+			case 8:
 			case 11:
 				return Ic2Items.advancedMachine.getItem();
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 9:
+			case 10:
 			default:
 				return Ic2Items.machine.getItem();
 		}
 	}
 
+	@Override
 	public int damageDropped(int meta)
 	{
 		switch (meta)
 		{
+			case 0:
+			case 6:
+			case 7:
+			case 8:
 			case 11:
 				return Ic2Items.advancedMachine.getItemDamage();
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 9:
+			case 10:
 			default:
 				return Ic2Items.machine.getItemDamage();
 		}
 	}
 
+	@Override
 	public Class<? extends TileEntity> getTeClass(int meta, MutableObject<Class<?>[]> ctorArgTypes, MutableObject<Object[]> ctorArgs)
 	{
 		switch (meta)
@@ -153,11 +179,13 @@ public class BlockMachine2 extends BlockMultiID
 		}
 	}
 
+	@Override
 	public void randomDisplayTick(World world, int i, int j, int k, Random random)
 	{
 		world.getBlockMetadata(i, j, k);
 	}
 
+	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack)
 	{
 		super.onBlockPlacedBy(world, x, y, z, entity, stack);
@@ -191,17 +219,20 @@ public class BlockMachine2 extends BlockMultiID
 		}
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public EnumRarity getRarity(ItemStack stack)
 	{
 		return stack.getItemDamage() == 0 ? EnumRarity.rare : EnumRarity.common;
 	}
 
+	@Override
 	public boolean hasComparatorInputOverride()
 	{
 		return true;
 	}
 
+	@Override
 	public int getComparatorInputOverride(World world, int x, int y, int z, int side)
 	{
 		TileEntityBlock te = (TileEntityBlock) this.getOwnTe(world, x, y, z);

@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import com.mojang.authlib.GameProfile;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockStaticLiquid;
@@ -43,6 +41,9 @@ import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.IFluidBlock;
+
+import com.mojang.authlib.GameProfile;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -245,7 +246,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		}
 		else return;
 		// TODO gamerforEA code end
-
 		if (this.silktouch && block.canSilkHarvest(this.worldObj, new Ic2Player(this.worldObj), this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))
 		{
 			if (Item.getItemFromBlock(block) != null && StackUtil.check(new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ))))
@@ -549,9 +549,9 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	@Override
 	public List<ItemStack> getCompatibleUpgradeList()
 	{
-		List<ItemStack> list = new ArrayList<ItemStack>();
-		list.add(Ic2Items.overclockerUpgrade);
-		list.add(Ic2Items.redstoneinvUpgrade);
-		return list;
+		ArrayList itemstack = new ArrayList();
+		itemstack.add(Ic2Items.overclockerUpgrade);
+		itemstack.add(Ic2Items.redstoneinvUpgrade);
+		return itemstack;
 	}
 }

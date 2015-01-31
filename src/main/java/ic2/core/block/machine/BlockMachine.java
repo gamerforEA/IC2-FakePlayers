@@ -86,7 +86,7 @@ public class BlockMachine extends BlockMultiID
 		super.onBlockPlacedBy(world, x, y, z, entity, stack);
 		if (IC2.platform.isSimulating())
 		{
-			TileEntityBlock te = (TileEntityBlock) this.getOwnTe(world, x, y, z);
+			TileEntity te = this.getOwnTe(world, x, y, z);
 			if (te != null && entity != null && entity instanceof EntityPlayer)
 			{
 				GameProfile profile = ((EntityPlayer) entity).getGameProfile();
@@ -122,6 +122,16 @@ public class BlockMachine extends BlockMultiID
 				return meta;
 			case 2:
 				return meta;
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 10:
+			case 11:
+			default:
+				return 0;
 			case 9:
 				return meta;
 			case 12:
@@ -132,8 +142,6 @@ public class BlockMachine extends BlockMultiID
 				return 12;
 			case 15:
 				return 12;
-			default:
-				return 0;
 		}
 	}
 
@@ -164,14 +172,15 @@ public class BlockMachine extends BlockMultiID
 				return TileEntityElectrolyzer.class;
 			case 11:
 				return TileEntityRecycler.class;
+			case 12:
+			default:
+				return null;
 			case 13:
 				return TileEntityInduction.class;
 			case 14:
 				return TileEntityMatter.class;
 			case 15:
 				return TileEntityTerra.class;
-			default:
-				return null;
 		}
 	}
 
@@ -187,13 +196,13 @@ public class BlockMachine extends BlockMultiID
 			float f2mod;
 			if (meta == 1 && this.isActive(world, x, y, z))
 			{
-				TileEntityBlock var14 = (TileEntityBlock) this.getOwnTe(world, x, y, z);
-				if (var14 == null)
+				TileEntityBlock tile = (TileEntityBlock) this.getOwnTe(world, x, y, z);
+				if (tile == null)
 				{
 					return;
 				}
 
-				short var15 = var14.getFacing();
+				short var15 = tile.getFacing();
 				f2 = (float) x + 0.5F;
 				float var16 = (float) y + 0.0F + random.nextFloat() * 6.0F / 16.0F;
 				fmod = (float) z + 0.5F;

@@ -1,49 +1,36 @@
 package ic2.core.item.tool;
 
-import ic2.core.ExplosionIC2;
-import ic2.core.IC2;
-import ic2.core.util.Quaternion;
-import ic2.core.util.Vector3;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.registry.IThrowableEntity;
 
 public class EntityParticle extends Entity implements IThrowableEntity
 {
+	/* TODO gamerforEA code clear:
 	private double coreSize;
 	private double influenceSize;
 	private int lifeTime;
+	private Vector3[] radialTestVectors; */
 	private Entity owner;
-	private Vector3[] radialTestVectors;
 
 	public EntityParticle(World world)
 	{
 		super(world);
+		/* TODO gamerforEA code clear:
 		this.noClip = true;
-		this.lifeTime = 6000;
+		this.lifeTime = 6000; */
 	}
 
 	public EntityParticle(World world, EntityLivingBase owner, float speed, double coreSize, double influenceSize)
 	{
 		this(world);
+		this.owner = owner;
+		/* TODO gamerforEA code clear:
 		this.coreSize = coreSize;
 		this.influenceSize = influenceSize;
-		this.owner = owner;
 		this.setPosition(owner.posX, owner.posY + (double) owner.getEyeHeight(), owner.posZ);
 		Vector3 motion = new Vector3(owner.getLookVec());
 		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize);
@@ -62,7 +49,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		motion.scale((double) speed);
 		this.motionX = motion.x;
 		this.motionY = motion.y;
-		this.motionZ = motion.z;
+		this.motionZ = motion.z; */
 	}
 
 	@Override
@@ -95,13 +82,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 	@Override
 	public void onUpdate()
 	{
-		// TODO gamerforEA code start
-		if (this.worldObj != null)
-		{
-			this.setDead();
-			return;
-		}
-		// TODO gamerforEA code end
+		/* TODO gamerforEA code replace:
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;
@@ -119,10 +100,12 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			this.posZ = hit.hitVec.zCoord;
 		}
 
-		List<MovingObjectPosition> entitiesInfluences = new ArrayList<MovingObjectPosition>();
+		List<Entity> entitiesToCheck = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(this.prevPosX, this.prevPosY, this.prevPosZ, this.posX, this.posY, this.posZ).expand(this.influenceSize, this.influenceSize, this.influenceSize));
+		List<MovingObjectPosition> entitiesInfluences = new ArrayList();
 		double minDistanceSq = start.distanceSquared(end);
 
-		for (Entity entity : (List<Entity>) this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(this.prevPosX, this.prevPosY, this.prevPosZ, this.posX, this.posY, this.posZ).expand(this.influenceSize, this.influenceSize, this.influenceSize)))
+		MovingObjectPosition len;
+		for (Entity entity : entitiesToCheck)
 		{
 			if (entity != this.owner && entity.canBeCollidedWith())
 			{
@@ -130,7 +113,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 				if (vForward != null)
 				{
 					entitiesInfluences.add(vForward);
-					MovingObjectPosition len = entity.boundingBox.expand(this.coreSize, this.coreSize, this.coreSize).calculateIntercept(start.toVec3(), end.toVec3());
+					len = entity.boundingBox.expand(this.coreSize, this.coreSize, this.coreSize).calculateIntercept(start.toVec3(), end.toVec3());
 					if (len != null)
 					{
 						double distanceSq = start.distanceSquared(len.hitVec);
@@ -144,25 +127,26 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			}
 		}
 
-		double var18 = Math.sqrt(minDistanceSq) + this.influenceSize;
+		double d = Math.sqrt(minDistanceSq) + this.influenceSize;
 
-		for (MovingObjectPosition pos : entitiesInfluences)
+		for (MovingObjectPosition mop : entitiesInfluences)
 		{
-			if (start.distance(pos.hitVec) <= var18)
+			len = mop;
+			if (start.distance(len.hitVec) <= d)
 			{
-				this.onInfluence(pos);
+				this.onInfluence(len);
 			}
 		}
 
 		if (this.radialTestVectors != null)
 		{
-			Vector3 vec = end.copy().sub(start);
-			double d = vec.length();
-			vec.scale(1.0D / d);
+			Vector3 var20 = end.copy().sub(start);
+			double var21 = var20.length();
+			var20.scale(1.0D / var21);
 			Vector3 origin = new Vector3(start);
 			Vector3 tmp = new Vector3();
 
-			for (int i = 0; (double) i < d; ++i)
+			for (int i = 0; (double) i < var21; ++i)
 			{
 				for (int j = 0; j < this.radialTestVectors.length; ++j)
 				{
@@ -174,7 +158,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 					}
 				}
 
-				origin.add(vec);
+				origin.add(var20);
 			}
 		}
 
@@ -190,25 +174,32 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			{
 				this.setDead();
 			}
-		}
+		} */
+		this.setDead();
+		// TODO gamerforEA code end
 	}
 
 	protected void onImpact(MovingObjectPosition hit)
 	{
+		/* TODO gamerforEA code clear:
 		if (IC2.platform.isSimulating())
 		{
-			// TODO gamerforEA code clear: System.out.println("hit " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
+			System.out.println("hit " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
+			if (hit.typeOfHit == MovingObjectType.BLOCK && IC2.platform.isSimulating())
+			{
+			}
 
 			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, this.owner, hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 18.0F, 0.95F, ExplosionIC2.Type.Heat);
 			explosion.doExplosion();
-		}
+		} */
 	}
 
 	protected void onInfluence(MovingObjectPosition hit)
 	{
+		/* TODO gamerforEA code clear:
 		if (IC2.platform.isSimulating())
 		{
-			// TODO gamerforEA code clear: System.out.println("influenced " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
+			System.out.println("influenced " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
 			if (hit.typeOfHit == MovingObjectType.BLOCK && IC2.platform.isSimulating())
 			{
 				Block block = this.worldObj.getBlock(hit.blockX, hit.blockY, hit.blockZ);
@@ -237,6 +228,6 @@ public class EntityParticle extends Entity implements IThrowableEntity
 					this.worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
 				}
 			}
-		}
+		} */
 	}
 }

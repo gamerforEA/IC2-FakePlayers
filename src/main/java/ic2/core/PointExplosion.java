@@ -1,57 +1,66 @@
 package ic2.core;
 
-import ic2.core.util.Util;
-
-import java.util.List;
-
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
 public class PointExplosion extends Explosion
 {
+	/* TODO gamerforEA code replace:
 	private final World world;
+	private final Entity entity;
 	private final float dropRate;
 	private final int entityDamage;
 
-	public PointExplosion(World world1, Entity entity, double x, double y, double z, float power, float dropRate1, int entityDamage1)
+	public PointExplosion(World world, Entity entity, EntityLivingBase exploder, double x, double y, double z, float power, float dropRate, int entityDamage)
 	{
-		super(world1, entity, x, y, z, power);
-		this.world = world1;
-		this.dropRate = dropRate1;
-		this.entityDamage = entityDamage1;
+		super(world, exploder, x, y, z, power);
+		this.world = world;
+		this.entity = entity;
+		this.dropRate = dropRate;
+		this.entityDamage = entityDamage;
 	}
 
+	@Override
 	public void doExplosionA()
 	{
-		// TODO gamerforEA code start
-		if (this.world != null) return;
-		// TODO gamerforEA code end
-
-		for (int entitiesInRange = Util.roundToNegInf(this.explosionX) - 1; entitiesInRange <= Util.roundToNegInf(this.explosionX) + 1; ++entitiesInRange)
+		ExplosionEvent event = new ExplosionEvent(this.world, this.entity, this.explosionX, this.explosionY, this.explosionZ, (double) this.explosionSize, (EntityLivingBase) this.exploder, 0, 1.0D);
+		if (!MinecraftForge.EVENT_BUS.post(event))
 		{
-			for (int i = Util.roundToNegInf(this.explosionY) - 1; i <= Util.roundToNegInf(this.explosionY) + 1; ++i)
+			for (int x = Util.roundToNegInf(this.explosionX) - 1; x <= Util.roundToNegInf(this.explosionX) + 1; ++x)
 			{
-				for (int entity = Util.roundToNegInf(this.explosionZ) - 1; entity <= Util.roundToNegInf(this.explosionZ) + 1; ++entity)
+				for (int y = Util.roundToNegInf(this.explosionY) - 1; y <= Util.roundToNegInf(this.explosionY) + 1; ++y)
 				{
-					Block block = this.world.getBlock(entitiesInRange, i, entity);
-					if (block.getExplosionResistance(this.exploder, this.world, entitiesInRange, i, entity, this.explosionX, this.explosionY, this.explosionZ) < this.explosionSize * 10.0F)
+					for (int z = Util.roundToNegInf(this.explosionZ) - 1; z <= Util.roundToNegInf(this.explosionZ) + 1; ++z)
 					{
-						this.affectedBlockPositions.add(new ChunkPosition(entitiesInRange, i, entity));
+						Block block = this.world.getBlock(x, y, z);
+						if (block.getExplosionResistance(this.exploder, this.world, x, y, z, this.explosionX, this.explosionY, this.explosionZ) < this.explosionSize * 10.0F)
+						{
+							this.affectedBlockPositions.add(new ChunkPosition(x, y, z));
+						}
 					}
 				}
 			}
-		}
 
-		for (Entity entity : (List<Entity>) this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D)))
-		{
-			entity.attackEntityFrom(DamageSource.setExplosionSource(this), (float) this.entityDamage);
-		}
+			List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D));
 
-		this.explosionSize = 1.0F / this.dropRate;
+			for (Entity entity : list)
+			{
+				entity.attackEntityFrom(DamageSource.setExplosionSource(this), (float) this.entityDamage);
+			}
+
+			this.explosionSize = 1.0F / this.dropRate;
+		} 
+	} */
+	public PointExplosion(World world, Entity entity, EntityLivingBase exploder, double x, double y, double z, float power, float dropRate, int entityDamage)
+	{
+		super(world, exploder, x, y, z, power);
 	}
+
+	@Override
+	public void doExplosionA()
+	{
+	}
+	// TODO gamerforEA code end
 }
