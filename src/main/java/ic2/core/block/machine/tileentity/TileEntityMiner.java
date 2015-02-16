@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import com.mojang.authlib.GameProfile;
+
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
@@ -35,23 +37,20 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fluids.IFluidBlock;
-
-import com.mojang.authlib.GameProfile;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityMiner extends TileEntityElectricMachine implements IHasGui, IUpgradableBlock
 {
-	private Mode lastMode;
+	private TileEntityMiner.Mode lastMode;
 	public int progress;
 	private int scannedLevel;
 	private int scanRange;
@@ -78,7 +77,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	public TileEntityMiner()
 	{
 		super(1000, ConfigUtil.getInt(MainConfig.get(), "balance/minerDischargeTier"), 0, false);
-		this.lastMode = Mode.None;
+		this.lastMode = TileEntityMiner.Mode.None;
 		this.progress = 0;
 		this.scannedLevel = -1;
 		this.scanRange = 0;
@@ -91,7 +90,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.buffer = new InvSlot(this, "buffer", 1, InvSlot.Access.IO, 15);
 	}
 
-	@Override
 	public void onLoaded()
 	{
 		super.onLoaded();
@@ -101,7 +99,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.canProvideLiquid = false;
 	}
 
-	@Override
 	public void onUnloaded()
 	{
 		if (IC2.platform.isRendering() && this.audioSource != null)
@@ -113,11 +110,10 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		super.onUnloaded();
 	}
 
-	@Override
 	public void readFromNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.readFromNBT(nbtTagCompound);
-		this.lastMode = Mode.values()[nbtTagCompound.getInteger("lastMode")];
+		this.lastMode = TileEntityMiner.Mode.values()[nbtTagCompound.getInteger("lastMode")];
 		this.progress = nbtTagCompound.getInteger("progress");
 
 		// TODO gamerforEA code start
@@ -128,7 +124,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		// TODO gamerforEA code end
 	}
 
-	@Override
 	public void writeToNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.writeToNBT(nbtTagCompound);
@@ -141,7 +136,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		// TODO gamerforEA code end
 	}
 
-	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
@@ -165,6 +159,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			this.setActive(false);
 		}
+
 	}
 
 	private void chargeTools()
@@ -178,6 +173,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			this.energy -= ElectricItem.manager.charge(this.drillSlot.get(), this.energy, 1, false, false);
 		}
+
 	}
 
 	private boolean work()
@@ -196,8 +192,8 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			}
 			else
 			{
-				MineResult result = this.mineLevel(operationHeight);
-				return result == MineResult.Done ? this.digDown(operationHeight - 1, true) : result == MineResult.Working;
+				TileEntityMiner.MineResult result = this.mineLevel(operationHeight);
+				return result == TileEntityMiner.MineResult.Done ? this.digDown(operationHeight - 1, true) : result == TileEntityMiner.MineResult.Working;
 			}
 		}
 		else
@@ -222,9 +218,9 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 	private boolean withDrawPipe(int y)
 	{
-		if (this.lastMode != Mode.Withdraw)
+		if (this.lastMode != TileEntityMiner.Mode.Withdraw)
 		{
-			this.lastMode = Mode.Withdraw;
+			this.lastMode = TileEntityMiner.Mode.Withdraw;
 			this.progress = 0;
 		}
 
@@ -278,6 +274,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				((ItemBlock) fillerItem).onItemUse(filler, new Ic2Player(this.worldObj), this.worldObj, this.xCoord, y + 1, this.zCoord, 0, 0.0F, 0.0F, 0.0F);
 			}
 		}
+
 	}
 
 	private boolean digDown(int y, boolean removeTipAbove)
@@ -296,10 +293,10 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			}
 			else
 			{
-				MineResult result = this.mineBlock(this.xCoord, y, this.zCoord);
-				if (result != MineResult.Failed_Temp && result != MineResult.Failed_Perm)
+				TileEntityMiner.MineResult result = this.mineBlock(this.xCoord, y, this.zCoord);
+				if (result != TileEntityMiner.MineResult.Failed_Temp && result != TileEntityMiner.MineResult.Failed_Perm)
 				{
-					if (result == MineResult.Done)
+					if (result == TileEntityMiner.MineResult.Done)
 					{
 						if (removeTipAbove)
 						{
@@ -329,11 +326,11 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		}
 	}
 
-	private MineResult mineLevel(int y)
+	private TileEntityMiner.MineResult mineLevel(int y)
 	{
 		if (this.scannerSlot.isEmpty())
 		{
-			return MineResult.Done;
+			return TileEntityMiner.MineResult.Done;
 		}
 		else
 		{
@@ -344,7 +341,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 			if (this.scanRange <= 0)
 			{
-				return MineResult.Failed_Temp;
+				return TileEntityMiner.MineResult.Failed_Temp;
 			}
 			else
 			{
@@ -372,13 +369,13 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 						if (isValidTarget)
 						{
-							MineResult var8 = this.mineTowards(x, y, z);
-							if (var8 == MineResult.Done)
+							TileEntityMiner.MineResult var8 = this.mineTowards(x, y, z);
+							if (var8 == TileEntityMiner.MineResult.Done)
 							{
-								return MineResult.Working;
+								return TileEntityMiner.MineResult.Working;
 							}
 
-							if (var8 != MineResult.Failed_Perm)
+							if (var8 != TileEntityMiner.MineResult.Failed_Perm)
 							{
 								return var8;
 							}
@@ -386,12 +383,12 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 					}
 				}
 
-				return MineResult.Done;
+				return TileEntityMiner.MineResult.Done;
 			}
 		}
 	}
 
-	private MineResult mineTowards(int x, int y, int z)
+	private TileEntityMiner.MineResult mineTowards(int x, int y, int z)
 	{
 		int dx = Math.abs(x - this.xCoord);
 		int sx = this.xCoord < x ? 1 : -1;
@@ -408,7 +405,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			{
 				this.lastX = this.xCoord;
 				this.lastZ = this.zCoord;
-				return MineResult.Done;
+				return TileEntityMiner.MineResult.Done;
 			}
 
 			boolean isCurrentPos = cx == this.lastX && cz == this.lastZ;
@@ -444,8 +441,8 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		}
 		while (!isBlocking);
 
-		MineResult result1 = this.mineBlock(cx, y, cz);
-		if (result1 == MineResult.Done)
+		TileEntityMiner.MineResult result1 = this.mineBlock(cx, y, cz);
+		if (result1 == TileEntityMiner.MineResult.Done)
 		{
 			this.lastX = cx;
 			this.lastZ = cz;
@@ -454,7 +451,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		return result1;
 	}
 
-	private MineResult mineBlock(int x, int y, int z)
+	private TileEntityMiner.MineResult mineBlock(int x, int y, int z)
 	{
 		Block block = this.worldObj.getBlock(x, y, z);
 		boolean isAirBlock = true;
@@ -470,28 +467,28 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 					this.liquidY = y;
 					this.liquidZ = z;
 					this.canProvideLiquid = true;
-					return this.pumpMode ? MineResult.Failed_Temp : MineResult.Failed_Perm;
+					return this.pumpMode ? TileEntityMiner.MineResult.Failed_Temp : TileEntityMiner.MineResult.Failed_Perm;
 				}
 			}
 			else if (!this.canMine(x, y, z))
 			{
-				return MineResult.Failed_Perm;
+				return TileEntityMiner.MineResult.Failed_Perm;
 			}
 		}
 
 		this.canProvideLiquid = false;
 		byte energyPerTick;
 		short duration;
-		Mode mode1;
+		TileEntityMiner.Mode mode1;
 		if (isAirBlock)
 		{
-			mode1 = Mode.MineAir;
+			mode1 = TileEntityMiner.Mode.MineAir;
 			energyPerTick = 3;
 			duration = 20;
 		}
 		else if (this.drillSlot.get().getItem() == Ic2Items.miningDrill.getItem())
 		{
-			mode1 = Mode.MineDrill;
+			mode1 = TileEntityMiner.Mode.MineDrill;
 			energyPerTick = 6;
 			duration = 200;
 		}
@@ -502,7 +499,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				throw new IllegalStateException("invalid drill: " + this.drillSlot.get());
 			}
 
-			mode1 = Mode.MineDDrill;
+			mode1 = TileEntityMiner.Mode.MineDDrill;
 			energyPerTick = 20;
 			duration = 50;
 		}
@@ -519,16 +516,16 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			{
 				this.energy -= (double) energyPerTick;
 				++this.progress;
-				return MineResult.Working;
+				return TileEntityMiner.MineResult.Working;
 			}
 		}
 		else if (isAirBlock || this.harvestBlock(x, y, z, block))
 		{
 			this.progress = 0;
-			return MineResult.Done;
+			return TileEntityMiner.MineResult.Done;
 		}
 
-		return MineResult.Failed_Temp;
+		return TileEntityMiner.MineResult.Failed_Temp;
 	}
 
 	private boolean harvestBlock(int x, int y, int z, Block block)
@@ -616,7 +613,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		else
 		{
 			int meta = this.worldObj.getBlockMetadata(x, y, z);
-			return !StackUtil.equals(block, Ic2Items.miningPipe) && !StackUtil.equals(block, Ic2Items.miningPipeTip) && block != Blocks.chest ? (block instanceof IFluidBlock && this.isPumpConnected(x, y, z) ? true : ((block == Blocks.water || block == Blocks.flowing_water || block == Blocks.lava || block == Blocks.flowing_lava) && this.isPumpConnected(x, y, z) ? true : (block.getBlockHardness(this.worldObj, x, y, z) < 0.0F ? false : (block.canCollideCheck(meta, false) && block.getMaterial().isToolNotRequired() ? true : (block == Blocks.web ? true : (!this.drillSlot.isEmpty() && this.drillSlot.get().getItem() instanceof ItemTool ? ((ItemTool) this.drillSlot.get().getItem()).canHarvestBlock(block, this.drillSlot.get()) : false)))))) : false;
+			return !StackUtil.equals(block, Ic2Items.miningPipe) && !StackUtil.equals(block, Ic2Items.miningPipeTip) && block != Blocks.chest ? (block instanceof IFluidBlock && this.isPumpConnected(x, y, z) ? true : ((block == Blocks.water || block == Blocks.flowing_water || block == Blocks.lava || block == Blocks.flowing_lava) && this.isPumpConnected(x, y, z) ? true : (block.getBlockHardness(this.worldObj, x, y, z) < 0.0F ? false : (block.canCollideCheck(meta, false) && block.getMaterial().isToolNotRequired() ? true : (block == Blocks.web ? true : (this.drillSlot.isEmpty() ? false : ForgeHooks.canToolHarvestBlock(block, meta, this.drillSlot.get()) || this.drillSlot.get().func_150998_b(block))))))) : false;
 		}
 	}
 
@@ -630,31 +627,26 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		return this.worldObj.getTileEntity(this.xCoord, this.yCoord + 1, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord, this.yCoord - 1, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1) instanceof TileEntityPump ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1) instanceof TileEntityPump))));
 	}
 
-	@Override
 	public String getInventoryName()
 	{
 		return "Miner";
 	}
 
-	@Override
 	public ContainerBase<TileEntityMiner> getGuiContainer(EntityPlayer entityPlayer)
 	{
 		return new ContainerMiner(entityPlayer, this);
 	}
 
-	@Override
 	@SideOnly(Side.CLIENT)
 	public GuiScreen getGui(EntityPlayer entityPlayer, boolean isAdmin)
 	{
 		return new GuiMiner(new ContainerMiner(entityPlayer, this));
 	}
 
-	@Override
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
 	}
 
-	@Override
 	public void onNetworkUpdate(String field)
 	{
 		if (field.equals("active") && this.prevActive != this.getActive())
@@ -680,13 +672,11 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		super.onNetworkUpdate(field);
 	}
 
-	@Override
 	public double getEnergy()
 	{
 		return this.energy;
 	}
 
-	@Override
 	public boolean useEnergy(double amount)
 	{
 		if (this.energy >= amount)
@@ -700,30 +690,25 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		}
 	}
 
-	@Override
 	public int getOutputSize()
 	{
 		return this.buffer.size();
 	}
 
-	@Override
 	public ItemStack getOutput(int index)
 	{
 		return this.buffer.get(index);
 	}
 
-	@Override
 	public void setOutput(int index, ItemStack stack)
 	{
 		this.buffer.put(index, stack);
 	}
 
-	@Override
 	public void setRedstonePowered(boolean redstone)
 	{
 	}
 
-	@Override
 	public List<ItemStack> getCompatibleUpgradeList()
 	{
 		ArrayList itemstack = new ArrayList();
