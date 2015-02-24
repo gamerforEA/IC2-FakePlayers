@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2.2.677"
+version = "2.2.683"
 group= "ic2"
 archivesBaseName = "industrialcraft-2"
 
@@ -29,10 +29,10 @@ minecraft {
 }
 
 dependencies {
-	compile files('lib/ejml-0.23.jar', 'lib/industrialcraft-2-2.2.677-experimental-dev.jar')
+	compile files('lib/ejml-0.23.jar', 'lib/industrialcraft-2-2.2.683-experimental-dev.jar')
 }
 
 jar {
-	from zipTree('lib/industrialcraft-2-2.2.677-experimental.jar')
+	from zipTree('lib/industrialcraft-2-2.2.683-experimental.jar')
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
