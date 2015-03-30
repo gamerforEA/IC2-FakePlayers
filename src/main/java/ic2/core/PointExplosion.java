@@ -7,7 +7,6 @@ import net.minecraft.world.World;
 
 public class PointExplosion extends Explosion
 {
-	/* TODO gamerforEA code replace:
 	private final World world;
 	private final Entity entity;
 	private final float dropRate;
@@ -22,9 +21,9 @@ public class PointExplosion extends Explosion
 		this.entityDamage = entityDamage;
 	}
 
-	@Override
 	public void doExplosionA()
 	{
+		/* TODO gamerforEA code clear:
 		ExplosionEvent event = new ExplosionEvent(this.world, this.entity, this.explosionX, this.explosionY, this.explosionZ, (double) this.explosionSize, (EntityLivingBase) this.exploder, 0, 1.0D);
 		if (!MinecraftForge.EVENT_BUS.post(event))
 		{
@@ -43,24 +42,13 @@ public class PointExplosion extends Explosion
 				}
 			}
 
-			List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D));
-
-			for (Entity entity : list)
+			List<Entity> entities = this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D));
+			for (Entity entity : entities)
 			{
 				entity.attackEntityFrom(DamageSource.setExplosionSource(this), (float) this.entityDamage);
 			}
 
 			this.explosionSize = 1.0F / this.dropRate;
-		} 
-	} */
-	public PointExplosion(World world, Entity entity, EntityLivingBase exploder, double x, double y, double z, float power, float dropRate, int entityDamage)
-	{
-		super(world, exploder, x, y, z, power);
+		} */
 	}
-
-	@Override
-	public void doExplosionA()
-	{
-	}
-	// TODO gamerforEA code end
 }

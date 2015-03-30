@@ -1,40 +1,45 @@
 package ic2.core.item.tool;
 
+import ic2.core.util.Quaternion;
+import ic2.core.util.Vector3;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.registry.IThrowableEntity;
 
 public class EntityParticle extends Entity implements IThrowableEntity
 {
-	/* TODO gamerforEA code clear:
 	private double coreSize;
 	private double influenceSize;
 	private int lifeTime;
-	private Vector3[] radialTestVectors; */
 	private Entity owner;
+	private Vector3[] radialTestVectors;
 
 	public EntityParticle(World world)
 	{
 		super(world);
-		/* TODO gamerforEA code clear:
 		this.noClip = true;
-		this.lifeTime = 6000; */
+		this.lifeTime = 6000;
 	}
 
-	public EntityParticle(World world, EntityLivingBase owner, float speed, double coreSize, double influenceSize)
+	public EntityParticle(World world, EntityLivingBase owner1, float speed, double coreSize1, double influenceSize1)
 	{
 		this(world);
-		this.owner = owner;
-		/* TODO gamerforEA code clear:
-		this.coreSize = coreSize;
-		this.influenceSize = influenceSize;
-		this.setPosition(owner.posX, owner.posY + (double) owner.getEyeHeight(), owner.posZ);
-		Vector3 motion = new Vector3(owner.getLookVec());
-		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize);
-		double stepAngle = Math.atan(0.5D / influenceSize) * 2.0D;
+		this.coreSize = coreSize1;
+		this.influenceSize = influenceSize1;
+		this.owner = owner1;
+		this.setPosition(owner1.posX, owner1.posY + (double) owner1.getEyeHeight(), owner1.posZ);
+		Vector3 motion = new Vector3(owner1.getLookVec());
+		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize1);
+		double stepAngle = Math.atan(0.5D / influenceSize1) * 2.0D;
 		int steps = (int) Math.ceil(6.283185307179586D / stepAngle);
 		Quaternion q = (new Quaternion()).setFromAxisAngle(motion, stepAngle);
 		this.radialTestVectors = new Vector3[steps];
@@ -49,40 +54,33 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		motion.scale((double) speed);
 		this.motionX = motion.x;
 		this.motionY = motion.y;
-		this.motionZ = motion.z; */
+		this.motionZ = motion.z;
 	}
 
-	@Override
 	protected void entityInit()
 	{
 	}
 
-	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound)
 	{
 	}
 
-	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound)
 	{
 	}
 
-	@Override
 	public Entity getThrower()
 	{
 		return this.owner;
 	}
 
-	@Override
 	public void setThrower(Entity entity)
 	{
 		this.owner = entity;
 	}
 
-	@Override
 	public void onUpdate()
 	{
-		/* TODO gamerforEA code replace:
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;
@@ -100,13 +98,15 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			this.posZ = hit.hitVec.zCoord;
 		}
 
-		List<Entity> entitiesToCheck = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(this.prevPosX, this.prevPosY, this.prevPosZ, this.posX, this.posY, this.posZ).expand(this.influenceSize, this.influenceSize, this.influenceSize));
-		List<MovingObjectPosition> entitiesInfluences = new ArrayList();
+		List entitiesToCheck = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(this.prevPosX, this.prevPosY, this.prevPosZ, this.posX, this.posY, this.posZ).expand(this.influenceSize, this.influenceSize, this.influenceSize));
+		ArrayList entitiesInfluences = new ArrayList();
 		double minDistanceSq = start.distanceSquared(end);
+		Iterator maxInfluenceDistance = entitiesToCheck.iterator();
 
 		MovingObjectPosition len;
-		for (Entity entity : entitiesToCheck)
+		while (maxInfluenceDistance.hasNext())
 		{
+			Entity entity = (Entity) maxInfluenceDistance.next();
 			if (entity != this.owner && entity.canBeCollidedWith())
 			{
 				MovingObjectPosition vForward = entity.boundingBox.expand(this.influenceSize, this.influenceSize, this.influenceSize).calculateIntercept(start.toVec3(), end.toVec3());
@@ -127,12 +127,13 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			}
 		}
 
-		double d = Math.sqrt(minDistanceSq) + this.influenceSize;
+		double var18 = Math.sqrt(minDistanceSq) + this.influenceSize;
+		Iterator var19 = entitiesInfluences.iterator();
 
-		for (MovingObjectPosition mop : entitiesInfluences)
+		while (var19.hasNext())
 		{
-			len = mop;
-			if (start.distance(len.hitVec) <= d)
+			len = (MovingObjectPosition) var19.next();
+			if (start.distance(len.hitVec) <= var18)
 			{
 				this.onInfluence(len);
 			}
@@ -146,11 +147,11 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			Vector3 origin = new Vector3(start);
 			Vector3 tmp = new Vector3();
 
-			for (int i = 0; (double) i < var21; ++i)
+			for (int d = 0; (double) d < var21; ++d)
 			{
-				for (int j = 0; j < this.radialTestVectors.length; ++j)
+				for (int i = 0; i < this.radialTestVectors.length; ++i)
 				{
-					origin.copy(tmp).add(this.radialTestVectors[j]);
+					origin.copy(tmp).add(this.radialTestVectors[i]);
 					MovingObjectPosition influence = this.worldObj.rayTraceBlocks(origin.toVec3(), tmp.toVec3(), true);
 					if (influence != null)
 					{
@@ -174,21 +175,15 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			{
 				this.setDead();
 			}
-		} */
-		this.setDead();
-		// TODO gamerforEA code end
+		}
 	}
 
 	protected void onImpact(MovingObjectPosition hit)
 	{
-		/* TODO gamerforEA code clear:
+		/* TODO gamerforEA code replace:
 		if (IC2.platform.isSimulating())
 		{
 			System.out.println("hit " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
-			if (hit.typeOfHit == MovingObjectType.BLOCK && IC2.platform.isSimulating())
-			{
-			}
-
 			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, this.owner, hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 18.0F, 0.95F, ExplosionIC2.Type.Heat);
 			explosion.doExplosion();
 		} */
@@ -196,7 +191,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 
 	protected void onInfluence(MovingObjectPosition hit)
 	{
-		/* TODO gamerforEA code clear:
+		/* TODO gamerforEA code replace:
 		if (IC2.platform.isSimulating())
 		{
 			System.out.println("influenced " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());

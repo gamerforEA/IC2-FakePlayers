@@ -6,7 +6,6 @@ import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 
 public class IC2Potion extends Potion
 {
@@ -26,17 +25,16 @@ public class IC2Potion extends Potion
 		this.curativeItems = Arrays.asList(curativeItems);
 	}
 
-	@Override
 	public void performEffect(EntityLivingBase entity, int amplifier)
 	{
-		/* TODO gamerforEA code clear:
 		if (this.id == radiation.id)
 		{
-			entity.attackEntityFrom(IC2DamageSource.radiation, (float) (amplifier / 100) + 0.5F);
-		} */
+			// TODO gamerforEA code replace: entity.attackEntityFrom(IC2DamageSource.radiation, (float) (amplifier / 100) + 0.5F);
+			entity.removePotionEffect(radiation.id);
+			// TODO gamerforEA code end
+		}
 	}
 
-	@Override
 	public boolean isReady(int duration, int amplifier)
 	{
 		if (this.id == radiation.id)
@@ -52,8 +50,9 @@ public class IC2Potion extends Potion
 
 	public void applyTo(EntityLivingBase entity, int duration, int amplifier)
 	{
+		/* TODO gamerforEA code clear:
 		PotionEffect effect = new PotionEffect(this.id, duration, amplifier);
 		effect.setCurativeItems(this.curativeItems);
-		entity.addPotionEffect(effect);
+		entity.addPotionEffect(effect); */
 	}
 }

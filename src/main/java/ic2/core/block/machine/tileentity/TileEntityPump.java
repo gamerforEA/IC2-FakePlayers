@@ -21,7 +21,6 @@ import ic2.core.util.PumpUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
@@ -30,12 +29,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -44,7 +38,7 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import com.mojang.authlib.GameProfile;
+import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -68,12 +62,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	public int operationLength;
 	public float guiProgress;
 
-	// TODO gamerforEA code start
-	public UUID ownerUUID;
-	public String ownerName;
-	public FakePlayer fakePlayer;
-	// TODO gamerforEA code end
-
 	public TileEntityPump()
 	{
 		super(20, 1, 1, 8);
@@ -86,7 +74,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		this.defaultEnergyStorage = 1 * this.operationLength;
 	}
 
-	@Override
 	public void onUnloaded()
 	{
 		if (IC2.platform.isRendering() && this.audioSource != null)
@@ -99,7 +86,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		super.onUnloaded();
 	}
 
-	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
@@ -144,7 +130,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		}
 	}
 
-	@Override
 	public String getInventoryName()
 	{
 		return "Pump";
@@ -210,20 +195,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	public FluidStack pump(int x, int y, int z, boolean sim, TileEntity miner)
 	{
 		// TODO gamerforEA code start
-		EntityPlayer player = null;
-		if (this.ownerName != null && this.ownerUUID != null)
-		{
-			if (this.fakePlayer == null) this.fakePlayer = FakePlayerFactory.get((WorldServer) this.worldObj, new GameProfile(this.ownerUUID, this.ownerName));
-			player = this.fakePlayer;
-		}
-
-		if (player != null)
-		{
-			BreakEvent breakEvent = new BreakEvent(x, y, z, this.worldObj, this.worldObj.getBlock(x, y, z), this.worldObj.getBlockMetadata(x, y, z), player);
-			MinecraftForge.EVENT_BUS.post(breakEvent);
-			if (breakEvent.isCanceled()) return null;
-		}
-		else return null;
+		if (FakePlayerUtils.callBlockBreakEvent(x, y, z, this.getFakePlayer()).isCancelled()) return null;
 		// TODO gamerforEA code end
 		FluidStack ret = null;
 		TileEntity te = null;
@@ -320,19 +292,16 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		return direction.ordinal() == this.getFacing();
 	}
 
-	@Override
 	public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side)
 	{
 		return this.getFacing() != side;
 	}
 
-	@Override
 	public void setFacing(short side)
 	{
 		super.setFacing(side);
 	}
 
-	@Override
 	public void onLoaded()
 	{
 		super.onLoaded();
@@ -342,7 +311,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		}
 	}
 
-	@Override
 	public void markDirty()
 	{
 		super.markDirty();
@@ -399,29 +367,24 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		return ret > 2.147483647E9D ? Integer.MAX_VALUE : (int) ret;
 	}
 
-	@Override
 	public boolean isRedstonePowered()
 	{
 		return this.redstonePowered ? !super.isRedstonePowered() : super.isRedstonePowered();
 	}
 
-	@Override
 	public void setRedstonePowered(boolean redstone)
 	{
 		if (this.redstonePowered != redstone)
 		{
 			this.redstonePowered = redstone;
 		}
-
 	}
 
-	@Override
 	public double getEnergy()
 	{
 		return this.energy;
 	}
 
-	@Override
 	public boolean useEnergy(double amount)
 	{
 		if (this.energy >= amount)
@@ -435,67 +398,48 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		}
 	}
 
-	@Override
 	public int getOutputSize()
 	{
 		return this.outputSlot.size();
 	}
 
-	@Override
 	public ItemStack getOutput(int index)
 	{
 		return this.outputSlot.get(index);
 	}
 
-	@Override
 	public void setOutput(int index, ItemStack stack)
 	{
 		this.outputSlot.put(index, stack);
 	}
 
-	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound)
 	{
 		super.readFromNBT(nbttagcompound);
 		this.progress = nbttagcompound.getShort("progress");
-		// TODO gamerforEA code start
-		String uuid = nbttagcompound.getString("ownerUUID");
-		if (!uuid.isEmpty()) this.ownerUUID = UUID.fromString(uuid);
-		String name = nbttagcompound.getString("ownerName");
-		if (!name.isEmpty()) this.ownerName = name;
-		// TODO gamerforEA code end
 	}
 
-	@Override
 	public void writeToNBT(NBTTagCompound nbttagcompound)
 	{
 		super.writeToNBT(nbttagcompound);
 		nbttagcompound.setShort("progress", this.progress);
-		// TODO gamerforEA code start
-		if (this.ownerUUID != null) nbttagcompound.setString("ownerUUID", this.ownerUUID.toString());
-		if (this.ownerName != null) nbttagcompound.setString("ownerName", this.ownerName);
-		// TODO gamerforEA code end
 	}
 
-	@Override
 	public ContainerBase<TileEntityPump> getGuiContainer(EntityPlayer entityPlayer)
 	{
 		return new ContainerPump(entityPlayer, this);
 	}
 
-	@Override
 	@SideOnly(Side.CLIENT)
 	public GuiScreen getGui(EntityPlayer entityPlayer, boolean isAdmin)
 	{
 		return new GuiPump(new ContainerPump(entityPlayer, this));
 	}
 
-	@Override
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
 	}
 
-	@Override
 	public void onNetworkUpdate(String field)
 	{
 		if (field.equals("active") && this.prevActive != this.getActive())
@@ -521,19 +465,16 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		super.onNetworkUpdate(field);
 	}
 
-	@Override
 	public boolean canFill(ForgeDirection from, Fluid fluid)
 	{
 		return false;
 	}
 
-	@Override
 	public boolean canDrain(ForgeDirection from, Fluid fluid)
 	{
 		return true;
 	}
 
-	@Override
 	public List<ItemStack> getCompatibleUpgradeList()
 	{
 		ArrayList itemstack = new ArrayList();

@@ -25,9 +25,6 @@ import ic2.core.util.StackUtil;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
-
-import com.mojang.authlib.GameProfile;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
@@ -38,19 +35,17 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fluids.IFluidBlock;
+
+import com.gamerforea.ic2.FakePlayerUtils;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityMiner extends TileEntityElectricMachine implements IHasGui, IUpgradableBlock
 {
-	private TileEntityMiner.Mode lastMode;
+	private Mode lastMode;
 	public int progress;
 	private int scannedLevel;
 	private int scanRange;
@@ -68,16 +63,10 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	public final InvSlotConsumableId pipeSlot;
 	public final InvSlotConsumableId scannerSlot;
 
-	// TODO gamerforEA code start
-	public UUID ownerUUID;
-	public String ownerName;
-	public FakePlayer fakePlayer;
-	// TODO gamerforEA code end
-
 	public TileEntityMiner()
 	{
 		super(1000, ConfigUtil.getInt(MainConfig.get(), "balance/minerDischargeTier"), 0, false);
-		this.lastMode = TileEntityMiner.Mode.None;
+		this.lastMode = Mode.None;
 		this.progress = 0;
 		this.scannedLevel = -1;
 		this.scanRange = 0;
@@ -113,15 +102,8 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	public void readFromNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.readFromNBT(nbtTagCompound);
-		this.lastMode = TileEntityMiner.Mode.values()[nbtTagCompound.getInteger("lastMode")];
+		this.lastMode = Mode.values()[nbtTagCompound.getInteger("lastMode")];
 		this.progress = nbtTagCompound.getInteger("progress");
-
-		// TODO gamerforEA code start
-		String uuid = nbtTagCompound.getString("ownerUUID");
-		if (!uuid.isEmpty()) this.ownerUUID = UUID.fromString(uuid);
-		String name = nbtTagCompound.getString("ownerName");
-		if (!name.isEmpty()) this.ownerName = name;
-		// TODO gamerforEA code end
 	}
 
 	public void writeToNBT(NBTTagCompound nbtTagCompound)
@@ -129,11 +111,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		super.writeToNBT(nbtTagCompound);
 		nbtTagCompound.setInteger("lastMode", this.lastMode.ordinal());
 		nbtTagCompound.setInteger("progress", this.progress);
-
-		// TODO gamerforEA code start
-		if (this.ownerUUID != null) nbtTagCompound.setString("ownerUUID", this.ownerUUID.toString());
-		if (this.ownerName != null) nbtTagCompound.setString("ownerName", this.ownerName);
-		// TODO gamerforEA code end
 	}
 
 	public void updateEntity()
@@ -159,7 +136,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			this.setActive(false);
 		}
-
 	}
 
 	private void chargeTools()
@@ -173,7 +149,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			this.energy -= ElectricItem.manager.charge(this.drillSlot.get(), this.energy, 1, false, false);
 		}
-
 	}
 
 	private boolean work()
@@ -218,9 +193,9 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 	private boolean withDrawPipe(int y)
 	{
-		if (this.lastMode != TileEntityMiner.Mode.Withdraw)
+		if (this.lastMode != Mode.Withdraw)
 		{
-			this.lastMode = TileEntityMiner.Mode.Withdraw;
+			this.lastMode = Mode.Withdraw;
 			this.progress = 0;
 		}
 
@@ -274,7 +249,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				((ItemBlock) fillerItem).onItemUse(filler, new Ic2Player(this.worldObj), this.worldObj, this.xCoord, y + 1, this.zCoord, 0, 0.0F, 0.0F, 0.0F);
 			}
 		}
-
 	}
 
 	private boolean digDown(int y, boolean removeTipAbove)
@@ -479,16 +453,16 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.canProvideLiquid = false;
 		byte energyPerTick;
 		short duration;
-		TileEntityMiner.Mode mode1;
+		Mode mode1;
 		if (isAirBlock)
 		{
-			mode1 = TileEntityMiner.Mode.MineAir;
+			mode1 = Mode.MineAir;
 			energyPerTick = 3;
 			duration = 20;
 		}
 		else if (this.drillSlot.get().getItem() == Ic2Items.miningDrill.getItem())
 		{
-			mode1 = TileEntityMiner.Mode.MineDrill;
+			mode1 = Mode.MineDrill;
 			energyPerTick = 6;
 			duration = 200;
 		}
@@ -499,7 +473,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				throw new IllegalStateException("invalid drill: " + this.drillSlot.get());
 			}
 
-			mode1 = TileEntityMiner.Mode.MineDDrill;
+			mode1 = Mode.MineDDrill;
 			energyPerTick = 20;
 			duration = 50;
 		}
@@ -555,20 +529,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 			this.energy -= (double) energyCost;
 			// TODO gamerforEA code start
-			EntityPlayer player = null;
-			if (this.ownerName != null && this.ownerUUID != null)
-			{
-				if (this.fakePlayer == null) this.fakePlayer = FakePlayerFactory.get((WorldServer) this.worldObj, new GameProfile(this.ownerUUID, this.ownerName));
-				player = this.fakePlayer;
-			}
-
-			if (player != null)
-			{
-				BreakEvent breakEvent = new BreakEvent(x, y, z, this.worldObj, this.worldObj.getBlock(x, y, z), this.worldObj.getBlockMetadata(x, y, z), player);
-				MinecraftForge.EVENT_BUS.post(breakEvent);
-				if (breakEvent.isCanceled()) return false;
-			}
-			else return false;
+			if (FakePlayerUtils.callBlockBreakEvent(x, y, z, this.getFakePlayer()).isCancelled()) return false;
 			// TODO gamerforEA code end
 			ArrayList drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
 			if (drops != null)

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
@@ -34,15 +33,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.IFluidBlock;
 
-import com.mojang.authlib.GameProfile;
+import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -68,12 +62,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public final InvSlotUpgrade upgradeSlot;
 	public final InvSlot ListSlot;
 
-	// TODO gamerforEA code start
-	public UUID ownerUUID;
-	public String ownerName;
-	public FakePlayer fakePlayer;
-	// TODO gamerforEA code end
-
 	public TileEntityAdvMiner()
 	{
 		super(4000000, 3, 0);
@@ -85,7 +73,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		this.workTick = 20;
 	}
 
-	@Override
 	public void onLoaded()
 	{
 		super.onLoaded();
@@ -108,7 +95,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		}
 	}
 
-	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
@@ -231,21 +217,9 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public void doMine(Block block)
 	{
 		// TODO gamerforEA code start
-		EntityPlayer player = null;
-		if (this.ownerName != null && this.ownerUUID != null)
-		{
-			if (this.fakePlayer == null) this.fakePlayer = FakePlayerFactory.get((WorldServer) this.worldObj, new GameProfile(this.ownerUUID, this.ownerName));
-			player = this.fakePlayer;
-		}
-
-		if (player != null)
-		{
-			BreakEvent breakEvent = new BreakEvent(this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj, this.worldObj.getBlock(this.minetargetX, this.minelayer, this.minetargetZ), this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ), player);
-			MinecraftForge.EVENT_BUS.post(breakEvent);
-			if (breakEvent.isCanceled()) return;
-		}
-		else return;
+		if (FakePlayerUtils.callBlockBreakEvent(this.minetargetX, this.minelayer, this.minetargetZ, this.getFakePlayer()).isCancelled()) return;
 		// TODO gamerforEA code end
+
 		if (this.silktouch && block.canSilkHarvest(this.worldObj, new Ic2Player(this.worldObj), this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))
 		{
 			if (Item.getItemFromBlock(block) != null && StackUtil.check(new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ))))
@@ -353,7 +327,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		}
 	}
 
-	@Override
 	public void readFromNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.readFromNBT(nbtTagCompound);
@@ -362,16 +335,8 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		this.zcounter = nbtTagCompound.getInteger("zcounter");
 		this.blacklist = nbtTagCompound.getBoolean("blacklist");
 		this.silktouch = nbtTagCompound.getBoolean("silktouch");
-
-		// TODO gamerforEA code start
-		String uuid = nbtTagCompound.getString("ownerUUID");
-		if (!uuid.isEmpty()) this.ownerUUID = UUID.fromString(uuid);
-		String name = nbtTagCompound.getString("ownerName");
-		if (!name.isEmpty()) this.ownerName = name;
-		// TODO gamerforEA code end
 	}
 
-	@Override
 	public void writeToNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.writeToNBT(nbtTagCompound);
@@ -380,14 +345,8 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		nbtTagCompound.setInteger("zcounter", this.zcounter);
 		nbtTagCompound.setBoolean("blacklist", this.blacklist);
 		nbtTagCompound.setBoolean("silktouch", this.silktouch);
-
-		// TODO gamerforEA code start
-		if (this.ownerUUID != null) nbtTagCompound.setString("ownerUUID", this.ownerUUID.toString());
-		if (this.ownerName != null) nbtTagCompound.setString("ownerName", this.ownerName);
-		// TODO gamerforEA code end
 	}
 
-	@Override
 	public void onNetworkEvent(EntityPlayer player, int event)
 	{
 		switch (event)
@@ -450,47 +409,39 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		return ret > 2.147483647E9D ? Integer.MAX_VALUE : (int) ret;
 	}
 
-	@Override
 	public ContainerBase<TileEntityAdvMiner> getGuiContainer(EntityPlayer entityPlayer)
 	{
 		return new ContainerAdvMiner(entityPlayer, this);
 	}
 
-	@Override
 	@SideOnly(Side.CLIENT)
 	public GuiScreen getGui(EntityPlayer entityPlayer, boolean isAdmin)
 	{
 		return new GuiAdvMiner(new ContainerAdvMiner(entityPlayer, this));
 	}
 
-	@Override
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
 	}
 
-	@Override
 	public boolean isRedstonePowered()
 	{
 		return this.redstonePowered ? !super.isRedstonePowered() : super.isRedstonePowered();
 	}
 
-	@Override
 	public void setRedstonePowered(boolean redstone)
 	{
 		if (this.redstonePowered != redstone)
 		{
 			this.redstonePowered = redstone;
 		}
-
 	}
 
-	@Override
 	public double getEnergy()
 	{
 		return this.energy;
 	}
 
-	@Override
 	public boolean useEnergy(double amount)
 	{
 		if (this.energy >= amount)
@@ -504,24 +455,20 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		}
 	}
 
-	@Override
 	public int getOutputSize()
 	{
 		return 0;
 	}
 
-	@Override
 	public ItemStack getOutput(int index)
 	{
 		return null;
 	}
 
-	@Override
 	public void setOutput(int index, ItemStack stack)
 	{
 	}
 
-	@Override
 	public String getInventoryName()
 	{
 		return "AdvMiner";
@@ -532,7 +479,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		return this.minelayer;
 	}
 
-	@Override
 	public ItemStack getWrenchDrop(EntityPlayer entityPlayer)
 	{
 		ItemStack ret = super.getWrenchDrop(entityPlayer);
@@ -546,7 +492,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		return ret;
 	}
 
-	@Override
 	public List<ItemStack> getCompatibleUpgradeList()
 	{
 		ArrayList itemstack = new ArrayList();
