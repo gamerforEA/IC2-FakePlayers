@@ -1,9 +1,22 @@
 package ic2.core;
 
+import ic2.api.event.ExplosionEvent;
+import ic2.core.util.Util;
+
+import java.util.List;
+
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
 
 public class PointExplosion extends Explosion
 {
@@ -23,7 +36,9 @@ public class PointExplosion extends Explosion
 
 	public void doExplosionA()
 	{
-		/* TODO gamerforEA code clear:
+		// TODO gamerforEA code start
+		if (!EventConfig.explosionEnabled) return;
+		// TODO gamerforEA code end
 		ExplosionEvent event = new ExplosionEvent(this.world, this.entity, this.explosionX, this.explosionY, this.explosionZ, (double) this.explosionSize, (EntityLivingBase) this.exploder, 0, 1.0D);
 		if (!MinecraftForge.EVENT_BUS.post(event))
 		{
@@ -36,6 +51,9 @@ public class PointExplosion extends Explosion
 						Block block = this.world.getBlock(x, y, z);
 						if (block.getExplosionResistance(this.exploder, this.world, x, y, z, this.explosionX, this.explosionY, this.explosionZ) < this.explosionSize * 10.0F)
 						{
+							// TODO gamerforEA code start
+							if (EventConfig.explosionEvent && FakePlayerUtils.isInPrivate(this.world, x, y, z)) continue;
+							// TODO gamerforEA code end
 							this.affectedBlockPositions.add(new ChunkPosition(x, y, z));
 						}
 					}
@@ -49,6 +67,6 @@ public class PointExplosion extends Explosion
 			}
 
 			this.explosionSize = 1.0F / this.dropRate;
-		} */
+		}
 	}
 }

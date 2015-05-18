@@ -1,21 +1,43 @@
 package ic2.core;
 
+import ic2.api.event.ExplosionEvent;
 import ic2.api.tile.ExplosionWhitelist;
+import ic2.core.item.armor.ItemArmorHazmat;
+import ic2.core.network.NetworkManager;
+import ic2.core.util.ItemStackWrapper;
+import ic2.core.util.StackUtil;
 import ic2.core.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
 
 public class ExplosionIC2 extends Explosion
 {
@@ -85,14 +107,16 @@ public class ExplosionIC2 extends Explosion
 
 	public void doExplosion()
 	{
-		/* TODO gamerforEA code clear:
 		if (this.power > 0.0F)
 		{
+			// TODO gamerforEA code start
+			if (!EventConfig.explosionEnabled) return;
+			// TODO gamerforEA code end
 			ExplosionEvent event = new ExplosionEvent(this.worldObj, this.exploder, this.explosionX, this.explosionY, this.explosionZ, (double) this.power, this.igniter, this.radiationRange, this.maxDistance);
 			if (!MinecraftForge.EVENT_BUS.post(event))
 			{
 				this.chunkCache = new ChunkCache(this.worldObj, (int) this.explosionX - this.areaSize / 2, (int) this.explosionY - this.areaSize / 2, (int) this.explosionZ - this.areaSize / 2, (int) this.explosionX + this.areaSize / 2, (int) this.explosionY + this.areaSize / 2, (int) this.explosionZ + this.areaSize / 2, 0);
-				List<Entity> entities = this.worldObj.getEntitiesWithinAABBExcludingEntity((Entity) null, AxisAlignedBB.getBoundingBox(this.explosionX - this.maxDistance, this.explosionY - this.maxDistance, this.explosionZ - this.maxDistance, this.explosionX + this.maxDistance, this.explosionY + this.maxDistance, this.explosionZ + this.maxDistance));
+				List<Entity> entities = this.worldObj.getEntitiesWithinAABBExcludingEntity(null, AxisAlignedBB.getBoundingBox(this.explosionX - this.maxDistance, this.explosionY - this.maxDistance, this.explosionZ - this.maxDistance, this.explosionX + this.maxDistance, this.explosionY + this.maxDistance, this.explosionZ + this.maxDistance));
 
 				for (Entity entity : entities)
 				{
@@ -194,6 +218,9 @@ public class ExplosionIC2 extends Explosion
 							int x = i - z * this.areaSize;
 							x += this.areaX;
 							z += this.areaZ;
+							// TODO gamerforEA code start
+							if (EventConfig.explosionEvent && FakePlayerUtils.isInPrivate(this.worldObj, x, y, z)) continue;
+							// TODO gamerforEA code end
 							Block block = this.chunkCache.getBlock(x, y, z);
 							if (this.power < 20.0F)
 							{
@@ -267,7 +294,7 @@ public class ExplosionIC2 extends Explosion
 					}
 				}
 			}
-		} */
+		}
 	}
 
 	public void destroy(int x, int y, int z, boolean noDrop)
@@ -294,15 +321,22 @@ public class ExplosionIC2 extends Explosion
 		{
 			setAtIndex(index, array, 1);
 		}
-
 	}
 
 	private void shootRay(double x, double y, double z, double phi, double theta, double power, boolean killEntities)
 	{
-		double sinTheta = Math.sin(theta); // TODO gamerforEA improve performance - replace 2 calls Math.sin(D)
+		/* TODO gamerforEA code optimize, old code:
+		double sinTheta = Math.sin(theta);
 		double deltaX = sinTheta * Math.cos(phi);
 		double deltaY = Math.cos(theta);
-		double deltaZ = sinTheta * Math.sin(phi);
+		double deltaZ = sinTheta * Math.sin(phi); */
+		float fPhi = (float) phi;
+		float fTheta = (float) theta;
+		float sinTheta = MathHelper.sin(fTheta);
+		double deltaX = (double) (sinTheta * MathHelper.cos(fPhi));
+		double deltaY = (double) MathHelper.cos(fTheta);
+		double deltaZ = (double) (sinTheta * MathHelper.sin(fPhi));
+		// TODO gamerforEA code end
 		int step = 0;
 
 		while (true)

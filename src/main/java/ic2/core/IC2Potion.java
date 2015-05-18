@@ -6,6 +6,9 @@ import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+
+import com.gamerforea.ic2.EventConfig;
 
 public class IC2Potion extends Potion
 {
@@ -29,9 +32,10 @@ public class IC2Potion extends Potion
 	{
 		if (this.id == radiation.id)
 		{
-			// TODO gamerforEA code replace: entity.attackEntityFrom(IC2DamageSource.radiation, (float) (amplifier / 100) + 0.5F);
-			entity.removePotionEffect(radiation.id);
+			// TODO gameroforEA code start
+			if (!EventConfig.radiationEnabled) return;
 			// TODO gamerforEA code end
+			entity.attackEntityFrom(IC2DamageSource.radiation, (float) (amplifier / 100) + 0.5F);
 		}
 	}
 
@@ -50,9 +54,11 @@ public class IC2Potion extends Potion
 
 	public void applyTo(EntityLivingBase entity, int duration, int amplifier)
 	{
-		/* TODO gamerforEA code clear:
+		// TODO gameroforEA code start
+		if (!EventConfig.radiationEnabled) return;
+		// TODO gamerforEA code end
 		PotionEffect effect = new PotionEffect(this.id, duration, amplifier);
 		effect.setCurativeItems(this.curativeItems);
-		entity.addPotionEffect(effect); */
+		entity.addPotionEffect(effect);
 	}
 }

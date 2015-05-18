@@ -36,6 +36,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.IFluidBlock;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -217,7 +218,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public void doMine(Block block)
 	{
 		// TODO gamerforEA code start
-		if (FakePlayerUtils.callBlockBreakEvent(this.minetargetX, this.minelayer, this.minetargetZ, this.getFakePlayer()).isCancelled()) return;
+		if (EventConfig.advminerEvent && FakePlayerUtils.cantBreak(this.minetargetX, this.minelayer, this.minetargetZ, this.getOwnerFake())) return;
 		// TODO gamerforEA code end
 
 		if (this.silktouch && block.canSilkHarvest(this.worldObj, new Ic2Player(this.worldObj), this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))

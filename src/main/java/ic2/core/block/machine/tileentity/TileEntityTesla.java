@@ -17,8 +17,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 
 public class TileEntityTesla extends TileEntityBlock implements IEnergySink
@@ -94,22 +93,22 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 	public boolean shock(int damage)
 	{
 		boolean shock = false;
-		List list1 = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox((double) (this.xCoord - 4), (double) (this.yCoord - 4), (double) (this.zCoord - 4), (double) (this.xCoord + 5), (double) (this.yCoord + 5), (double) (this.zCoord + 5)));
+		List<EntityLivingBase> entities = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox((double) (this.xCoord - 4), (double) (this.yCoord - 4), (double) (this.zCoord - 4), (double) (this.xCoord + 5), (double) (this.yCoord + 5), (double) (this.zCoord + 5)));
 
-		for (int l = 0; l < list1.size(); ++l)
+		for (int l = 0; l < entities.size(); ++l)
 		{
-			EntityLivingBase victim = (EntityLivingBase) list1.get(l);
-			if (!ItemArmorHazmat.hasCompleteHazmat(victim))
+			EntityLivingBase entity = entities.get(l);
+			if (!ItemArmorHazmat.hasCompleteHazmat(entity))
 			{
-				shock = true;
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.callEntityDamageByEntityEvent(this.getFakePlayer(), victim, DamageCause.ENTITY_ATTACK, damage).isCancelled()) return shock;
+				if (EventConfig.teslaEvent && FakePlayerUtils.cantDamage(this.getOwnerFake(), entity)) continue;
 				// TODO gamerforEA code end
-				victim.attackEntityFrom(IC2DamageSource.electricity, (float) damage);
+				shock = true;
+				entity.attackEntityFrom(IC2DamageSource.electricity, (float) damage);
 
 				for (int i = 0; i < damage; ++i)
 				{
-					this.worldObj.spawnParticle("reddust", victim.posX + (double) this.worldObj.rand.nextFloat(), victim.posY + (double) (this.worldObj.rand.nextFloat() * 2.0F), victim.posZ + (double) this.worldObj.rand.nextFloat(), 0.0D, 0.0D, 1.0D);
+					this.worldObj.spawnParticle("reddust", entity.posX + (double) this.worldObj.rand.nextFloat(), entity.posY + (double) (this.worldObj.rand.nextFloat() * 2.0F), entity.posZ + (double) this.worldObj.rand.nextFloat(), 0.0D, 0.0D, 1.0D);
 				}
 			}
 		}

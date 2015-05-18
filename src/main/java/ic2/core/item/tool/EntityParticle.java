@@ -1,5 +1,7 @@
 package ic2.core.item.tool;
 
+import ic2.core.ExplosionIC2;
+import ic2.core.IC2;
 import ic2.core.util.Quaternion;
 import ic2.core.util.Vector3;
 
@@ -7,12 +9,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
 import cpw.mods.fml.common.registry.IThrowableEntity;
 
 public class EntityParticle extends Entity implements IThrowableEntity
@@ -30,16 +43,16 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		this.lifeTime = 6000;
 	}
 
-	public EntityParticle(World world, EntityLivingBase owner1, float speed, double coreSize1, double influenceSize1)
+	public EntityParticle(World world, EntityLivingBase owner, float speed, double coreSize, double influenceSize)
 	{
 		this(world);
-		this.coreSize = coreSize1;
-		this.influenceSize = influenceSize1;
-		this.owner = owner1;
-		this.setPosition(owner1.posX, owner1.posY + (double) owner1.getEyeHeight(), owner1.posZ);
-		Vector3 motion = new Vector3(owner1.getLookVec());
-		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize1);
-		double stepAngle = Math.atan(0.5D / influenceSize1) * 2.0D;
+		this.coreSize = coreSize;
+		this.influenceSize = influenceSize;
+		this.owner = owner;
+		this.setPosition(owner.posX, owner.posY + (double) owner.getEyeHeight(), owner.posZ);
+		Vector3 motion = new Vector3(owner.getLookVec());
+		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize);
+		double stepAngle = Math.atan(0.5D / influenceSize) * 2.0D;
 		int steps = (int) Math.ceil(6.283185307179586D / stepAngle);
 		Quaternion q = (new Quaternion()).setFromAxisAngle(motion, stepAngle);
 		this.radialTestVectors = new Vector3[steps];
@@ -81,6 +94,13 @@ public class EntityParticle extends Entity implements IThrowableEntity
 
 	public void onUpdate()
 	{
+		// TODO gamerforEA code start
+		if (!EventConfig.plasmaEnabled)
+		{
+			this.setDead();
+			return;
+		}
+		// TODO gamerforEA code end
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;
@@ -180,21 +200,19 @@ public class EntityParticle extends Entity implements IThrowableEntity
 
 	protected void onImpact(MovingObjectPosition hit)
 	{
-		/* TODO gamerforEA code replace:
 		if (IC2.platform.isSimulating())
 		{
-			System.out.println("hit " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
+			// TODO gamerforEA code clear: System.out.println("hit " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
 			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, this.owner, hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 18.0F, 0.95F, ExplosionIC2.Type.Heat);
 			explosion.doExplosion();
-		} */
+		}
 	}
 
 	protected void onInfluence(MovingObjectPosition hit)
 	{
-		/* TODO gamerforEA code replace:
 		if (IC2.platform.isSimulating())
 		{
-			System.out.println("influenced " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
+			// TODO gamerforEA code clear: System.out.println("influenced " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
 			if (hit.typeOfHit == MovingObjectType.BLOCK && IC2.platform.isSimulating())
 			{
 				Block block = this.worldObj.getBlock(hit.blockX, hit.blockY, hit.blockZ);
@@ -204,6 +222,9 @@ public class EntityParticle extends Entity implements IThrowableEntity
 					ItemStack smelted = FurnaceRecipes.smelting().getSmeltingResult(existing);
 					if (smelted != null && smelted.getItem() instanceof ItemBlock)
 					{
+						// TODO gamerforEA code start
+						if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ)) return;
+						// TODO gamerforEA code end
 						this.worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, ((ItemBlock) smelted.getItem()).field_150939_a, smelted.getItemDamage(), 3);
 					}
 					else
@@ -214,15 +235,21 @@ public class EntityParticle extends Entity implements IThrowableEntity
 							int x = hit.blockX - side.offsetX;
 							int y = hit.blockY - side.offsetY;
 							int z = hit.blockZ - side.offsetZ;
+							// TODO gamerforEA code start
+							if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, x, y, z)) return;
+							// TODO gamerforEA code end
 							this.worldObj.setBlock(x, y, z, Blocks.fire);
 						}
 					}
 				}
 				else
 				{
+					// TODO gamerforEA code start
+					if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ)) return;
+					// TODO gamerforEA code end
 					this.worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
 				}
 			}
-		} */
+		}
 	}
 }

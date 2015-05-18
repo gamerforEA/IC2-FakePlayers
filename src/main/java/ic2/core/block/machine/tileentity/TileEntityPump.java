@@ -38,6 +38,7 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -128,6 +129,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		{
 			super.markDirty();
 		}
+
 	}
 
 	public String getInventoryName()
@@ -145,7 +147,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		if (this.miner == null || this.miner.isInvalid())
 		{
 			this.miner = null;
-			Direction[] liquid = Direction.values();
+			Direction[] liquid = Direction.directions;
 			int dir = liquid.length;
 
 			for (int i$ = 0; i$ < dir; ++i$)
@@ -195,7 +197,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	public FluidStack pump(int x, int y, int z, boolean sim, TileEntity miner)
 	{
 		// TODO gamerforEA code start
-		if (FakePlayerUtils.callBlockBreakEvent(x, y, z, this.getFakePlayer()).isCancelled()) return null;
+		if (EventConfig.pumpEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake())) return null;
 		// TODO gamerforEA code end
 		FluidStack ret = null;
 		TileEntity te = null;
@@ -309,6 +311,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		{
 			this.setUpgradestat();
 		}
+
 	}
 
 	public void markDirty()
@@ -318,6 +321,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		{
 			this.setUpgradestat();
 		}
+
 	}
 
 	public void setUpgradestat()
@@ -378,6 +382,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		{
 			this.redstonePowered = redstone;
 		}
+
 	}
 
 	public double getEnergy()

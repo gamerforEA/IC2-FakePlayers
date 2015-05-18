@@ -27,6 +27,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 
 public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
@@ -102,22 +103,22 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 					maxFoamBlocks += var19.amount / this.getFluidPerFoam();
 				}
 
-				ItemStack var20 = player.inventory.armorInventory[2];
-				if (var20 != null && var20.getItem() == Ic2Items.cfPack.getItem())
+				ItemStack pack = player.inventory.armorInventory[2];
+				if (pack != null && pack.getItem() == Ic2Items.cfPack.getItem())
 				{
-					var19 = ((ItemArmorCFPack) var20.getItem()).getFluid(var20);
+					var19 = ((ItemArmorCFPack) pack.getItem()).getFluid(pack);
 					if (var19 != null && var19.amount > 0)
 					{
 						maxFoamBlocks += var19.amount / this.getFluidPerFoam();
 					}
 					else
 					{
-						var20 = null;
+						pack = null;
 					}
 				}
 				else
 				{
-					var20 = null;
+					pack = null;
 				}
 
 				if (maxFoamBlocks == 0)
@@ -127,15 +128,15 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 				else
 				{
 					maxFoamBlocks = Math.min(maxFoamBlocks, this.getMaxFoamBlocks(stack));
-					ChunkPosition var21 = new ChunkPosition(x, y, z);
-					Target var22;
-					if (canPlaceFoam(world, var21, Target.Scaffold))
+					ChunkPosition pos = new ChunkPosition(x, y, z);
+					Target target;
+					if (canPlaceFoam(world, pos, Target.Scaffold))
 					{
-						var22 = Target.Scaffold;
+						target = Target.Scaffold;
 					}
-					else if (canPlaceFoam(world, var21, Target.Cable))
+					else if (canPlaceFoam(world, pos, Target.Cable))
 					{
-						var22 = Target.Cable;
+						target = Target.Cable;
 					}
 					else
 					{
@@ -163,22 +164,22 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 								assert false;
 						}
 
-						var22 = Target.Any;
+						target = Target.Any;
 					}
 
-					int var23 = this.sprayFoam(world, x, y, z, calculateDirectionsFromPlayer(player), var22, maxFoamBlocks, player); // TODO gamerforEA add EntityPlayer parameter
-					var23 *= this.getFluidPerFoam();
-					if (var23 > 0)
+					int amount = this.sprayFoam(world, x, y, z, calculateDirectionsFromPlayer(player), target, maxFoamBlocks, player); // TODO gamerforEA add EntityPlayer parameter
+					amount *= this.getFluidPerFoam();
+					if (amount > 0)
 					{
-						if (var20 != null)
+						if (pack != null)
 						{
-							var19 = ((ItemArmorCFPack) var20.getItem()).drainfromCFpack(player, var20, var23);
-							var23 -= var19.amount;
+							var19 = ((ItemArmorCFPack) pack.getItem()).drainfromCFpack(player, pack, amount);
+							amount -= var19.amount;
 						}
 
-						if (var23 > 0)
+						if (amount > 0)
 						{
-							this.drain(stack, var23, true);
+							this.drain(stack, amount, true);
 						}
 
 						return true;
@@ -236,11 +237,11 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 	// TODO gamerforEA code start
 	public int sprayFoam(World world, int x, int y, int z, boolean[] directions, Target target, int maxFoamBlocks)
 	{
-		return this.sprayFoam(world, x, y, z, directions, target, maxFoamBlocks, FakePlayerUtils.getPlayer(world));
+		return this.sprayFoam(world, x, y, z, directions, target, maxFoamBlocks, FakePlayerUtils.getModFake(world));
 	}
 	// TODO gamerforEA code end
 
-	// gamerforEA add EntityPlayer parameter
+	// TODO gamerforEA add EntityPlayer parameter
 	public int sprayFoam(World world, int x, int y, int z, boolean[] directions, Target target, int maxFoamBlocks, EntityPlayer player)
 	{
 		ChunkPosition startPos = new ChunkPosition(x, y, z);
@@ -269,7 +270,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 			for (ChunkPosition pos : place)
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.callBlockBreakEvent(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, player).isCancelled()) continue;
+				if (EventConfig.sprayerEvent && FakePlayerUtils.cantBreak(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, player)) continue;
 				// TODO gamerforEA code end
 				Block targetBlock = world.getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
 				if (StackUtil.equals(targetBlock, Ic2Items.scaffold))

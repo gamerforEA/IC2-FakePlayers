@@ -38,6 +38,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fluids.IFluidBlock;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.relauncher.Side;
@@ -529,7 +530,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 			this.energy -= (double) energyCost;
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.callBlockBreakEvent(x, y, z, this.getFakePlayer()).isCancelled()) return false;
+			if (EventConfig.minerEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake())) return false;
 			// TODO gamerforEA code end
 			ArrayList drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
 			if (drops != null)

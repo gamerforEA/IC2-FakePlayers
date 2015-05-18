@@ -40,8 +40,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import com.mojang.authlib.GameProfile;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -53,14 +51,14 @@ public abstract class BlockMultiID extends BlockBase
 	private static final int tesBeforeBreakLimit = 8;
 	private static ArrayDeque<TileEntity> tesBeforeBreak = new ArrayDeque(8);
 
-	public BlockMultiID(InternalName internalName1, Material material)
+	public BlockMultiID(InternalName internalName, Material material)
 	{
-		super(internalName1, material);
+		super(internalName, material);
 	}
 
-	public BlockMultiID(InternalName internalName1, Material material, Class<? extends ItemBlockIC2> itemClass)
+	public BlockMultiID(InternalName internalName, Material material, Class<? extends ItemBlockIC2> itemClass)
 	{
-		super(internalName1, material, itemClass);
+		super(internalName, material, itemClass);
 	}
 
 	public int getFacing(IBlockAccess iBlockAccess, int x, int y, int z)
@@ -322,16 +320,14 @@ public abstract class BlockMultiID extends BlockBase
 							te.setFacing((short) 4);
 					}
 				}
+				// TODO gamerforEA code start
+				if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
+				{
+					TileEntityBlock machine = (TileEntityBlock) te;
+					machine.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
+				}
+				// TODO gamerforEA code end
 			}
-			// TODO gamerforEA code start
-			if (tileEntity instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
-			{
-				TileEntityBlock machine = (TileEntityBlock) tileEntity;
-				GameProfile profile = ((EntityPlayer) entityliving).getGameProfile();
-				machine.ownerName = profile.getName();
-				machine.ownerUUID = profile.getId();
-			}
-			// TODO gamerforEA code end
 		}
 	}
 

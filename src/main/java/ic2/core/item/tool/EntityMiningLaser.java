@@ -1,6 +1,7 @@
 package ic2.core.item.tool;
 
 import ic2.api.event.LaserEvent;
+import ic2.core.ExplosionIC2;
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
 import ic2.core.block.MaterialIC2TNT;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -32,10 +34,12 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayer;
 
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
+import com.google.common.base.Strings;
+import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.common.registry.IThrowableEntity;
 
@@ -45,7 +49,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	public float power;
 	public int blockBreaks;
 	public boolean explosive;
-	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(new Block[] { Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock) }));
+	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock)));
 	public static final double laserSpeed = 1.0D;
 	public EntityLivingBase owner;
 	public boolean headingSet;
@@ -53,9 +57,14 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	private int ticksInAir;
 
 	// TODO gamerforEA code start
-	public Entity getOwner()
+	public GameProfile ownerProfile;
+	private FakePlayer ownerFake;
+
+	public FakePlayer getOwnerFake()
 	{
-		return this.getThrower() != null ? this.getThrower() : FakePlayerUtils.getPlayer(this.worldObj);
+		if (this.ownerFake != null) return this.ownerFake;
+		else if (this.ownerProfile != null) return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
+		else return FakePlayerUtils.getModFake(this.worldObj);
 	}
 	// TODO gamerforEA code end
 
@@ -104,17 +113,23 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		this.yOffset = 0.0F;
 		double yaw = Math.toRadians(yawDeg);
 		double pitch = Math.toRadians(pitchDeg);
-		double x = entityliving.posX - Math.cos(yaw) * 0.16D;
-		double z = entityliving.posZ - Math.sin(yaw) * 0.16D;
-		double startMotionX = -Math.sin(yaw) * Math.cos(pitch);
+		double sinYaw = Math.sin(yaw);
+		double cosYaw = Math.cos(yaw);
+		double cosPitch = Math.cos(pitch);
+		double x = entityliving.posX - cosYaw * 0.16D;
+		double z = entityliving.posZ - sinYaw * 0.16D;
+		double startMotionX = -sinYaw * cosPitch;
 		double startMotionY = -Math.sin(pitch);
-		double startMotionZ = Math.cos(yaw) * Math.cos(pitch);
+		double startMotionZ = cosYaw * cosPitch;
 		this.setPosition(x, y, z);
 		this.setLaserHeading(startMotionX, startMotionY, startMotionZ, 1.0D);
 		this.range = range;
 		this.power = power;
 		this.blockBreaks = blockBreaks;
 		this.explosive = explosive;
+		// TODO gamerforEA code start
+		if (entityliving instanceof EntityPlayer) this.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
+		// TODO gamerforEA code end
 	}
 
 	protected void entityInit()
@@ -223,14 +238,17 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 							{
 								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
 							} */
-							if (!FakePlayerUtils.callEntityDamageByEntityEvent(this.getOwner(), event.hitentity, DamageCause.ENTITY_ATTACK, powerI).isCancelled())
+							if (EventConfig.laserEvent && FakePlayerUtils.cantDamage(this.getOwnerFake(), event.hitentity))
 							{
-								if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
-								{
-									IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
-								}
+								this.setDead();
+								return;
 							}
-							// TODO gamerforEA code end
+							else
+							// TODO gamerforEA code end	
+							if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
+							{
+								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
+							}
 						}
 
 						this.setDead();
@@ -240,9 +258,15 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 				{
 					LaserEvent.LaserHitsBlockEvent event = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit, 0.9F, true, true);
 					MinecraftForge.EVENT_BUS.post(event);
-					// TODO gamerforEA code replace, old code: if (this.takeDataFromEvent(event))
-					if (this.getOwner() instanceof EntityPlayer && !FakePlayerUtils.callBlockBreakEvent(event.x, event.y, event.z, (EntityPlayer) this.getOwner()).isCancelled() && this.takeDataFromEvent(event))
+					// TODO gamerforEA code start
+					if (EventConfig.laserEvent && FakePlayerUtils.cantBreak(event.x, event.y, event.z, this.getOwnerFake()))
+					{
+						this.setDead();
+						return;
+					}
+					else
 					// TODO gamerforEA code end
+					if (this.takeDataFromEvent(event))
 					{
 						Block block = this.worldObj.getBlock(event.x, event.y, event.z);
 						if (block != null && block != Blocks.glass && block != Blocks.glass_pane && !StackUtil.equals(block, Ic2Items.reinforcedGlass))
@@ -341,12 +365,27 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		}
 	}
 
-	public void writeEntityToNBT(NBTTagCompound nbttagcompound)
+	public void writeEntityToNBT(NBTTagCompound nbt)
 	{
+		// TODO gamerforEA code start
+		if (this.ownerProfile != null)
+		{
+			nbt.setString("ownerUUID", this.ownerProfile.getId().toString());
+			nbt.setString("ownerName", this.ownerProfile.getName());
+		}
+		// TODO gamerforEA code end
 	}
 
-	public void readEntityFromNBT(NBTTagCompound nbttagcompound)
+	public void readEntityFromNBT(NBTTagCompound nbt)
 	{
+		// TODO gamerforEA code start
+		String uuid = nbt.getString("ownerUUID");
+		if (!Strings.isNullOrEmpty(uuid))
+		{
+			String name = nbt.getString("ownerName");
+			if (!Strings.isNullOrEmpty(name)) this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
+		}
+		// TODO gamerforEA code end
 	}
 
 	public float getShadowSize()
@@ -354,15 +393,15 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		return 0.0F;
 	}
 
-	public boolean takeDataFromEvent(LaserEvent aEvent)
+	public boolean takeDataFromEvent(LaserEvent event)
 	{
-		this.owner = aEvent.owner;
-		this.range = aEvent.range;
-		this.power = aEvent.power;
-		this.blockBreaks = aEvent.blockBreaks;
-		this.explosive = aEvent.explosive;
-		this.smelt = aEvent.smelt;
-		if (aEvent.isCanceled())
+		this.owner = event.owner;
+		this.range = event.range;
+		this.power = event.power;
+		this.blockBreaks = event.blockBreaks;
+		this.explosive = event.explosive;
+		this.smelt = event.smelt;
+		if (event.isCanceled())
 		{
 			this.setDead();
 			return false;
@@ -375,7 +414,6 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 	public void explode()
 	{
-		/* TODO gamerforEA code clear:
 		if (IC2.platform.isSimulating())
 		{
 			LaserEvent.LaserExplodesEvent event = new LaserEvent.LaserExplodesEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, 5.0F, 0.85F, 0.55F);
@@ -385,7 +423,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.posX, this.posY, this.posZ, event.explosionpower, event.explosiondroprate);
 				explosion.doExplosion();
 			}
-		} */
+		}
 	}
 
 	public boolean canMine(Block block)

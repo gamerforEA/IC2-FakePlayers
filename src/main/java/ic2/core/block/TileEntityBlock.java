@@ -27,6 +27,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.google.common.base.Strings;
+import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -46,21 +47,14 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	private static final int defaultTesrTtl = 500;
 
 	// TODO gamerforEA code start
-	public UUID ownerUUID;
-	public String ownerName;
-	private FakePlayer fakePlayer;
+	public GameProfile ownerProfile;
+	private FakePlayer ownerFake;
 
-	public EntityPlayer getFakePlayer()
+	public FakePlayer getOwnerFake()
 	{
-		EntityPlayer player = null;
-		if (!Strings.isNullOrEmpty(this.ownerName) && this.ownerUUID != null)
-		{
-			if (this.fakePlayer == null) this.fakePlayer = FakePlayerUtils.createFakePlayer(this.ownerUUID, this.ownerName, this.worldObj);
-			player = this.fakePlayer;
-		}
-		else player = FakePlayerUtils.getPlayer(this.worldObj);
-
-		return player;
+		if (this.ownerFake != null) return this.ownerFake;
+		else if (this.ownerProfile != null) return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
+		else return FakePlayerUtils.getModFake(this.worldObj);
 	}
 	// TODO gamerforEA code end
 
@@ -124,12 +118,13 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		this.tileEntityId = nbttagcompound.getInteger("tileEntityId");
 		this.prevFacing = this.facing = nbttagcompound.getShort("facing");
 		this.prevActive = this.active = nbttagcompound.getBoolean("active");
-
 		// TODO gamerforEA code start
 		String uuid = nbttagcompound.getString("ownerUUID");
-		if (!Strings.isNullOrEmpty(uuid)) this.ownerUUID = UUID.fromString(uuid);
-		String name = nbttagcompound.getString("ownerName");
-		if (!Strings.isNullOrEmpty(name)) this.ownerName = name;
+		if (!Strings.isNullOrEmpty(uuid))
+		{
+			String name = nbttagcompound.getString("ownerName");
+			if (!Strings.isNullOrEmpty(name)) this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
+		}
 		// TODO gamerforEA code end
 	}
 
@@ -139,10 +134,12 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		nbttagcompound.setInteger("tileEntityId", this.tileEntityId);
 		nbttagcompound.setShort("facing", this.facing);
 		nbttagcompound.setBoolean("active", this.active);
-
 		// TODO gamerforEA code start
-		if (this.ownerUUID != null) nbttagcompound.setString("ownerUUID", this.ownerUUID.toString());
-		if (!Strings.isNullOrEmpty(this.ownerName)) nbttagcompound.setString("ownerName", this.ownerName);
+		if (this.ownerProfile != null)
+		{
+			nbttagcompound.setString("ownerUUID", this.ownerProfile.getId().toString());
+			nbttagcompound.setString("ownerName", this.ownerProfile.getName());
+		}
 		// TODO gamerforEA code end
 	}
 
@@ -257,6 +254,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 			this.prevActive = this.active;
 			this.prevFacing = this.facing;
 		}
+
 	}
 
 	public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side)
@@ -290,7 +288,12 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		return new ItemStack(this.worldObj.getBlock(this.xCoord, this.yCoord, this.zCoord), 1, this.worldObj.getBlockMetadata(this.xCoord, this.yCoord, this.zCoord));
 	}
 
-	public int getTesrMask()
+	public boolean shouldRenderInPass(int pass)
+	{
+		return this.tesrMask != 0 && pass == 0;
+	}
+
+	public final int getTesrMask()
 	{
 		return this.tesrMask;
 	}
