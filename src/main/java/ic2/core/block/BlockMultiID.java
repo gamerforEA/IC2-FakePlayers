@@ -51,14 +51,14 @@ public abstract class BlockMultiID extends BlockBase
 	private static final int tesBeforeBreakLimit = 8;
 	private static ArrayDeque<TileEntity> tesBeforeBreak = new ArrayDeque(8);
 
-	public BlockMultiID(InternalName internalName, Material material)
+	public BlockMultiID(InternalName internalName1, Material material)
 	{
-		super(internalName, material);
+		super(internalName1, material);
 	}
 
-	public BlockMultiID(InternalName internalName, Material material, Class<? extends ItemBlockIC2> itemClass)
+	public BlockMultiID(InternalName internalName1, Material material, Class<? extends ItemBlockIC2> itemClass)
 	{
-		super(internalName, material, itemClass);
+		super(internalName1, material, itemClass);
 	}
 
 	public int getFacing(IBlockAccess iBlockAccess, int x, int y, int z)
@@ -99,6 +99,7 @@ public abstract class BlockMultiID extends BlockBase
 				}
 			}
 		}
+
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -227,23 +228,28 @@ public abstract class BlockMultiID extends BlockBase
 		return ret;
 	}
 
-	public void breakBlock(World world, int x, int y, int z, Block block, int meta)
+	public void onBlockPreDestroy(World world, int x, int y, int z, int meta)
 	{
 		TileEntity te = this.getOwnTe(world, x, y, z);
 		if (te instanceof TileEntityBlock)
 		{
-			((TileEntityBlock) te).onBlockBreak(block, meta);
+			TileEntityBlock i$ = (TileEntityBlock) te;
+			i$.onBlockBreak(this, meta);
+			if (i$.loaded)
+			{
+				i$.onUnloaded();
+			}
 		}
 
 		if (te != null)
 		{
 			if (te instanceof IHasGui)
 			{
-				Iterator i$ = world.playerEntities.iterator();
+				Iterator i$1 = world.playerEntities.iterator();
 
-				while (i$.hasNext())
+				while (i$1.hasNext())
 				{
-					Object obj = i$.next();
+					Object obj = i$1.next();
 					if (obj instanceof EntityPlayerMP)
 					{
 						EntityPlayerMP player = (EntityPlayerMP) obj;
@@ -286,8 +292,21 @@ public abstract class BlockMultiID extends BlockBase
 		{
 			this.dropXpOnBlockBreak(world, x, y, z, 1);
 		}
+	}
 
-		super.breakBlock(world, x, y, z, block, meta);
+	public void onBlockAdded(World world, int x, int y, int z)
+	{
+		Iterator it = tesBeforeBreak.descendingIterator();
+
+		while (it.hasNext())
+		{
+			TileEntity te = (TileEntity) it.next();
+			if (te.getWorldObj() == world && te.xCoord == x && te.yCoord == y && te.zCoord == z)
+			{
+				it.remove();
+				break;
+			}
+		}
 	}
 
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemStack)
@@ -319,28 +338,14 @@ public abstract class BlockMultiID extends BlockBase
 						case 3:
 							te.setFacing((short) 4);
 					}
+					// TODO gamerforEA code start
+					if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
+					{
+						TileEntityBlock machine = (TileEntityBlock) te;
+						machine.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
+					}
+					// TODO gamerforEA code end
 				}
-				// TODO gamerforEA code start
-				if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
-				{
-					TileEntityBlock machine = (TileEntityBlock) te;
-					machine.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
-				}
-				// TODO gamerforEA code end
-			}
-		}
-	}
-
-	public void onBlockPreDestroy(World world, int x, int y, int z, int meta)
-	{
-		super.onBlockPreDestroy(world, x, y, z, meta);
-		TileEntity te = this.getOwnTe(world, x, y, z);
-		if (te instanceof TileEntityBlock)
-		{
-			TileEntityBlock teb = (TileEntityBlock) te;
-			if (teb.loaded)
-			{
-				teb.onUnloaded();
 			}
 		}
 	}

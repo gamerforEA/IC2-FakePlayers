@@ -46,7 +46,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityMiner extends TileEntityElectricMachine implements IHasGui, IUpgradableBlock
 {
-	private Mode lastMode;
+	private TileEntityMiner.Mode lastMode;
 	public int progress;
 	private int scannedLevel;
 	private int scanRange;
@@ -67,7 +67,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	public TileEntityMiner()
 	{
 		super(1000, ConfigUtil.getInt(MainConfig.get(), "balance/minerDischargeTier"), 0, false);
-		this.lastMode = Mode.None;
+		this.lastMode = TileEntityMiner.Mode.None;
 		this.progress = 0;
 		this.scannedLevel = -1;
 		this.scanRange = 0;
@@ -103,7 +103,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	public void readFromNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.readFromNBT(nbtTagCompound);
-		this.lastMode = Mode.values()[nbtTagCompound.getInteger("lastMode")];
+		this.lastMode = TileEntityMiner.Mode.values()[nbtTagCompound.getInteger("lastMode")];
 		this.progress = nbtTagCompound.getInteger("progress");
 	}
 
@@ -194,9 +194,9 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 	private boolean withDrawPipe(int y)
 	{
-		if (this.lastMode != Mode.Withdraw)
+		if (this.lastMode != TileEntityMiner.Mode.Withdraw)
 		{
-			this.lastMode = Mode.Withdraw;
+			this.lastMode = TileEntityMiner.Mode.Withdraw;
 			this.progress = 0;
 		}
 
@@ -454,16 +454,16 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.canProvideLiquid = false;
 		byte energyPerTick;
 		short duration;
-		Mode mode1;
+		TileEntityMiner.Mode mode1;
 		if (isAirBlock)
 		{
-			mode1 = Mode.MineAir;
+			mode1 = TileEntityMiner.Mode.MineAir;
 			energyPerTick = 3;
 			duration = 20;
 		}
 		else if (this.drillSlot.get().getItem() == Ic2Items.miningDrill.getItem())
 		{
-			mode1 = Mode.MineDrill;
+			mode1 = TileEntityMiner.Mode.MineDrill;
 			energyPerTick = 6;
 			duration = 200;
 		}
@@ -474,7 +474,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				throw new IllegalStateException("invalid drill: " + this.drillSlot.get());
 			}
 
-			mode1 = Mode.MineDDrill;
+			mode1 = TileEntityMiner.Mode.MineDDrill;
 			energyPerTick = 20;
 			duration = 50;
 		}
@@ -652,21 +652,6 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		}
 	}
 
-	public int getOutputSize()
-	{
-		return this.buffer.size();
-	}
-
-	public ItemStack getOutput(int index)
-	{
-		return this.buffer.get(index);
-	}
-
-	public void setOutput(int index, ItemStack stack)
-	{
-		this.buffer.put(index, stack);
-	}
-
 	public void setRedstonePowered(boolean redstone)
 	{
 	}
@@ -675,6 +660,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	{
 		ArrayList itemstack = new ArrayList();
 		itemstack.add(Ic2Items.ejectorUpgrade);
+		itemstack.add(Ic2Items.pullingUpgrade);
 		return itemstack;
 	}
 

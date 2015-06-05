@@ -403,21 +403,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		}
 	}
 
-	public int getOutputSize()
-	{
-		return this.outputSlot.size();
-	}
-
-	public ItemStack getOutput(int index)
-	{
-		return this.outputSlot.get(index);
-	}
-
-	public void setOutput(int index, ItemStack stack)
-	{
-		this.outputSlot.put(index, stack);
-	}
-
 	public void readFromNBT(NBTTagCompound nbttagcompound)
 	{
 		super.readFromNBT(nbttagcompound);
@@ -487,6 +472,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		itemstack.add(Ic2Items.energyStorageUpgrade);
 		itemstack.add(Ic2Items.ejectorUpgrade);
 		itemstack.add(Ic2Items.fluidEjectorUpgrade);
+		itemstack.add(Ic2Items.pullingUpgrade);
 		return itemstack;
 	}
 }

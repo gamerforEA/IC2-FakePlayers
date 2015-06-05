@@ -220,7 +220,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		// TODO gamerforEA code start
 		if (EventConfig.advminerEvent && FakePlayerUtils.cantBreak(this.minetargetX, this.minelayer, this.minetargetZ, this.getOwnerFake())) return;
 		// TODO gamerforEA code end
-
 		if (this.silktouch && block.canSilkHarvest(this.worldObj, new Ic2Player(this.worldObj), this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))
 		{
 			if (Item.getItemFromBlock(block) != null && StackUtil.check(new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ))))
@@ -372,6 +371,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 					this.silktouch = !this.silktouch;
 				}
 		}
+
 	}
 
 	public void setUpgradestat()
@@ -454,20 +454,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		{
 			return false;
 		}
-	}
-
-	public int getOutputSize()
-	{
-		return 0;
-	}
-
-	public ItemStack getOutput(int index)
-	{
-		return null;
-	}
-
-	public void setOutput(int index, ItemStack stack)
-	{
 	}
 
 	public String getInventoryName()
