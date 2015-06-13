@@ -7,10 +7,12 @@ import ic2.core.IC2;
 import ic2.core.IHasGui;
 import ic2.core.Ic2Items;
 import ic2.core.Ic2Player;
+import ic2.core.InvSlotConsumableBlock;
 import ic2.core.audio.AudioSource;
 import ic2.core.audio.PositionSpec;
 import ic2.core.block.IUpgradableBlock;
 import ic2.core.block.invslot.InvSlot;
+import ic2.core.block.invslot.InvSlotConsumable;
 import ic2.core.block.invslot.InvSlotConsumableId;
 import ic2.core.block.invslot.InvSlotUpgrade;
 import ic2.core.block.machine.container.ContainerMiner;
@@ -23,7 +25,6 @@ import ic2.core.util.LiquidUtil;
 import ic2.core.util.StackUtil;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -60,9 +61,9 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	private AudioSource audioSource;
 	public final InvSlot buffer;
 	public final InvSlotUpgrade upgradeSlot;
-	public final InvSlotConsumableId drillSlot;
-	public final InvSlotConsumableId pipeSlot;
-	public final InvSlotConsumableId scannerSlot;
+	public final InvSlotConsumable drillSlot;
+	public final InvSlotConsumable pipeSlot;
+	public final InvSlotConsumable scannerSlot;
 
 	public TileEntityMiner()
 	{
@@ -74,10 +75,10 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.pumpMode = false;
 		this.canProvideLiquid = false;
 		this.drillSlot = new InvSlotConsumableId(this, "drill", 19, InvSlot.Access.IO, 1, InvSlot.InvSide.TOP, new Item[] { Ic2Items.miningDrill.getItem(), Ic2Items.diamondDrill.getItem() });
-		this.pipeSlot = new InvSlotConsumableId(this, "pipe", 18, InvSlot.Access.IO, 1, InvSlot.InvSide.SIDE, new Item[] { Ic2Items.miningPipe.getItem() });
+		this.pipeSlot = new InvSlotConsumableBlock(this, "pipe", 18, InvSlot.Access.IO, 1, InvSlot.InvSide.TOP);
 		this.scannerSlot = new InvSlotConsumableId(this, "scanner", 17, InvSlot.Access.IO, 1, InvSlot.InvSide.BOTTOM, new Item[] { Ic2Items.odScanner.getItem(), Ic2Items.ovScanner.getItem() });
 		this.upgradeSlot = new InvSlotUpgrade(this, "upgrade", 16, 1);
-		this.buffer = new InvSlot(this, "buffer", 1, InvSlot.Access.IO, 15);
+		this.buffer = new InvSlot(this, "buffer", 1, InvSlot.Access.IO, 15, InvSlot.InvSide.SIDE);
 	}
 
 	public void onLoaded()
@@ -229,17 +230,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	private void removePipe(int y)
 	{
 		this.worldObj.setBlockToAir(this.xCoord, y, this.zCoord);
-		ArrayList drops = new ArrayList();
-		drops.add(Ic2Items.miningPipe.copy());
-		if (StackUtil.putInInventory(this, Direction.XN, Ic2Items.miningPipe.copy(), true) == 0)
-		{
-			StackUtil.distributeDrop(this, drops);
-		}
-		else
-		{
-			StackUtil.putInInventory(this, Direction.XN, Ic2Items.miningPipe.copy(), false);
-		}
-
+		this.storeDrop(Ic2Items.miningPipe.copy());
 		ItemStack pipe = this.pipeSlot.consume(1, true, false);
 		if (pipe != null && pipe.getItem() != Ic2Items.miningPipe.getItem())
 		{
@@ -532,23 +523,11 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			// TODO gamerforEA code start
 			if (EventConfig.minerEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake())) return false;
 			// TODO gamerforEA code end
-			ArrayList drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
+			ArrayList<ItemStack> drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
 			if (drops != null)
 			{
-				Iterator i$ = drops.iterator();
-
-				while (i$.hasNext())
-				{
-					ItemStack drop = (ItemStack) i$.next();
-					if (StackUtil.putInInventory(this, Direction.XN, drop, true) == 0)
-					{
-						StackUtil.dropAsEntity(this.worldObj, this.xCoord, this.yCoord, this.zCoord, drop);
-					}
-					else
-					{
-						StackUtil.putInInventory(this, Direction.XN, drop, false);
-					}
-				}
+				for (ItemStack drop : drops)
+					this.storeDrop(drop);
 			}
 
 			this.worldObj.setBlockToAir(x, y, z);
@@ -557,6 +536,18 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		else
 		{
 			return false;
+		}
+	}
+
+	private void storeDrop(ItemStack stack)
+	{
+		if (StackUtil.putInInventory(this, Direction.XN, stack, true) == 0)
+		{
+			StackUtil.dropAsEntity(this.worldObj, this.xCoord, this.yCoord, this.zCoord, stack);
+		}
+		else
+		{
+			StackUtil.putInInventory(this, Direction.XN, stack, false);
 		}
 	}
 
