@@ -1,5 +1,12 @@
 package ic2.core.item.resources;
 
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.gamerforea.ic2.FakePlayerUtils;
+
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
 import ic2.core.init.BlocksItems;
@@ -7,12 +14,6 @@ import ic2.core.init.InternalName;
 import ic2.core.item.ItemIC2;
 import ic2.core.util.LiquidUtil;
 import ic2.core.util.StackUtil;
-
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,8 +27,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-
-import com.gamerforea.ic2.FakePlayerUtils;
 
 public class ItemCell extends ItemIC2
 {

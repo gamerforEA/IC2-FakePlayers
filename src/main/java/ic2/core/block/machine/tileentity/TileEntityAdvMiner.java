@@ -1,5 +1,17 @@
 package ic2.core.block.machine.tileentity;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.item.ElectricItem;
 import ic2.api.network.INetworkClientTileEntityEventListener;
 import ic2.api.recipe.IRecipeInput;
@@ -8,23 +20,18 @@ import ic2.core.IC2;
 import ic2.core.IHasGui;
 import ic2.core.Ic2Items;
 import ic2.core.Ic2Player;
-import ic2.core.block.IUpgradableBlock;
+import ic2.core.block.comp.Redstone;
 import ic2.core.block.invslot.InvSlot;
 import ic2.core.block.invslot.InvSlotConsumableId;
 import ic2.core.block.invslot.InvSlotUpgrade;
 import ic2.core.block.machine.container.ContainerAdvMiner;
 import ic2.core.block.machine.gui.GuiAdvMiner;
 import ic2.core.init.MainConfig;
-import ic2.core.item.IUpgradeItem;
 import ic2.core.item.tool.ItemScanner;
+import ic2.core.upgrade.IUpgradableBlock;
+import ic2.core.upgrade.UpgradableProperty;
 import ic2.core.util.ConfigUtil;
 import ic2.core.util.StackUtil;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockStaticLiquid;
@@ -35,12 +42,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.IFluidBlock;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHasGui, INetworkClientTileEntityEventListener, IUpgradableBlock
 {
@@ -62,6 +63,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public final InvSlotConsumableId scannerSlot;
 	public final InvSlotUpgrade upgradeSlot;
 	public final InvSlot ListSlot;
+	protected final Redstone redstone;
 
 	public TileEntityAdvMiner()
 	{
@@ -72,6 +74,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		this.energyConsume = 512;
 		this.defaultTier = 3;
 		this.workTick = 20;
+		this.redstone = (Redstone) this.addComponent(new Redstone(this));
 	}
 
 	public void onLoaded()
@@ -86,6 +89,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 
 			this.setUpgradestat();
 		}
+
 	}
 
 	private void chargeTool()
@@ -94,6 +98,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		{
 			this.energy -= ElectricItem.manager.charge(this.scannerSlot.get(), this.energy, 2, false, false);
 		}
+
 	}
 
 	public void updateEntity()
@@ -113,6 +118,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		{
 			this.setActive(false);
 		}
+
 	}
 
 	private boolean work()
@@ -121,7 +127,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		{
 			return false;
 		}
-		else if (!this.isRedstonePowered())
+		else if (this.redstone.hasRedstoneInput())
 		{
 			return false;
 		}
@@ -220,6 +226,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		// TODO gamerforEA code start
 		if (EventConfig.advminerEvent && FakePlayerUtils.cantBreak(this.minetargetX, this.minelayer, this.minetargetZ, this.getOwnerFake())) return;
 		// TODO gamerforEA code end
+
 		if (this.silktouch && block.canSilkHarvest(this.worldObj, new Ic2Player(this.worldObj), this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))
 		{
 			if (Item.getItemFromBlock(block) != null && StackUtil.check(new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ))))
@@ -376,32 +383,9 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 
 	public void setUpgradestat()
 	{
-		int extraTier = 0;
-		int scannMultiplier = 1;
-		this.redstonePowered = false;
-
-		for (int i = 0; i < this.upgradeSlot.size(); ++i)
-		{
-			ItemStack stack = this.upgradeSlot.get(i);
-			if (stack != null && stack.getItem() instanceof IUpgradeItem)
-			{
-				IUpgradeItem upgrade = (IUpgradeItem) stack.getItem();
-				extraTier += upgrade.getExtraTier(stack, this) * stack.stackSize;
-				if (stack.getItemDamage() == 0)
-				{
-					scannMultiplier += stack.stackSize;
-				}
-
-				if (((IUpgradeItem) stack.getItem()).useRedstoneinverter(stack, this))
-				{
-					this.redstonePowered = true;
-				}
-			}
-		}
-
-		this.setTier(applyModifier(this.defaultTier, extraTier, 1.0D));
-		this.blockscanncount = 5 * scannMultiplier;
-		this.setRedstonePowered(this.redstonePowered);
+		this.upgradeSlot.onChanged();
+		this.setTier(applyModifier(this.defaultTier, this.upgradeSlot.extraTier, 1.0D));
+		this.blockscanncount = 5 * this.upgradeSlot.augmentation;
 	}
 
 	private static int applyModifier(int base, int extra, double multiplier)
@@ -423,19 +407,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
-	}
-
-	public boolean isRedstonePowered()
-	{
-		return this.redstonePowered ? !super.isRedstonePowered() : super.isRedstonePowered();
-	}
-
-	public void setRedstonePowered(boolean redstone)
-	{
-		if (this.redstonePowered != redstone)
-		{
-			this.redstonePowered = redstone;
-		}
 	}
 
 	public double getEnergy()
@@ -479,11 +450,8 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		return ret;
 	}
 
-	public List<ItemStack> getCompatibleUpgradeList()
+	public Set<UpgradableProperty> getUpgradableProperties()
 	{
-		ArrayList itemstack = new ArrayList();
-		itemstack.add(Ic2Items.overclockerUpgrade);
-		itemstack.add(Ic2Items.redstoneinvUpgrade);
-		return itemstack;
+		return EnumSet.of(UpgradableProperty.Augmentable, UpgradableProperty.RedstoneSensitive, UpgradableProperty.Transformer);
 	}
 }

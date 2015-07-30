@@ -1,27 +1,12 @@
 package ic2.core.block;
 
-import ic2.api.network.INetworkDataProvider;
-import ic2.api.network.INetworkUpdateListener;
-import ic2.api.tile.IWrenchable;
-import ic2.core.IC2;
-import ic2.core.ITickCallback;
-import ic2.core.Ic2Items;
-import ic2.core.migration.BlockMigrate;
-import ic2.core.network.NetworkManager;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.Vector;
-
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IIcon;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.FakePlayer;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
@@ -31,9 +16,28 @@ import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ic2.api.network.INetworkDataProvider;
+import ic2.api.network.INetworkUpdateListener;
+import ic2.api.tile.IWrenchable;
+import ic2.core.IC2;
+import ic2.core.ITickCallback;
+import ic2.core.Ic2Items;
+import ic2.core.block.comp.TileEntityComponent;
+import ic2.core.migration.BlockMigrate;
+import ic2.core.network.NetworkManager;
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IIcon;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 
 public class TileEntityBlock extends TileEntity implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
 {
+	private static final List<TileEntityComponent> emptyComponents = Arrays.asList(new TileEntityComponent[0]);
+	private List<TileEntityComponent> components;
 	public int tileEntityId;
 	private boolean active = false;
 	private short facing = 0;
@@ -105,11 +109,34 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		{
 			((BlockMigrate) block).migrate(this.worldObj, this.xCoord, this.yCoord, this.zCoord);
 		}
+
+		if (this.components != null)
+		{
+			Iterator i$ = this.components.iterator();
+
+			while (i$.hasNext())
+			{
+				TileEntityComponent component = (TileEntityComponent) i$.next();
+				component.onLoaded();
+			}
+		}
+
 	}
 
 	public void onUnloaded()
 	{
 		this.loaded = false;
+		if (this.components != null)
+		{
+			Iterator i$ = this.components.iterator();
+
+			while (i$.hasNext())
+			{
+				TileEntityComponent component = (TileEntityComponent) i$.next();
+				component.onUnloaded();
+			}
+		}
+
 	}
 
 	public void readFromNBT(NBTTagCompound nbttagcompound)
@@ -118,6 +145,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		this.tileEntityId = nbttagcompound.getInteger("tileEntityId");
 		this.prevFacing = this.facing = nbttagcompound.getShort("facing");
 		this.prevActive = this.active = nbttagcompound.getBoolean("active");
+
 		// TODO gamerforEA code start
 		String uuid = nbttagcompound.getString("ownerUUID");
 		if (!Strings.isNullOrEmpty(uuid))
@@ -134,6 +162,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		nbttagcompound.setInteger("tileEntityId", this.tileEntityId);
 		nbttagcompound.setShort("facing", this.facing);
 		nbttagcompound.setBoolean("active", this.active);
+
 		// TODO gamerforEA code start
 		if (this.ownerProfile != null)
 		{
@@ -319,5 +348,36 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	public void adjustDrops(List<ItemStack> drops, int fortune)
 	{
 		drops.set(0, new ItemStack(Ic2Items.teBlock.getItem(), 1, this.tileEntityId));
+	}
+
+	protected <T extends TileEntityComponent> T addComponent(T component)
+	{
+		if (this.components == null)
+		{
+			this.components = new ArrayList(4);
+		}
+
+		this.components.add(component);
+		return component;
+	}
+
+	public Iterable<TileEntityComponent> getComponents()
+	{
+		return this.components == null ? emptyComponents : this.components;
+	}
+
+	public void onNeighborUpdate(Block srcBlock)
+	{
+		if (this.components != null)
+		{
+			Iterator i$ = this.components.iterator();
+
+			while (i$.hasNext())
+			{
+				TileEntityComponent component = (TileEntityComponent) i$.next();
+				component.onNeighborUpdate(srcBlock);
+			}
+		}
+
 	}
 }

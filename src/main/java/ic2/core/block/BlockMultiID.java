@@ -1,5 +1,16 @@
 package ic2.core.block;
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.tile.IWrenchable;
 import ic2.core.ContainerBase;
 import ic2.core.IC2;
@@ -9,14 +20,6 @@ import ic2.core.init.InternalName;
 import ic2.core.item.block.ItemBlockIC2;
 import ic2.core.util.LogCategory;
 import ic2.core.util.Util;
-
-import java.lang.reflect.Constructor;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -37,11 +40,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.ForgeDirection;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public abstract class BlockMultiID extends BlockBase
 {
@@ -176,6 +174,7 @@ public abstract class BlockMultiID extends BlockBase
 		{
 			((TileEntityBlock) te).onRender();
 		}
+
 	}
 
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float a, float b, float c)
@@ -292,6 +291,7 @@ public abstract class BlockMultiID extends BlockBase
 		{
 			this.dropXpOnBlockBreak(world, x, y, z, 1);
 		}
+
 	}
 
 	public void onBlockAdded(World world, int x, int y, int z)
@@ -307,6 +307,7 @@ public abstract class BlockMultiID extends BlockBase
 				break;
 			}
 		}
+
 	}
 
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemStack)
@@ -338,14 +339,13 @@ public abstract class BlockMultiID extends BlockBase
 						case 3:
 							te.setFacing((short) 4);
 					}
-					// TODO gamerforEA code start
-					if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
-					{
-						TileEntityBlock machine = (TileEntityBlock) te;
-						machine.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
-					}
-					// TODO gamerforEA code end
 				}
+				// TODO gamerforEA code start
+				if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
+				{
+					((TileEntityBlock) te).ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
+				}
+				// TODO gamerforEA code end
 			}
 		}
 	}
@@ -464,6 +464,7 @@ public abstract class BlockMultiID extends BlockBase
 				itemList.add(is);
 			}
 		}
+
 	}
 
 	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z)
@@ -491,6 +492,15 @@ public abstract class BlockMultiID extends BlockBase
 			}
 
 			return false;
+		}
+	}
+
+	public void onNeighborBlockChange(World world, int x, int y, int z, Block srcBlock)
+	{
+		TileEntity te = this.getOwnTe(world, x, y, z);
+		if (te instanceof TileEntityBlock)
+		{
+			((TileEntityBlock) te).onNeighborUpdate(srcBlock);
 		}
 	}
 }

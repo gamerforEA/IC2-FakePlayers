@@ -1,14 +1,17 @@
 package ic2.core.item.tool;
 
-import ic2.core.ExplosionIC2;
-import ic2.core.IC2;
-import ic2.core.util.Quaternion;
-import ic2.core.util.Vector3;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
+import cpw.mods.fml.common.registry.IThrowableEntity;
+import ic2.core.ExplosionIC2;
+import ic2.core.IC2;
+import ic2.core.util.Quaternion;
+import ic2.core.util.Vector3;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -22,11 +25,6 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
-
-import cpw.mods.fml.common.registry.IThrowableEntity;
 
 public class EntityParticle extends Entity implements IThrowableEntity
 {

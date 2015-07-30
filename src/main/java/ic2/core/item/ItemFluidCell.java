@@ -1,12 +1,16 @@
 package ic2.core.item;
 
+import java.util.Iterator;
+import java.util.List;
+
+import com.gamerforea.ic2.FakePlayerUtils;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
 import ic2.core.init.InternalName;
 import ic2.core.util.LiquidUtil;
-
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,11 +28,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.IFluidHandler;
-
-import com.gamerforea.ic2.FakePlayerUtils;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemFluidCell extends ItemIC2FluidContainer
 {
@@ -105,9 +104,9 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 						return true;
 					}
 
-					FluidStack fluid = LiquidUtil.drainContainerStack(stack, player, 1000, true);
+					FluidStack fs = LiquidUtil.drainContainerStack(stack, player, 1000, true);
 					ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[position.sideHit];
-					if (LiquidUtil.placeFluid(fluid, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, position.sideHit, stack) && LiquidUtil.placeFluid(fluid, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
+					if (LiquidUtil.placeFluid(fs, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, position.sideHit, stack) && LiquidUtil.placeFluid(fs, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
 					{
 						if (!player.capabilities.isCreativeMode)
 						{
@@ -132,12 +131,16 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 	public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList)
 	{
 		itemList.add(Ic2Items.FluidCell.copy());
-		for (int fluidId : FluidRegistry.getRegisteredFluidIDs().values())
+		Iterator i$ = FluidRegistry.getRegisteredFluidIDs().values().iterator();
+
+		while (i$.hasNext())
 		{
+			int fluidId = ((Integer) i$.next()).intValue();
 			ItemStack stack = Ic2Items.FluidCell.copy();
 			this.fill(stack, new FluidStack(fluidId, Integer.MAX_VALUE), true);
 			itemList.add(stack);
 		}
+
 	}
 
 	private boolean interactWithTank(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side)
@@ -232,15 +235,9 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 			FluidStack fluid = null;
 			if (block != Blocks.water && block != Blocks.flowing_water)
 			{
-				if (block == Blocks.lava || block == Blocks.flowing_lava)
-				{
-					fluid = new FluidStack(FluidRegistry.LAVA, 1000);
-				}
+				if (block == Blocks.lava || block == Blocks.flowing_lava) fluid = new FluidStack(FluidRegistry.LAVA, 1000);
 			}
-			else
-			{
-				fluid = new FluidStack(FluidRegistry.WATER, 1000);
-			}
+			else fluid = new FluidStack(FluidRegistry.WATER, 1000);
 
 			if (fluid != null)
 			{

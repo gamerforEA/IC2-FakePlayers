@@ -3,12 +3,12 @@ package ic2.core;
 import java.util.Arrays;
 import java.util.List;
 
+import com.gamerforea.ic2.EventConfig;
+
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-
-import com.gamerforea.ic2.EventConfig;
 
 public class IC2Potion extends Potion
 {

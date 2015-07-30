@@ -1,10 +1,12 @@
 package ic2.core;
 
-import ic2.api.event.ExplosionEvent;
-import ic2.core.util.Util;
-
 import java.util.List;
 
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
+import ic2.api.event.ExplosionEvent;
+import ic2.core.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -14,9 +16,6 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
 public class PointExplosion extends Explosion
 {

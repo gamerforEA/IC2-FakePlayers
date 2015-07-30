@@ -1,13 +1,21 @@
 package ic2.core.block.machine.tileentity;
 
+import java.util.EnumSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.core.ContainerBase;
 import ic2.core.IC2;
 import ic2.core.IHasGui;
-import ic2.core.Ic2Items;
 import ic2.core.audio.AudioSource;
 import ic2.core.audio.PositionSpec;
-import ic2.core.block.IUpgradableBlock;
 import ic2.core.block.TileEntityLiquidTankElectricMachine;
 import ic2.core.block.invslot.InvSlot;
 import ic2.core.block.invslot.InvSlotCharge;
@@ -16,12 +24,10 @@ import ic2.core.block.invslot.InvSlotOutput;
 import ic2.core.block.invslot.InvSlotUpgrade;
 import ic2.core.block.machine.container.ContainerPump;
 import ic2.core.block.machine.gui.GuiPump;
-import ic2.core.item.IUpgradeItem;
+import ic2.core.upgrade.IUpgradableBlock;
+import ic2.core.upgrade.IUpgradeItem;
+import ic2.core.upgrade.UpgradableProperty;
 import ic2.core.util.PumpUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,14 +41,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.IFluidHandler;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityPump extends TileEntityLiquidTankElectricMachine implements IHasGui, IUpgradableBlock
 {
@@ -199,6 +197,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		// TODO gamerforEA code start
 		if (EventConfig.pumpEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake())) return null;
 		// TODO gamerforEA code end
+
 		FluidStack ret = null;
 		TileEntity te = null;
 		int freespace = this.fluidTank.getCapacity() - this.fluidTank.getFluidAmount();
@@ -371,20 +370,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		return ret > 2.147483647E9D ? Integer.MAX_VALUE : (int) ret;
 	}
 
-	public boolean isRedstonePowered()
-	{
-		return this.redstonePowered ? !super.isRedstonePowered() : super.isRedstonePowered();
-	}
-
-	public void setRedstonePowered(boolean redstone)
-	{
-		if (this.redstonePowered != redstone)
-		{
-			this.redstonePowered = redstone;
-		}
-
-	}
-
 	public double getEnergy()
 	{
 		return this.energy;
@@ -465,14 +450,8 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		return true;
 	}
 
-	public List<ItemStack> getCompatibleUpgradeList()
+	public Set<UpgradableProperty> getUpgradableProperties()
 	{
-		ArrayList itemstack = new ArrayList();
-		itemstack.add(Ic2Items.transformerUpgrade);
-		itemstack.add(Ic2Items.energyStorageUpgrade);
-		itemstack.add(Ic2Items.ejectorUpgrade);
-		itemstack.add(Ic2Items.fluidEjectorUpgrade);
-		itemstack.add(Ic2Items.pullingUpgrade);
-		return itemstack;
+		return EnumSet.of(UpgradableProperty.Processing, new UpgradableProperty[] { UpgradableProperty.Transformer, UpgradableProperty.EnergyStorage, UpgradableProperty.ItemConsuming, UpgradableProperty.ItemProducing, UpgradableProperty.FluidProducing });
 	}
 }

@@ -1,5 +1,10 @@
 package ic2.core.block.machine.tileentity;
 
+import java.util.List;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
@@ -7,18 +12,12 @@ import ic2.core.IC2;
 import ic2.core.IC2DamageSource;
 import ic2.core.block.TileEntityBlock;
 import ic2.core.item.armor.ItemArmorHazmat;
-
-import java.util.List;
-
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
 public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 {

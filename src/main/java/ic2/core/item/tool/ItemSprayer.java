@@ -1,5 +1,11 @@
 package ic2.core.item.tool;
 
+import java.util.ArrayList;
+import java.util.Random;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
 import ic2.api.item.IBoxable;
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
@@ -10,10 +16,6 @@ import ic2.core.item.ItemIC2FluidContainer;
 import ic2.core.item.armor.ItemArmorCFPack;
 import ic2.core.util.LiquidUtil;
 import ic2.core.util.StackUtil;
-
-import java.util.ArrayList;
-import java.util.Random;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -26,9 +28,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
 public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 {

@@ -1,12 +1,5 @@
 package ic2.core.item.tool;
 
-import ic2.api.event.LaserEvent;
-import ic2.core.ExplosionIC2;
-import ic2.core.IC2;
-import ic2.core.Ic2Items;
-import ic2.core.block.MaterialIC2TNT;
-import ic2.core.util.StackUtil;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,6 +7,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+import com.google.common.base.Strings;
+import com.mojang.authlib.GameProfile;
+
+import cpw.mods.fml.common.registry.IThrowableEntity;
+import ic2.api.event.LaserEvent;
+import ic2.core.ExplosionIC2;
+import ic2.core.IC2;
+import ic2.core.Ic2Items;
+import ic2.core.block.MaterialIC2TNT;
+import ic2.core.util.StackUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -35,13 +40,6 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
-import com.google.common.base.Strings;
-import com.mojang.authlib.GameProfile;
-
-import cpw.mods.fml.common.registry.IThrowableEntity;
 
 public class EntityMiningLaser extends Entity implements IThrowableEntity
 {
@@ -233,7 +231,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 							{
 								entity.setFire(powerI * (this.smelt ? 2 : 1));
 							}
-
+							
 							if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
 							{
 								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");

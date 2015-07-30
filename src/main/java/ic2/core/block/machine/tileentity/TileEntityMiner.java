@@ -1,5 +1,15 @@
 package ic2.core.block.machine.tileentity;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.FakePlayerUtils;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.api.item.ElectricItem;
 import ic2.core.ContainerBase;
@@ -10,7 +20,6 @@ import ic2.core.Ic2Player;
 import ic2.core.InvSlotConsumableBlock;
 import ic2.core.audio.AudioSource;
 import ic2.core.audio.PositionSpec;
-import ic2.core.block.IUpgradableBlock;
 import ic2.core.block.invslot.InvSlot;
 import ic2.core.block.invslot.InvSlotConsumable;
 import ic2.core.block.invslot.InvSlotConsumableId;
@@ -18,15 +27,13 @@ import ic2.core.block.invslot.InvSlotUpgrade;
 import ic2.core.block.machine.container.ContainerMiner;
 import ic2.core.block.machine.gui.GuiMiner;
 import ic2.core.init.MainConfig;
-import ic2.core.item.IUpgradeItem;
 import ic2.core.item.tool.ItemScanner;
+import ic2.core.upgrade.IUpgradableBlock;
+import ic2.core.upgrade.IUpgradeItem;
+import ic2.core.upgrade.UpgradableProperty;
 import ic2.core.util.ConfigUtil;
 import ic2.core.util.LiquidUtil;
 import ic2.core.util.StackUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
@@ -38,12 +45,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fluids.IFluidBlock;
-
-import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class TileEntityMiner extends TileEntityElectricMachine implements IHasGui, IUpgradableBlock
 {
@@ -138,6 +139,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			this.setActive(false);
 		}
+
 	}
 
 	private void chargeTools()
@@ -151,6 +153,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			this.energy -= ElectricItem.manager.charge(this.drillSlot.get(), this.energy, 1, false, false);
 		}
+
 	}
 
 	private boolean work()
@@ -241,6 +244,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				((ItemBlock) fillerItem).onItemUse(filler, new Ic2Player(this.worldObj), this.worldObj, this.xCoord, y + 1, this.zCoord, 0, 0.0F, 0.0F, 0.0F);
 			}
 		}
+
 	}
 
 	private boolean digDown(int y, boolean removeTipAbove)
@@ -520,14 +524,21 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			}
 
 			this.energy -= (double) energyCost;
+
 			// TODO gamerforEA code start
 			if (EventConfig.minerEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake())) return false;
 			// TODO gamerforEA code end
-			ArrayList<ItemStack> drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
+
+			ArrayList drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
 			if (drops != null)
 			{
-				for (ItemStack drop : drops)
+				Iterator i$ = drops.iterator();
+
+				while (i$.hasNext())
+				{
+					ItemStack drop = (ItemStack) i$.next();
 					this.storeDrop(drop);
+				}
 			}
 
 			this.worldObj.setBlockToAir(x, y, z);
@@ -549,6 +560,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			StackUtil.putInInventory(this, Direction.XN, stack, false);
 		}
+
 	}
 
 	public boolean canPump(int x, int y, int z)
@@ -643,16 +655,9 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		}
 	}
 
-	public void setRedstonePowered(boolean redstone)
+	public Set<UpgradableProperty> getUpgradableProperties()
 	{
-	}
-
-	public List<ItemStack> getCompatibleUpgradeList()
-	{
-		ArrayList itemstack = new ArrayList();
-		itemstack.add(Ic2Items.ejectorUpgrade);
-		itemstack.add(Ic2Items.pullingUpgrade);
-		return itemstack;
+		return EnumSet.of(UpgradableProperty.ItemConsuming, UpgradableProperty.ItemProducing);
 	}
 
 	static enum MineResult
