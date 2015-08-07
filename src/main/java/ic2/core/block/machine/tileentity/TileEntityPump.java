@@ -73,6 +73,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		this.defaultEnergyStorage = 1 * this.operationLength;
 	}
 
+	@Override
 	public void onUnloaded()
 	{
 		if (IC2.platform.isRendering() && this.audioSource != null)
@@ -85,51 +86,45 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		super.onUnloaded();
 	}
 
+	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
 		boolean needsInvUpdate = false;
-		if (this.canoperate() && this.energy >= (double) (this.energyConsume * this.operationLength))
-		{
+		if (this.canoperate() && this.energy >= this.energyConsume * this.operationLength)
 			if (this.progress < this.operationLength)
 			{
 				++this.progress;
-				this.energy -= (double) this.energyConsume;
+				this.energy -= this.energyConsume;
 			}
 			else
 			{
 				this.progress = 0;
 				this.operate(false);
 			}
-		}
 
 		MutableObject output = new MutableObject();
 		if (this.containerSlot.transferFromTank(this.fluidTank, output, true) && (output.getValue() == null || this.outputSlot.canAdd((ItemStack) output.getValue())))
 		{
 			this.containerSlot.transferFromTank(this.fluidTank, output, false);
 			if (output.getValue() != null)
-			{
 				this.outputSlot.add((ItemStack) output.getValue());
-			}
 		}
 
 		for (int i = 0; i < this.upgradeSlot.size(); ++i)
 		{
 			ItemStack stack = this.upgradeSlot.get(i);
 			if (stack != null && stack.getItem() instanceof IUpgradeItem && ((IUpgradeItem) stack.getItem()).onTick(stack, this))
-			{
 				needsInvUpdate = true;
-			}
 		}
 
 		this.guiProgress = (float) this.progress / (float) this.operationLength;
 		if (needsInvUpdate)
-		{
 			super.markDirty();
-		}
 
 	}
 
+	@Override
 	public String getInventoryName()
 	{
 		return "Pump";
@@ -167,9 +162,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		if (this.miner != null)
 		{
 			if (this.miner.canProvideLiquid)
-			{
 				var7 = this.pump(this.miner.liquidX, this.miner.liquidY, this.miner.liquidZ, sim, this.miner);
-			}
 		}
 		else
 		{
@@ -180,22 +173,19 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		if (var7 != null && this.getFluidTank().fill(var7, false) > 0)
 		{
 			if (!sim)
-			{
 				this.getFluidTank().fill(var7, true);
-			}
 
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
 	public FluidStack pump(int x, int y, int z, boolean sim, TileEntity miner)
 	{
 		// TODO gamerforEA code start
-		if (EventConfig.pumpEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake())) return null;
+		if (EventConfig.pumpEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake()))
+			return null;
 		// TODO gamerforEA code end
 
 		FluidStack ret = null;
@@ -204,26 +194,18 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		if (miner == null && freespace > 0 && (te = this.worldObj.getTileEntity(x, y, z)) instanceof IFluidHandler)
 		{
 			if (freespace > 1000)
-			{
 				freespace = 1000;
-			}
 
 			ret = ((IFluidHandler) te).drain(ForgeDirection.getOrientation(this.getFacing()), freespace, false);
 			if (ret != null)
 			{
 				if (!((IFluidHandler) te).canDrain(ForgeDirection.getOrientation(this.getFacing()), ret.getFluid()))
-				{
 					return null;
-				}
 
 				if (sim)
-				{
 					ret = ((IFluidHandler) te).drain(ForgeDirection.getOrientation(this.getFacing()), freespace, false);
-				}
 				else
-				{
 					ret = ((IFluidHandler) te).drain(ForgeDirection.getOrientation(this.getFacing()), freespace, true);
-				}
 			}
 
 			return ret;
@@ -240,46 +222,34 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 					{
 						IFluidBlock liquid = (IFluidBlock) block;
 						if (liquid.canDrain(this.worldObj, cood[0], cood[1], cood[2]))
-						{
 							if (!sim)
 							{
 								ret = liquid.drain(this.worldObj, cood[0], cood[1], cood[2], true);
 								this.worldObj.setBlockToAir(cood[0], cood[1], cood[2]);
 							}
 							else
-							{
 								ret = new FluidStack(liquid.getFluid(), 1000);
-							}
-						}
 					}
 					else if (block != Blocks.water && block != Blocks.flowing_water)
 					{
 						if (block == Blocks.lava || block == Blocks.flowing_lava)
 						{
 							if (this.worldObj.getBlockMetadata(cood[0], cood[1], cood[2]) != 0)
-							{
 								return null;
-							}
 
 							ret = new FluidStack(FluidRegistry.LAVA, 1000);
 							if (!sim)
-							{
 								this.worldObj.setBlockToAir(cood[0], cood[1], cood[2]);
-							}
 						}
 					}
 					else
 					{
 						if (this.worldObj.getBlockMetadata(cood[0], cood[1], cood[2]) != 0)
-						{
 							return null;
-						}
 
 						ret = new FluidStack(FluidRegistry.WATER, 1000);
 						if (!sim)
-						{
 							this.worldObj.setBlockToAir(cood[0], cood[1], cood[2]);
-						}
 					}
 				}
 			}
@@ -293,33 +263,33 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		return direction.ordinal() == this.getFacing();
 	}
 
+	@Override
 	public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side)
 	{
 		return this.getFacing() != side;
 	}
 
+	@Override
 	public void setFacing(short side)
 	{
 		super.setFacing(side);
 	}
 
+	@Override
 	public void onLoaded()
 	{
 		super.onLoaded();
 		if (IC2.platform.isSimulating())
-		{
 			this.setUpgradestat();
-		}
 
 	}
 
+	@Override
 	public void markDirty()
 	{
 		super.markDirty();
 		if (IC2.platform.isSimulating())
-		{
 			this.setUpgradestat();
-		}
 
 	}
 
@@ -340,11 +310,11 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 			{
 				IUpgradeItem stackOpLen = (IUpgradeItem) stack.getItem();
 				extraProcessTime += stackOpLen.getExtraProcessTime(stack, this) * stack.stackSize;
-				processTimeMultiplier *= Math.pow(stackOpLen.getProcessTimeMultiplier(stack, this), (double) stack.stackSize);
+				processTimeMultiplier *= Math.pow(stackOpLen.getProcessTimeMultiplier(stack, this), stack.stackSize);
 				extraEnergyDemand += stackOpLen.getExtraEnergyDemand(stack, this) * stack.stackSize;
-				energyDemandMultiplier *= Math.pow(stackOpLen.getEnergyDemandMultiplier(stack, this), (double) stack.stackSize);
+				energyDemandMultiplier *= Math.pow(stackOpLen.getEnergyDemandMultiplier(stack, this), stack.stackSize);
 				extraEnergyStorage += stackOpLen.getExtraEnergyStorage(stack, this) * stack.stackSize;
-				energyStorageMultiplier *= Math.pow(stackOpLen.getEnergyStorageMultiplier(stack, this), (double) stack.stackSize);
+				energyStorageMultiplier *= Math.pow(stackOpLen.getEnergyStorageMultiplier(stack, this), stack.stackSize);
 				extraTier += stackOpLen.getExtraTier(stack, this) * stack.stackSize;
 			}
 		}
@@ -352,29 +322,29 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		double var15 = (double) this.progress / (double) this.operationLength;
 		double var16 = ((double) this.defaultOperationLength + (double) extraProcessTime) * 64.0D * processTimeMultiplier;
 		this.operationsPerTick = (int) Math.min(Math.ceil(64.0D / var16), 2.147483647E9D);
-		this.operationLength = (int) Math.round(var16 * (double) this.operationsPerTick / 64.0D);
+		this.operationLength = (int) Math.round(var16 * this.operationsPerTick / 64.0D);
 		this.energyConsume = applyModifier(this.defaultEnergyConsume, extraEnergyDemand, energyDemandMultiplier);
 		this.setTier(applyModifier(this.defaultTier, extraTier, 1.0D));
 		this.maxEnergy = applyModifier(this.defaultEnergyStorage, extraEnergyStorage + this.operationLength * this.energyConsume, energyStorageMultiplier);
 		if (this.operationLength < 1)
-		{
 			this.operationLength = 1;
-		}
 
-		this.progress = (short) ((int) Math.floor(var15 * (double) this.operationLength + 0.1D));
+		this.progress = (short) (int) Math.floor(var15 * this.operationLength + 0.1D);
 	}
 
 	private static int applyModifier(int base, int extra, double multiplier)
 	{
-		double ret = (double) Math.round(((double) base + (double) extra) * multiplier);
+		double ret = Math.round(((double) base + (double) extra) * multiplier);
 		return ret > 2.147483647E9D ? Integer.MAX_VALUE : (int) ret;
 	}
 
+	@Override
 	public double getEnergy()
 	{
 		return this.energy;
 	}
 
+	@Override
 	public boolean useEnergy(double amount)
 	{
 		if (this.energy >= amount)
@@ -383,73 +353,74 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
+	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound)
 	{
 		super.readFromNBT(nbttagcompound);
 		this.progress = nbttagcompound.getShort("progress");
 	}
 
+	@Override
 	public void writeToNBT(NBTTagCompound nbttagcompound)
 	{
 		super.writeToNBT(nbttagcompound);
 		nbttagcompound.setShort("progress", this.progress);
 	}
 
+	@Override
 	public ContainerBase<TileEntityPump> getGuiContainer(EntityPlayer entityPlayer)
 	{
 		return new ContainerPump(entityPlayer, this);
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public GuiScreen getGui(EntityPlayer entityPlayer, boolean isAdmin)
 	{
 		return new GuiPump(new ContainerPump(entityPlayer, this));
 	}
 
+	@Override
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
 	}
 
+	@Override
 	public void onNetworkUpdate(String field)
 	{
 		if (field.equals("active") && this.prevActive != this.getActive())
 		{
 			if (this.audioSource == null)
-			{
 				this.audioSource = IC2.audioManager.createSource(this, PositionSpec.Center, "Machines/PumpOp.ogg", true, false, IC2.audioManager.getDefaultVolume());
-			}
 
 			if (this.getActive())
 			{
 				if (this.audioSource != null)
-				{
 					this.audioSource.play();
-				}
 			}
 			else if (this.audioSource != null)
-			{
 				this.audioSource.stop();
-			}
 		}
 
 		super.onNetworkUpdate(field);
 	}
 
+	@Override
 	public boolean canFill(ForgeDirection from, Fluid fluid)
 	{
 		return false;
 	}
 
+	@Override
 	public boolean canDrain(ForgeDirection from, Fluid fluid)
 	{
 		return true;
 	}
 
+	@Override
 	public Set<UpgradableProperty> getUpgradableProperties()
 	{
 		return EnumSet.of(UpgradableProperty.Processing, new UpgradableProperty[] { UpgradableProperty.Transformer, UpgradableProperty.EnergyStorage, UpgradableProperty.ItemConsuming, UpgradableProperty.ItemProducing, UpgradableProperty.FluidProducing });

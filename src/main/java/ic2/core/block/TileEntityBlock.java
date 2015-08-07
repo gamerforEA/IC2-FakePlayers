@@ -24,7 +24,6 @@ import ic2.core.ITickCallback;
 import ic2.core.Ic2Items;
 import ic2.core.block.comp.TileEntityComponent;
 import ic2.core.migration.BlockMigrate;
-import ic2.core.network.NetworkManager;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -56,47 +55,48 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 
 	public FakePlayer getOwnerFake()
 	{
-		if (this.ownerFake != null) return this.ownerFake;
-		else if (this.ownerProfile != null) return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else return FakePlayerUtils.getModFake(this.worldObj);
+		if (this.ownerFake != null)
+			return this.ownerFake;
+		else if (this.ownerProfile != null)
+			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
+		else
+			return FakePlayerUtils.getModFake(this.worldObj);
 	}
 	// TODO gamerforEA code end
 
+	@Override
 	public void validate()
 	{
 		super.validate();
 		IC2.tickHandler.addSingleTickCallback(this.worldObj, new ITickCallback()
 		{
+			@Override
 			public void tickCallback(World world)
 			{
 				if (!TileEntityBlock.this.isInvalid() && world.blockExists(TileEntityBlock.this.xCoord, TileEntityBlock.this.yCoord, TileEntityBlock.this.zCoord))
 				{
 					TileEntityBlock.this.onLoaded();
 					if (!TileEntityBlock.this.isInvalid() && TileEntityBlock.this.enableUpdateEntity())
-					{
 						world.loadedTileEntityList.add(TileEntityBlock.this);
-					}
 				}
 			}
 		});
 	}
 
+	@Override
 	public void invalidate()
 	{
 		if (this.loaded)
-		{
 			this.onUnloaded();
-		}
 
 		super.invalidate();
 	}
 
+	@Override
 	public void onChunkUnload()
 	{
 		if (this.loaded)
-		{
 			this.onUnloaded();
-		}
 
 		super.onChunkUnload();
 	}
@@ -106,9 +106,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		this.loaded = true;
 		Block block = this.getBlockType();
 		if (block instanceof BlockMigrate)
-		{
 			((BlockMigrate) block).migrate(this.worldObj, this.xCoord, this.yCoord, this.zCoord);
-		}
 
 		if (this.components != null)
 		{
@@ -139,6 +137,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 
 	}
 
+	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound)
 	{
 		super.readFromNBT(nbttagcompound);
@@ -151,11 +150,13 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		if (!Strings.isNullOrEmpty(uuid))
 		{
 			String name = nbttagcompound.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name)) this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
+			if (!Strings.isNullOrEmpty(name))
+				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
 		}
 		// TODO gamerforEA code end
 	}
 
+	@Override
 	public void writeToNBT(NBTTagCompound nbttagcompound)
 	{
 		super.writeToNBT(nbttagcompound);
@@ -172,6 +173,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		// TODO gamerforEA code end
 	}
 
+	@Override
 	public final boolean canUpdate()
 	{
 		return false;
@@ -187,18 +189,15 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	{
 		Block block = this.getBlockType();
 		if (this.lastRenderIcons == null)
-		{
 			this.lastRenderIcons = new IIcon[6];
-		}
 
 		for (int side = 0; side < 6; ++side)
-		{
 			this.lastRenderIcons[side] = block.getIcon(this.worldObj, this.xCoord, this.yCoord, this.zCoord, side);
-		}
 
 		this.tesrMask = 0;
 	}
 
+	@Override
 	public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z)
 	{
 		return !(oldBlock instanceof BlockMigrate) || !(newBlock instanceof BlockTileEntity);
@@ -213,18 +212,18 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	{
 		this.active = active1;
 		if (this.prevActive != active1)
-		{
-			((NetworkManager) IC2.network.get()).updateTileEntityField(this, "active");
-		}
+			IC2.network.get().updateTileEntityField(this, "active");
 
 		this.prevActive = active1;
 	}
 
+	@Override
 	public short getFacing()
 	{
 		return this.facing;
 	}
 
+	@Override
 	public List<String> getNetworkedFields()
 	{
 		Vector ret = new Vector(2);
@@ -234,6 +233,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		return ret;
 	}
 
+	@Override
 	public void onNetworkUpdate(String field)
 	{
 		if (field.equals("active") && this.prevActive != this.active || field.equals("facing") && this.prevFacing != this.facing)
@@ -241,44 +241,30 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 			int reRenderMask = 0;
 			Block block = this.getBlockType();
 			if (this.lastRenderIcons == null)
-			{
 				reRenderMask = -1;
-			}
 			else
-			{
 				for (int side = 0; side < 6; ++side)
 				{
 					IIcon oldIcon = this.lastRenderIcons[side];
 					if (oldIcon instanceof BlockTextureStitched)
-					{
 						oldIcon = ((BlockTextureStitched) oldIcon).getRealTexture();
-					}
 
 					IIcon newIcon = block.getIcon(this.worldObj, this.xCoord, this.yCoord, this.zCoord, side);
 					if (newIcon instanceof BlockTextureStitched)
-					{
 						newIcon = ((BlockTextureStitched) newIcon).getRealTexture();
-					}
 
 					if (oldIcon != newIcon)
-					{
 						reRenderMask |= 1 << side;
-					}
 				}
-			}
 
 			if (reRenderMask != 0)
-			{
 				if (reRenderMask >= 0 && this.prevFacing == this.facing && block.getRenderType() == IC2.platform.getRenderId("default"))
 				{
 					this.tesrMask = reRenderMask;
 					this.tesrTtl = 500;
 				}
 				else
-				{
 					this.worldObj.markBlockForUpdate(this.xCoord, this.yCoord, this.zCoord);
-				}
-			}
 
 			this.prevActive = this.active;
 			this.prevFacing = this.facing;
@@ -286,37 +272,41 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 
 	}
 
+	@Override
 	public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side)
 	{
 		return false;
 	}
 
+	@Override
 	public void setFacing(short facing1)
 	{
 		this.facing = facing1;
 		if (this.prevFacing != facing1)
-		{
-			((NetworkManager) IC2.network.get()).updateTileEntityField(this, "facing");
-		}
+			IC2.network.get().updateTileEntityField(this, "facing");
 
 		this.prevFacing = facing1;
 	}
 
+	@Override
 	public boolean wrenchCanRemove(EntityPlayer entityPlayer)
 	{
 		return true;
 	}
 
+	@Override
 	public float getWrenchDropRate()
 	{
 		return 1.0F;
 	}
 
+	@Override
 	public ItemStack getWrenchDrop(EntityPlayer entityPlayer)
 	{
 		return new ItemStack(this.worldObj.getBlock(this.xCoord, this.yCoord, this.zCoord), 1, this.worldObj.getBlockMetadata(this.xCoord, this.yCoord, this.zCoord));
 	}
 
+	@Override
 	public boolean shouldRenderInPass(int pass)
 	{
 		return this.tesrMask != 0 && pass == 0;
@@ -353,9 +343,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	protected <T extends TileEntityComponent> T addComponent(T component)
 	{
 		if (this.components == null)
-		{
 			this.components = new ArrayList(4);
-		}
 
 		this.components.add(component);
 		return component;

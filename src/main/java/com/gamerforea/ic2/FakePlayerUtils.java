@@ -29,7 +29,8 @@ public final class FakePlayerUtils
 			GameProfile profile = new GameProfile(UUID.fromString("6c788982-d6ca-11e4-b9d6-1681e6b88ec1"), "[IC2]");
 			player = new WeakReference<FakePlayer>(create(world, profile));
 		}
-		else player.get().worldObj = world;
+		else
+			player.get().worldObj = world;
 
 		return player.get();
 	}

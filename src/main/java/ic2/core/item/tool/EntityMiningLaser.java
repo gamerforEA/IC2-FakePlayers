@@ -60,9 +60,12 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 	public FakePlayer getOwnerFake()
 	{
-		if (this.ownerFake != null) return this.ownerFake;
-		else if (this.ownerProfile != null) return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else return FakePlayerUtils.getModFake(this.worldObj);
+		if (this.ownerFake != null)
+			return this.ownerFake;
+		else if (this.ownerProfile != null)
+			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
+		else
+			return FakePlayerUtils.getModFake(this.worldObj);
 	}
 	// TODO gamerforEA code end
 
@@ -82,18 +85,18 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 	public EntityMiningLaser(World world, EntityLivingBase entityliving, float range, float power, int blockBreaks, boolean explosive)
 	{
-		this(world, entityliving, range, power, blockBreaks, explosive, (double) entityliving.rotationYaw, (double) entityliving.rotationPitch);
+		this(world, entityliving, range, power, blockBreaks, explosive, entityliving.rotationYaw, entityliving.rotationPitch);
 	}
 
 	public EntityMiningLaser(World world, EntityLivingBase entityliving, float range, float power, int blockBreaks, boolean explosive, boolean smelt)
 	{
-		this(world, entityliving, range, power, blockBreaks, explosive, (double) entityliving.rotationYaw, (double) entityliving.rotationPitch);
+		this(world, entityliving, range, power, blockBreaks, explosive, entityliving.rotationYaw, entityliving.rotationPitch);
 		this.smelt = smelt;
 	}
 
 	public EntityMiningLaser(World world, EntityLivingBase entityliving, float range, float power, int blockBreaks, boolean explosive, double yawDeg, double pitchDeg)
 	{
-		this(world, entityliving, range, power, blockBreaks, explosive, yawDeg, pitchDeg, entityliving.posY + (double) entityliving.getEyeHeight() - 0.1D);
+		this(world, entityliving, range, power, blockBreaks, explosive, yawDeg, pitchDeg, entityliving.posY + entityliving.getEyeHeight() - 0.1D);
 	}
 
 	public EntityMiningLaser(World world, EntityLivingBase entityliving, float range, float power, int blockBreaks, boolean explosive, double yawDeg, double pitchDeg, double y)
@@ -126,39 +129,41 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		this.blockBreaks = blockBreaks;
 		this.explosive = explosive;
 		// TODO gamerforEA code start
-		if (entityliving instanceof EntityPlayer) this.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
+		if (entityliving instanceof EntityPlayer)
+			this.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
 		// TODO gamerforEA code end
 	}
 
+	@Override
 	protected void entityInit()
 	{
 	}
 
 	public void setLaserHeading(double motionX, double motionY, double motionZ, double speed)
 	{
-		double currentSpeed = (double) MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+		double currentSpeed = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
 		this.motionX = motionX / currentSpeed * speed;
 		this.motionY = motionY / currentSpeed * speed;
 		this.motionZ = motionZ / currentSpeed * speed;
 		this.prevRotationYaw = this.rotationYaw = (float) Math.toDegrees(Math.atan2(motionX, motionZ));
-		this.prevRotationPitch = this.rotationPitch = (float) Math.toDegrees(Math.atan2(motionY, (double) MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ)));
+		this.prevRotationPitch = this.rotationPitch = (float) Math.toDegrees(Math.atan2(motionY, MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ)));
 		this.headingSet = true;
 	}
 
+	@Override
 	public void setVelocity(double motionX, double motionY, double motionZ)
 	{
 		this.setLaserHeading(motionX, motionY, motionZ, 1.0D);
 	}
 
+	@Override
 	public void onUpdate()
 	{
 		super.onUpdate();
 		if (IC2.platform.isSimulating() && (this.range < 1.0F || this.power <= 0.0F || this.blockBreaks <= 0))
 		{
 			if (this.explosive)
-			{
 				this.explode();
-			}
 
 			this.setDead();
 		}
@@ -170,13 +175,9 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			MovingObjectPosition mop = this.worldObj.func_147447_a(oldPosition, newPosition, false, true, false);
 			oldPosition = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
 			if (mop != null)
-			{
 				newPosition = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
-			}
 			else
-			{
 				newPosition = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-			}
 
 			Entity entity = null;
 			List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
@@ -189,7 +190,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 				if (entity1.canBeCollidedWith() && (entity1 != this.owner || this.ticksInAir >= 5))
 				{
 					resis = 0.3F;
-					AxisAlignedBB axis = entity1.boundingBox.expand((double) resis, (double) resis, (double) resis);
+					AxisAlignedBB axis = entity1.boundingBox.expand(resis, resis, resis);
 					MovingObjectPosition mop1 = axis.calculateIntercept(oldPosition, newPosition);
 					if (mop1 != null)
 					{
@@ -204,9 +205,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			}
 
 			if (entity != null)
-			{
 				mop = new MovingObjectPosition(entity);
-			}
 
 			if (mop != null && IC2.platform.isSimulating())
 			{
@@ -225,13 +224,12 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 					{
 						int powerI = (int) this.power;
 						if (powerI > 0)
-						{
-							/* TODO gamerforEA code replace, old code: 
+							/* TODO gamerforEA code replace, old code:
 							if (entity != null)
 							{
 								entity.setFire(powerI * (this.smelt ? 2 : 1));
 							}
-							
+
 							if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
 							{
 								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
@@ -242,12 +240,9 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 								return;
 							}
 							else
-							// TODO gamerforEA code end	
-							if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
-							{
+							// TODO gamerforEA code end
+							if (event.hitentity.attackEntityFrom(new EntityDamageSourceIndirect("arrow", this, this.owner).setProjectile(), powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
 								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
-							}
-						}
 
 						this.setDead();
 					}
@@ -268,11 +263,8 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 					{
 						Block block = this.worldObj.getBlock(event.x, event.y, event.z);
 						if (block != null && block != Blocks.glass && block != Blocks.glass_pane && !StackUtil.equals(block, Ic2Items.reinforcedGlass))
-						{
 							if (!this.canMine(block))
-							{
 								this.setDead();
-							}
 							else if (IC2.platform.isSimulating())
 							{
 								resis = 0.0F;
@@ -283,11 +275,8 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 									if (block.getMaterial() != Material.tnt && block.getMaterial() != MaterialIC2TNT.instance)
 									{
 										if (this.smelt)
-										{
 											if (block.getMaterial() == Material.wood)
-											{
 												event.dropBlock = false;
-											}
 											else
 											{
 												Iterator var27 = block.getDrops(this.worldObj, event.x, event.y, event.z, this.worldObj.getBlockMetadata(event.x, event.y, event.z), 0).iterator();
@@ -309,10 +298,10 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 														{
 															event.dropBlock = false;
 															float var6 = 0.7F;
-															double var7 = (double) (this.worldObj.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-															double var9 = (double) (this.worldObj.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-															double var11 = (double) (this.worldObj.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-															EntityItem var13 = new EntityItem(this.worldObj, (double) event.x + var7, (double) event.y + var9, (double) event.z + var11, var29.copy());
+															double var7 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
+															double var9 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
+															double var11 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
+															EntityItem var13 = new EntityItem(this.worldObj, event.x + var7, event.y + var9, event.z + var11, var29.copy());
 															var13.delayBeforeCanPickup = 10;
 															this.worldObj.spawnEntityInWorld(var13);
 														}
@@ -321,48 +310,37 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 													}
 												}
 											}
-										}
 									}
 									else
-									{
-										block.onBlockDestroyedByExplosion(this.worldObj, event.x, event.y, event.z, new Explosion(this.worldObj, this, (double) event.x, (double) event.y, (double) event.z, 1.0F));
-									}
+										block.onBlockDestroyedByExplosion(this.worldObj, event.x, event.y, event.z, new Explosion(this.worldObj, this, event.x, event.y, event.z, 1.0F));
 
 									if (event.removeBlock)
 									{
 										if (event.dropBlock)
-										{
 											block.dropBlockAsItemWithChance(this.worldObj, event.x, event.y, event.z, this.worldObj.getBlockMetadata(event.x, event.y, event.z), event.dropChance, 0);
-										}
 
 										this.worldObj.setBlockToAir(event.x, event.y, event.z);
 										if (this.worldObj.rand.nextInt(10) == 0 && block.getMaterial().getCanBurn())
-										{
 											this.worldObj.setBlock(event.x, event.y, event.z, Blocks.fire, 0, 7);
-										}
 									}
 
 									--this.blockBreaks;
 								}
 							}
-						}
 					}
 				}
 			}
 			else
-			{
 				this.power -= 0.5F;
-			}
 
 			this.setPosition(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-			this.range = (float) ((double) this.range - Math.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ));
+			this.range = (float) (this.range - Math.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ));
 			if (this.isInWater())
-			{
 				this.setDead();
-			}
 		}
 	}
 
+	@Override
 	public void writeEntityToNBT(NBTTagCompound nbt)
 	{
 		// TODO gamerforEA code start
@@ -374,6 +352,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		// TODO gamerforEA code end
 	}
 
+	@Override
 	public void readEntityFromNBT(NBTTagCompound nbt)
 	{
 		// TODO gamerforEA code start
@@ -381,11 +360,13 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		if (!Strings.isNullOrEmpty(uuid))
 		{
 			String name = nbt.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name)) this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
+			if (!Strings.isNullOrEmpty(name))
+				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
 		}
 		// TODO gamerforEA code end
 	}
 
+	@Override
 	public float getShadowSize()
 	{
 		return 0.0F;
@@ -405,9 +386,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			return false;
 		}
 		else
-		{
 			return true;
-		}
 	}
 
 	public void explode()
@@ -429,16 +408,16 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		return !unmineableBlocks.contains(block);
 	}
 
+	@Override
 	public Entity getThrower()
 	{
 		return this.owner;
 	}
 
+	@Override
 	public void setThrower(Entity entity)
 	{
 		if (entity instanceof EntityLivingBase)
-		{
 			this.owner = (EntityLivingBase) entity;
-		}
 	}
 }

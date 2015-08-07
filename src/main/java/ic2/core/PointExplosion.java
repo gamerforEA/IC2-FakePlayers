@@ -33,37 +33,34 @@ public class PointExplosion extends Explosion
 		this.entityDamage = entityDamage;
 	}
 
+	@Override
 	public void doExplosionA()
 	{
 		// TODO gamerforEA code start
-		if (!EventConfig.explosionEnabled) return;
+		if (!EventConfig.explosionEnabled)
+			return;
 		// TODO gamerforEA code end
 		ExplosionEvent event = new ExplosionEvent(this.world, this.entity, this.explosionX, this.explosionY, this.explosionZ, (double) this.explosionSize, (EntityLivingBase) this.exploder, 0, 1.0D);
 		if (!MinecraftForge.EVENT_BUS.post(event))
 		{
 			for (int x = Util.roundToNegInf(this.explosionX) - 1; x <= Util.roundToNegInf(this.explosionX) + 1; ++x)
-			{
 				for (int y = Util.roundToNegInf(this.explosionY) - 1; y <= Util.roundToNegInf(this.explosionY) + 1; ++y)
-				{
 					for (int z = Util.roundToNegInf(this.explosionZ) - 1; z <= Util.roundToNegInf(this.explosionZ) + 1; ++z)
 					{
 						Block block = this.world.getBlock(x, y, z);
 						if (block.getExplosionResistance(this.exploder, this.world, x, y, z, this.explosionX, this.explosionY, this.explosionZ) < this.explosionSize * 10.0F)
 						{
 							// TODO gamerforEA code start
-							if (EventConfig.explosionEvent && FakePlayerUtils.isInPrivate(this.world, x, y, z)) continue;
+							if (EventConfig.explosionEvent && FakePlayerUtils.isInPrivate(this.world, x, y, z))
+								continue;
 							// TODO gamerforEA code end
 							this.affectedBlockPositions.add(new ChunkPosition(x, y, z));
 						}
 					}
-				}
-			}
 
 			List<Entity> entities = this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D));
 			for (Entity entity : entities)
-			{
-				entity.attackEntityFrom(DamageSource.setExplosionSource(this), (float) this.entityDamage);
-			}
+				entity.attackEntityFrom(DamageSource.setExplosionSource(this), this.entityDamage);
 
 			this.explosionSize = 1.0F / this.dropRate;
 		}

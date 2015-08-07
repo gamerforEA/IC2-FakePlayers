@@ -36,11 +36,13 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 		super(internalName, 1000);
 	}
 
+	@Override
 	public String getTextureFolder()
 	{
 		return "cell";
 	}
 
+	@Override
 	public String getTextureName(int index)
 	{
 		switch (index)
@@ -60,28 +62,24 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 		return this.textures[1];
 	}
 
+	@Override
 	public boolean isRepairable()
 	{
 		return false;
 	}
 
+	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float xOffset, float yOffset, float zOffset)
 	{
 		if (!IC2.platform.isSimulating())
-		{
 			return false;
-		}
 		else if (this.interactWithTank(stack, player, world, x, y, z, side))
-		{
 			return true;
-		}
 		else
 		{
 			MovingObjectPosition position = this.getMovingObjectPositionFromPlayer(world, player, true);
 			if (position == null)
-			{
 				return false;
-			}
 			else
 			{
 				if (position.typeOfHit == MovingObjectType.BLOCK)
@@ -90,28 +88,20 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 					y = position.blockY;
 					z = position.blockZ;
 					if (!world.canMineBlock(player, x, y, z))
-					{
 						return false;
-					}
 
 					if (!player.canPlayerEdit(x, y, z, position.sideHit, stack))
-					{
 						return false;
-					}
 
 					if (this.collectFluidBlock(stack, player, world, x, y, z))
-					{
 						return true;
-					}
 
 					FluidStack fs = LiquidUtil.drainContainerStack(stack, player, 1000, true);
 					ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[position.sideHit];
 					if (LiquidUtil.placeFluid(fs, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, position.sideHit, stack) && LiquidUtil.placeFluid(fs, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
 					{
 						if (!player.capabilities.isCreativeMode)
-						{
 							LiquidUtil.drainContainerStack(stack, player, 1000, false);
-						}
 
 						return true;
 					}
@@ -122,11 +112,13 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 		}
 	}
 
+	@Override
 	public boolean canfill(Fluid fluid)
 	{
 		return true;
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList)
 	{
@@ -146,16 +138,12 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 	private boolean interactWithTank(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side)
 	{
 		if (!IC2.platform.isSimulating())
-		{
 			return false;
-		}
 		else
 		{
 			TileEntity te = world.getTileEntity(x, y, z);
 			if (!(te instanceof IFluidHandler))
-			{
 				return false;
-			}
 			else
 			{
 				IFluidHandler handler = (IFluidHandler) te;
@@ -166,9 +154,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 				{
 					amount = handler.fill(dir, fs, false);
 					if (amount <= 0)
-					{
 						return false;
-					}
 					else
 					{
 						fs = LiquidUtil.drainContainerStack(stack, player, amount, false);
@@ -178,9 +164,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 							return true;
 						}
 						else
-						{
 							return false;
-						}
 					}
 				}
 				else
@@ -191,9 +175,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 					{
 						amount = LiquidUtil.fillContainerStack(stack, player, input, false);
 						if (amount <= 0)
-						{
 							return false;
-						}
 						else
 						{
 							handler.drain(dir, amount, true);
@@ -201,9 +183,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 						}
 					}
 					else
-					{
 						return false;
-					}
 				}
 			}
 		}
@@ -212,7 +192,8 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 	private boolean collectFluidBlock(ItemStack stack, EntityPlayer player, World world, int x, int y, int z)
 	{
 		// TODO gamerforEA code start
-		if (FakePlayerUtils.cantBreak(x, y, z, player)) return false;
+		if (FakePlayerUtils.cantBreak(x, y, z, player))
+			return false;
 		// TODO gamerforEA code end
 		Block block = world.getBlock(x, y, z);
 		if (block instanceof IFluidBlock)
@@ -235,9 +216,11 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 			FluidStack fluid = null;
 			if (block != Blocks.water && block != Blocks.flowing_water)
 			{
-				if (block == Blocks.lava || block == Blocks.flowing_lava) fluid = new FluidStack(FluidRegistry.LAVA, 1000);
+				if (block == Blocks.lava || block == Blocks.flowing_lava)
+					fluid = new FluidStack(FluidRegistry.LAVA, 1000);
 			}
-			else fluid = new FluidStack(FluidRegistry.WATER, 1000);
+			else
+				fluid = new FluidStack(FluidRegistry.WATER, 1000);
 
 			if (fluid != null)
 			{

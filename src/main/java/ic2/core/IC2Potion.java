@@ -28,17 +28,20 @@ public class IC2Potion extends Potion
 		this.curativeItems = Arrays.asList(curativeItems);
 	}
 
+	@Override
 	public void performEffect(EntityLivingBase entity, int amplifier)
 	{
 		if (this.id == radiation.id)
 		{
 			// TODO gameroforEA code start
-			if (!EventConfig.radiationEnabled) return;
+			if (!EventConfig.radiationEnabled)
+				return;
 			// TODO gamerforEA code end
-			entity.attackEntityFrom(IC2DamageSource.radiation, (float) (amplifier / 100) + 0.5F);
+			entity.attackEntityFrom(IC2DamageSource.radiation, amplifier / 100 + 0.5F);
 		}
 	}
 
+	@Override
 	public boolean isReady(int duration, int amplifier)
 	{
 		if (this.id == radiation.id)
@@ -47,15 +50,14 @@ public class IC2Potion extends Potion
 			return rate > 0 ? duration % rate == 0 : true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
 	public void applyTo(EntityLivingBase entity, int duration, int amplifier)
 	{
 		// TODO gameroforEA code start
-		if (!EventConfig.radiationEnabled) return;
+		if (!EventConfig.radiationEnabled)
+			return;
 		// TODO gamerforEA code end
 		PotionEffect effect = new PotionEffect(this.id, duration, amplifier);
 		effect.setCurativeItems(this.curativeItems);

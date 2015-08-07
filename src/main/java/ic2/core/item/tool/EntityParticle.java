@@ -47,12 +47,12 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		this.coreSize = coreSize;
 		this.influenceSize = influenceSize;
 		this.owner = owner;
-		this.setPosition(owner.posX, owner.posY + (double) owner.getEyeHeight(), owner.posZ);
+		this.setPosition(owner.posX, owner.posY + owner.getEyeHeight(), owner.posZ);
 		Vector3 motion = new Vector3(owner.getLookVec());
 		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize);
 		double stepAngle = Math.atan(0.5D / influenceSize) * 2.0D;
 		int steps = (int) Math.ceil(6.283185307179586D / stepAngle);
-		Quaternion q = (new Quaternion()).setFromAxisAngle(motion, stepAngle);
+		Quaternion q = new Quaternion().setFromAxisAngle(motion, stepAngle);
 		this.radialTestVectors = new Vector3[steps];
 		this.radialTestVectors[0] = ortho.copy();
 
@@ -62,34 +62,40 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			this.radialTestVectors[i] = ortho.copy();
 		}
 
-		motion.scale((double) speed);
+		motion.scale(speed);
 		this.motionX = motion.x;
 		this.motionY = motion.y;
 		this.motionZ = motion.z;
 	}
 
+	@Override
 	protected void entityInit()
 	{
 	}
 
+	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound)
 	{
 	}
 
+	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound)
 	{
 	}
 
+	@Override
 	public Entity getThrower()
 	{
 		return this.owner;
 	}
 
+	@Override
 	public void setThrower(Entity entity)
 	{
 		this.owner = entity;
 	}
 
+	@Override
 	public void onUpdate()
 	{
 		// TODO gamerforEA code start
@@ -152,9 +158,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		{
 			len = (MovingObjectPosition) var19.next();
 			if (start.distance(len.hitVec) <= var18)
-			{
 				this.onInfluence(len);
-			}
 		}
 
 		if (this.radialTestVectors != null)
@@ -165,16 +169,14 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			Vector3 origin = new Vector3(start);
 			Vector3 tmp = new Vector3();
 
-			for (int d = 0; (double) d < var21; ++d)
+			for (int d = 0; d < var21; ++d)
 			{
-				for (int i = 0; i < this.radialTestVectors.length; ++i)
+				for (Vector3 radialTestVector : this.radialTestVectors)
 				{
-					origin.copy(tmp).add(this.radialTestVectors[i]);
+					origin.copy(tmp).add(radialTestVector);
 					MovingObjectPosition influence = this.worldObj.rayTraceBlocks(origin.toVec3(), tmp.toVec3(), true);
 					if (influence != null)
-					{
 						this.onInfluence(influence);
-					}
 				}
 
 				origin.add(var20);
@@ -190,9 +192,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		{
 			--this.lifeTime;
 			if (this.lifeTime <= 0)
-			{
 				this.setDead();
-			}
 		}
 	}
 
@@ -209,7 +209,6 @@ public class EntityParticle extends Entity implements IThrowableEntity
 	protected void onInfluence(MovingObjectPosition hit)
 	{
 		if (IC2.platform.isSimulating())
-		{
 			// TODO gamerforEA code clear: System.out.println("influenced " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
 			if (hit.typeOfHit == MovingObjectType.BLOCK && IC2.platform.isSimulating())
 			{
@@ -221,7 +220,8 @@ public class EntityParticle extends Entity implements IThrowableEntity
 					if (smelted != null && smelted.getItem() instanceof ItemBlock)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ)) return;
+						if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
+							return;
 						// TODO gamerforEA code end
 						this.worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, ((ItemBlock) smelted.getItem()).field_150939_a, smelted.getItemDamage(), 3);
 					}
@@ -234,7 +234,8 @@ public class EntityParticle extends Entity implements IThrowableEntity
 							int y = hit.blockY - side.offsetY;
 							int z = hit.blockZ - side.offsetZ;
 							// TODO gamerforEA code start
-							if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, x, y, z)) return;
+							if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, x, y, z))
+								return;
 							// TODO gamerforEA code end
 							this.worldObj.setBlock(x, y, z, Blocks.fire);
 						}
@@ -243,11 +244,11 @@ public class EntityParticle extends Entity implements IThrowableEntity
 				else
 				{
 					// TODO gamerforEA code start
-					if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ)) return;
+					if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
+						return;
 					// TODO gamerforEA code end
 					this.worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
 				}
 			}
-		}
 	}
 }

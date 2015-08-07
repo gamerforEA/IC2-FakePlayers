@@ -37,6 +37,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		this.setMaxStackSize(1);
 	}
 
+	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player)
 	{
 		if (IC2.platform.isSimulating() && IC2.keyboard.isModeSwitchKeyDown(player))
@@ -52,23 +53,18 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		return super.onItemRightClick(stack, world, player);
 	}
 
+	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float xOffset, float yOffset, float zOffset)
 	{
 		if (IC2.keyboard.isModeSwitchKeyDown(player))
-		{
 			return false;
-		}
 		else if (!IC2.platform.isSimulating())
-		{
 			return true;
-		}
 		else
 		{
 			MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(world, player, true);
 			if (movingobjectposition == null)
-			{
 				return false;
-			}
 			else
 			{
 				int maxFoamBlocks;
@@ -98,45 +94,31 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 				maxFoamBlocks = 0;
 				FluidStack var19 = this.getFluid(stack);
 				if (var19 != null && var19.amount > 0)
-				{
 					maxFoamBlocks += var19.amount / this.getFluidPerFoam();
-				}
 
 				ItemStack pack = player.inventory.armorInventory[2];
 				if (pack != null && pack.getItem() == Ic2Items.cfPack.getItem())
 				{
 					var19 = ((ItemArmorCFPack) pack.getItem()).getFluid(pack);
 					if (var19 != null && var19.amount > 0)
-					{
 						maxFoamBlocks += var19.amount / this.getFluidPerFoam();
-					}
 					else
-					{
 						pack = null;
-					}
 				}
 				else
-				{
 					pack = null;
-				}
 
 				if (maxFoamBlocks == 0)
-				{
 					return false;
-				}
 				else
 				{
 					maxFoamBlocks = Math.min(maxFoamBlocks, this.getMaxFoamBlocks(stack));
 					ChunkPosition pos = new ChunkPosition(x, y, z);
 					Target target;
 					if (canPlaceFoam(world, pos, Target.Scaffold))
-					{
 						target = Target.Scaffold;
-					}
 					else if (canPlaceFoam(world, pos, Target.Cable))
-					{
 						target = Target.Cable;
-					}
 					else
 					{
 						switch (side)
@@ -177,16 +159,12 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 						}
 
 						if (amount > 0)
-						{
 							this.drain(stack, amount, true);
-						}
 
 						return true;
 					}
 					else
-					{
 						return false;
-					}
 				}
 			}
 		}
@@ -200,35 +178,23 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		if (pitch >= -65.0F && pitch <= 65.0F)
 		{
 			if (yaw >= 300.0F && yaw <= 360.0F || yaw >= 0.0F && yaw <= 60.0F)
-			{
 				r[2] = false;
-			}
 
 			if (yaw >= 30.0F && yaw <= 150.0F)
-			{
 				r[5] = false;
-			}
 
 			if (yaw >= 120.0F && yaw <= 240.0F)
-			{
 				r[3] = false;
-			}
 
 			if (yaw >= 210.0F && yaw <= 330.0F)
-			{
 				r[4] = false;
-			}
 		}
 
 		if (pitch <= -40.0F)
-		{
 			r[0] = false;
-		}
 
 		if (pitch >= 40.0F)
-		{
 			r[1] = false;
-		}
 
 		return r;
 	}
@@ -245,9 +211,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 	{
 		ChunkPosition startPos = new ChunkPosition(x, y, z);
 		if (!canPlaceFoam(world, startPos, target))
-		{
 			return 0;
-		}
 		else
 		{
 			ArrayList<ChunkPosition> check = new ArrayList();
@@ -269,7 +233,8 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 			for (ChunkPosition pos : place)
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.sprayerEvent && FakePlayerUtils.cantBreak(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, player)) continue;
+				if (EventConfig.sprayerEvent && FakePlayerUtils.cantBreak(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, player))
+					continue;
 				// TODO gamerforEA code end
 				Block targetBlock = world.getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
 				if (StackUtil.equals(targetBlock, Ic2Items.scaffold))
@@ -278,21 +243,15 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 					world.setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, StackUtil.getBlock(Ic2Items.constructionFoam), 0, 3);
 				}
 				else if (StackUtil.equals(targetBlock, Ic2Items.ironScaffold))
-				{
 					world.setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, StackUtil.getBlock(Ic2Items.constructionreinforcedFoam), 0, 3);
-				}
 				else if (StackUtil.equals(targetBlock, Ic2Items.copperCableBlock))
 				{
 					TileEntity te = world.getTileEntity(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
 					if (te instanceof TileEntityCable)
-					{
 						((TileEntityCable) te).changeFoam((byte) 1);
-					}
 				}
 				else
-				{
 					world.setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, StackUtil.getBlock(Ic2Items.constructionFoam), 0, 3);
-				}
 			}
 
 			return foamBlocks;
@@ -303,11 +262,9 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 	{
 		int[] order = this.generateRngSpread(IC2.random);
 
-		for (int i = 0; i < order.length; ++i)
-		{
-			if (ignoreDirections || directions[order[i]])
-			{
-				switch (order[i])
+		for (int element : order)
+			if (ignoreDirections || directions[element])
+				switch (element)
 				{
 					case 0:
 						this.considerAddingCoord(new ChunkPosition(x, y - 1, z), foam);
@@ -327,19 +284,15 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 					case 5:
 						this.considerAddingCoord(new ChunkPosition(x + 1, y, z), foam);
 				}
-			}
-		}
 	}
 
 	public void considerAddingCoord(ChunkPosition coord, ArrayList<ChunkPosition> list)
 	{
 		for (int i = 0; i < list.size(); ++i)
 		{
-			ChunkPosition entry = (ChunkPosition) list.get(i);
+			ChunkPosition entry = list.get(i);
 			if (entry.chunkPosX == coord.chunkPosX && entry.chunkPosY == coord.chunkPosY && entry.chunkPosZ == coord.chunkPosZ)
-			{
 				return;
-			}
 		}
 
 		list.add(coord);
@@ -372,11 +325,13 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		return 100;
 	}
 
+	@Override
 	public boolean canBeStoredInToolbox(ItemStack itemstack)
 	{
 		return true;
 	}
 
+	@Override
 	public boolean canfill(Fluid fluid)
 	{
 		return fluid == BlocksItems.getFluid(InternalName.fluidConstructionFoam);
@@ -398,15 +353,11 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 			case Cable:
 				block = world.getBlock(x, y, z);
 				if (!StackUtil.equals(block, Ic2Items.copperCableBlock))
-				{
 					return false;
-				}
 
 				TileEntity te = world.getTileEntity(x, y, z);
 				if (te instanceof TileEntityCable)
-				{
 					return !((TileEntityCable) te).isFoamed();
-				}
 				break;
 			default:
 				assert false;

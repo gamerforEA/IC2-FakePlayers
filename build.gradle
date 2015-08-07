@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2.2.757"
+version = "2.2.760"
 group= "ic2"
 archivesBaseName = "industrialcraft-2"
 
@@ -29,10 +29,11 @@ minecraft {
 }
 
 dependencies {
-	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar', 'lib/EJML-core-0.26.jar', 'lib/industrialcraft-2-2.2.757-experimental-dev.jar')
+	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar', 'lib/EJML-core-0.26.jar')
+	compile fileTree(dir: 'lib', include: '*-dev.jar')
 }
 
 jar {
-	from zipTree('lib/industrialcraft-2-2.2.757-experimental.jar')
+	from zipTree('lib/industrialcraft-2-2.2.760-experimental.jar')
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

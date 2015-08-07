@@ -82,6 +82,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.buffer = new InvSlot(this, "buffer", 1, InvSlot.Access.IO, 15, InvSlot.InvSide.SIDE);
 	}
 
+	@Override
 	public void onLoaded()
 	{
 		super.onLoaded();
@@ -91,6 +92,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.canProvideLiquid = false;
 	}
 
+	@Override
 	public void onUnloaded()
 	{
 		if (IC2.platform.isRendering() && this.audioSource != null)
@@ -102,6 +104,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		super.onUnloaded();
 	}
 
+	@Override
 	public void readFromNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.readFromNBT(nbtTagCompound);
@@ -109,6 +112,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		this.progress = nbtTagCompound.getInteger("progress");
 	}
 
+	@Override
 	public void writeToNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.writeToNBT(nbtTagCompound);
@@ -116,6 +120,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		nbtTagCompound.setInteger("progress", this.progress);
 	}
 
+	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
@@ -125,9 +130,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			ItemStack stack = this.upgradeSlot.get(i);
 			if (stack != null && stack.getItem() instanceof IUpgradeItem && ((IUpgradeItem) stack.getItem()).onTick(stack, this))
-			{
 				super.markDirty();
-			}
 		}
 
 		if (this.work())
@@ -136,23 +139,17 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			this.setActive(true);
 		}
 		else
-		{
 			this.setActive(false);
-		}
 
 	}
 
 	private void chargeTools()
 	{
 		if (!this.scannerSlot.isEmpty())
-		{
 			this.energy -= ElectricItem.manager.charge(this.scannerSlot.get(), this.energy, 2, false, false);
-		}
 
 		if (!this.drillSlot.isEmpty())
-		{
 			this.energy -= ElectricItem.manager.charge(this.drillSlot.get(), this.energy, 1, false, false);
-		}
 
 	}
 
@@ -160,16 +157,12 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	{
 		int operationHeight = this.getOperationHeight();
 		if (this.drillSlot.isEmpty())
-		{
 			return this.withDrawPipe(operationHeight);
-		}
 		else if (operationHeight >= 0)
 		{
 			Block block = this.worldObj.getBlock(this.xCoord, operationHeight, this.zCoord);
 			if (!StackUtil.equals(block, Ic2Items.miningPipeTip))
-			{
 				return operationHeight > 0 ? this.digDown(operationHeight, false) : false;
-			}
 			else
 			{
 				TileEntityMiner.MineResult result = this.mineLevel(operationHeight);
@@ -177,9 +170,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			}
 		}
 		else
-		{
 			return false;
-		}
 	}
 
 	private int getOperationHeight()
@@ -188,9 +179,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			Block block = this.worldObj.getBlock(this.xCoord, y, this.zCoord);
 			if (!StackUtil.equals(block, Ic2Items.miningPipe))
-			{
 				return y;
-			}
 		}
 
 		return -1;
@@ -205,9 +194,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		}
 
 		if (y < 0 || !StackUtil.equals(this.worldObj.getBlock(this.xCoord, y, this.zCoord), Ic2Items.miningPipeTip))
-		{
 			++y;
-		}
 
 		if (y != this.yCoord && this.energy >= 3.0D)
 		{
@@ -225,9 +212,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
 	private void removePipe(int y)
@@ -240,9 +225,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			ItemStack filler = this.pipeSlot.consume(1);
 			Item fillerItem = filler.getItem();
 			if (fillerItem instanceof ItemBlock)
-			{
 				((ItemBlock) fillerItem).onItemUse(filler, new Ic2Player(this.worldObj), this.worldObj, this.xCoord, y + 1, this.zCoord, 0, 0.0F, 0.0F, 0.0F);
-			}
 		}
 
 	}
@@ -255,9 +238,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			if (y < 0)
 			{
 				if (removeTipAbove)
-				{
 					this.worldObj.setBlock(this.xCoord, y + 1, this.zCoord, StackUtil.getBlock(Ic2Items.miningPipe));
-				}
 
 				return false;
 			}
@@ -269,9 +250,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 					if (result == TileEntityMiner.MineResult.Done)
 					{
 						if (removeTipAbove)
-						{
 							this.worldObj.setBlock(this.xCoord, y + 1, this.zCoord, StackUtil.getBlock(Ic2Items.miningPipe));
-						}
 
 						this.pipeSlot.consume(1);
 						this.worldObj.setBlock(this.xCoord, y, this.zCoord, StackUtil.getBlock(Ic2Items.miningPipeTip));
@@ -282,76 +261,56 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				else
 				{
 					if (removeTipAbove)
-					{
 						this.worldObj.setBlock(this.xCoord, y + 1, this.zCoord, StackUtil.getBlock(Ic2Items.miningPipe));
-					}
 
 					return false;
 				}
 			}
 		}
 		else
-		{
 			return false;
-		}
 	}
 
 	private TileEntityMiner.MineResult mineLevel(int y)
 	{
 		if (this.scannerSlot.isEmpty())
-		{
 			return TileEntityMiner.MineResult.Done;
-		}
 		else
 		{
 			if (this.scannedLevel != y)
-			{
 				this.scanRange = ((ItemScanner) this.scannerSlot.get().getItem()).startLayerScan(this.scannerSlot.get());
-			}
 
 			if (this.scanRange <= 0)
-			{
 				return TileEntityMiner.MineResult.Failed_Temp;
-			}
 			else
 			{
 				this.scannedLevel = y;
 
 				for (int x = this.xCoord - this.scanRange; x <= this.xCoord + this.scanRange; ++x)
-				{
 					for (int z = this.zCoord - this.scanRange; z <= this.zCoord + this.scanRange; ++z)
 					{
 						Block block = this.worldObj.getBlock(x, y, z);
 						int meta = this.worldObj.getBlockMetadata(x, y, z);
 						boolean isValidTarget = false;
 						if (ItemScanner.isValuable(block, meta) && this.canMine(x, y, z))
-						{
 							isValidTarget = true;
-						}
 						else if (this.pumpMode)
 						{
 							LiquidUtil.LiquidData result = LiquidUtil.getLiquid(this.worldObj, x, y, z);
 							if (result != null && this.canPump(x, y, z))
-							{
 								isValidTarget = true;
-							}
 						}
 
 						if (isValidTarget)
 						{
 							TileEntityMiner.MineResult var8 = this.mineTowards(x, y, z);
 							if (var8 == TileEntityMiner.MineResult.Done)
-							{
 								return TileEntityMiner.MineResult.Working;
-							}
 
 							if (var8 != TileEntityMiner.MineResult.Failed_Perm)
-							{
 								return var8;
-							}
 						}
 					}
-				}
 
 				return TileEntityMiner.MineResult.Done;
 			}
@@ -393,9 +352,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 			isBlocking = false;
 			if (isCurrentPos)
-			{
 				isBlocking = true;
-			}
 			else
 			{
 				Block result = this.worldObj.getBlock(cx, y, cz);
@@ -403,9 +360,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				{
 					LiquidUtil.LiquidData liquid = LiquidUtil.getLiquid(this.worldObj, cx, y, cz);
 					if (liquid == null || liquid.isSource || this.pumpMode && this.canPump(x, y, z))
-					{
 						isBlocking = true;
-					}
 				}
 			}
 		}
@@ -441,9 +396,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				}
 			}
 			else if (!this.canMine(x, y, z))
-			{
 				return TileEntityMiner.MineResult.Failed_Perm;
-			}
 		}
 
 		this.canProvideLiquid = false;
@@ -465,9 +418,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		else
 		{
 			if (this.drillSlot.get().getItem() != Ic2Items.diamondDrill.getItem())
-			{
 				throw new IllegalStateException("invalid drill: " + this.drillSlot.get());
-			}
 
 			mode1 = TileEntityMiner.Mode.MineDDrill;
 			energyPerTick = 20;
@@ -482,9 +433,9 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 		if (this.progress < duration)
 		{
-			if (this.energy >= (double) energyPerTick)
+			if (this.energy >= energyPerTick)
 			{
-				this.energy -= (double) energyPerTick;
+				this.energy -= energyPerTick;
 				++this.progress;
 				return TileEntityMiner.MineResult.Working;
 			}
@@ -501,32 +452,27 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	private boolean harvestBlock(int x, int y, int z, Block block)
 	{
 		int energyCost = 2 * (this.yCoord - y);
-		if (this.energy >= (double) energyCost)
+		if (this.energy >= energyCost)
 		{
 			if (this.drillSlot.get().getItem() == Ic2Items.miningDrill.getItem())
 			{
 				if (!ElectricItem.manager.use(this.drillSlot.get(), 50.0D, (EntityLivingBase) null))
-				{
 					return false;
-				}
 			}
 			else
 			{
 				if (this.drillSlot.get().getItem() != Ic2Items.diamondDrill.getItem())
-				{
 					throw new IllegalStateException("invalid drill: " + this.drillSlot.get());
-				}
 
 				if (!ElectricItem.manager.use(this.drillSlot.get(), 80.0D, (EntityLivingBase) null))
-				{
 					return false;
-				}
 			}
 
-			this.energy -= (double) energyCost;
+			this.energy -= energyCost;
 
 			// TODO gamerforEA code start
-			if (EventConfig.minerEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake())) return false;
+			if (EventConfig.minerEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake()))
+				return false;
 			// TODO gamerforEA code end
 
 			ArrayList drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
@@ -545,21 +491,15 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
 	private void storeDrop(ItemStack stack)
 	{
 		if (StackUtil.putInInventory(this, Direction.XN, stack, true) == 0)
-		{
 			StackUtil.dropAsEntity(this.worldObj, this.xCoord, this.yCoord, this.zCoord, stack);
-		}
 		else
-		{
 			StackUtil.putInInventory(this, Direction.XN, stack, false);
-		}
 
 	}
 
@@ -572,76 +512,75 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	{
 		Block block = this.worldObj.getBlock(x, y, z);
 		if (block.isAir(this.worldObj, x, y, z))
-		{
 			return true;
-		}
 		else
 		{
 			int meta = this.worldObj.getBlockMetadata(x, y, z);
-			return !StackUtil.equals(block, Ic2Items.miningPipe) && !StackUtil.equals(block, Ic2Items.miningPipeTip) && block != Blocks.chest ? (block instanceof IFluidBlock && this.isPumpConnected(x, y, z) ? true : ((block == Blocks.water || block == Blocks.flowing_water || block == Blocks.lava || block == Blocks.flowing_lava) && this.isPumpConnected(x, y, z) ? true : (block.getBlockHardness(this.worldObj, x, y, z) < 0.0F ? false : (block.canCollideCheck(meta, false) && block.getMaterial().isToolNotRequired() ? true : (block == Blocks.web ? true : (this.drillSlot.isEmpty() ? false : ForgeHooks.canToolHarvestBlock(block, meta, this.drillSlot.get()) || this.drillSlot.get().func_150998_b(block))))))) : false;
+			return !StackUtil.equals(block, Ic2Items.miningPipe) && !StackUtil.equals(block, Ic2Items.miningPipeTip) && block != Blocks.chest ? block instanceof IFluidBlock && this.isPumpConnected(x, y, z) ? true : (block == Blocks.water || block == Blocks.flowing_water || block == Blocks.lava || block == Blocks.flowing_lava) && this.isPumpConnected(x, y, z) ? true : block.getBlockHardness(this.worldObj, x, y, z) < 0.0F ? false : block.canCollideCheck(meta, false) && block.getMaterial().isToolNotRequired() ? true : block == Blocks.web ? true : this.drillSlot.isEmpty() ? false : ForgeHooks.canToolHarvestBlock(block, meta, this.drillSlot.get()) || this.drillSlot.get().func_150998_b(block) : false;
 		}
 	}
 
 	public boolean isPumpConnected(int x, int y, int z)
 	{
-		return this.worldObj.getTileEntity(this.xCoord, this.yCoord + 1, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord + 1, this.zCoord)).pump(x, y, z, true, this) != null ? true : (this.worldObj.getTileEntity(this.xCoord, this.yCoord - 1, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord - 1, this.zCoord)).pump(x, y, z, true, this) != null ? true : (this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord)).pump(x, y, z, true, this) != null ? true : (this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord)).pump(x, y, z, true, this) != null ? true : (this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1)).pump(x, y, z, true, this) != null ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1)).pump(x, y, z, true, this) != null))));
+		return this.worldObj.getTileEntity(this.xCoord, this.yCoord + 1, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord + 1, this.zCoord)).pump(x, y, z, true, this) != null ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord - 1, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord - 1, this.zCoord)).pump(x, y, z, true, this) != null ? true : this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord)).pump(x, y, z, true, this) != null ? true : this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord)).pump(x, y, z, true, this) != null ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1)).pump(x, y, z, true, this) != null ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1) instanceof TileEntityPump && ((TileEntityPump) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1)).pump(x, y, z, true, this) != null;
 	}
 
 	public boolean isAnyPumpConnected()
 	{
-		return this.worldObj.getTileEntity(this.xCoord, this.yCoord + 1, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord, this.yCoord - 1, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord) instanceof TileEntityPump ? true : (this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1) instanceof TileEntityPump ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1) instanceof TileEntityPump))));
+		return this.worldObj.getTileEntity(this.xCoord, this.yCoord + 1, this.zCoord) instanceof TileEntityPump ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord - 1, this.zCoord) instanceof TileEntityPump ? true : this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord) instanceof TileEntityPump ? true : this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord) instanceof TileEntityPump ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1) instanceof TileEntityPump ? true : this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1) instanceof TileEntityPump;
 	}
 
+	@Override
 	public String getInventoryName()
 	{
 		return "Miner";
 	}
 
+	@Override
 	public ContainerBase<TileEntityMiner> getGuiContainer(EntityPlayer entityPlayer)
 	{
 		return new ContainerMiner(entityPlayer, this);
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public GuiScreen getGui(EntityPlayer entityPlayer, boolean isAdmin)
 	{
 		return new GuiMiner(new ContainerMiner(entityPlayer, this));
 	}
 
+	@Override
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
 	}
 
+	@Override
 	public void onNetworkUpdate(String field)
 	{
 		if (field.equals("active") && this.prevActive != this.getActive())
 		{
 			if (this.audioSource == null)
-			{
 				this.audioSource = IC2.audioManager.createSource(this, PositionSpec.Center, "Machines/MinerOp.ogg", true, false, IC2.audioManager.getDefaultVolume());
-			}
 
 			if (this.getActive())
 			{
 				if (this.audioSource != null)
-				{
 					this.audioSource.play();
-				}
 			}
 			else if (this.audioSource != null)
-			{
 				this.audioSource.stop();
-			}
 		}
 
 		super.onNetworkUpdate(field);
 	}
 
+	@Override
 	public double getEnergy()
 	{
 		return this.energy;
 	}
 
+	@Override
 	public boolean useEnergy(double amount)
 	{
 		if (this.energy >= amount)
@@ -650,11 +589,10 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
+	@Override
 	public Set<UpgradableProperty> getUpgradableProperties()
 	{
 		return EnumSet.of(UpgradableProperty.ItemConsuming, UpgradableProperty.ItemProducing);

@@ -26,6 +26,7 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 	public int maxEnergy = 10000;
 	public boolean addedToEnergyNet = false;
 
+	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound)
 	{
 		super.readFromNBT(nbttagcompound);
@@ -36,16 +37,18 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 		}
 		catch (Exception var3)
 		{
-			this.energy = (double) nbttagcompound.getShort("energy");
+			this.energy = nbttagcompound.getShort("energy");
 		}
 	}
 
+	@Override
 	public void writeToNBT(NBTTagCompound nbttagcompound)
 	{
 		super.writeToNBT(nbttagcompound);
 		nbttagcompound.setDouble("energy", this.energy);
 	}
 
+	@Override
 	public void onLoaded()
 	{
 		super.onLoaded();
@@ -56,6 +59,7 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 		}
 	}
 
+	@Override
 	public void onUnloaded()
 	{
 		if (IC2.platform.isSimulating() && this.addedToEnergyNet)
@@ -67,32 +71,30 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 		super.onUnloaded();
 	}
 
+	@Override
 	public boolean enableUpdateEntity()
 	{
 		return IC2.platform.isSimulating();
 	}
 
+	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
 		if (IC2.platform.isSimulating() && this.redstoned())
-		{
-			if (this.energy >= (double) getCost())
+			if (this.energy >= getCost())
 			{
 				int damage = (int) this.energy / getCost();
 				--this.energy;
 				if (this.ticker++ % 32 == 0 && this.shock(damage))
-				{
 					this.energy = 0.0D;
-				}
 			}
-		}
 	}
 
 	public boolean shock(int damage)
 	{
 		boolean shock = false;
-		List<EntityLivingBase> entities = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox((double) (this.xCoord - 4), (double) (this.yCoord - 4), (double) (this.zCoord - 4), (double) (this.xCoord + 5), (double) (this.yCoord + 5), (double) (this.zCoord + 5)));
+		List<EntityLivingBase> entities = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 4, this.yCoord - 4, this.zCoord - 4, this.xCoord + 5, this.yCoord + 5, this.zCoord + 5));
 
 		for (int l = 0; l < entities.size(); ++l)
 		{
@@ -100,15 +102,14 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 			if (!ItemArmorHazmat.hasCompleteHazmat(entity))
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.teslaEvent && FakePlayerUtils.cantDamage(this.getOwnerFake(), entity)) continue;
+				if (EventConfig.teslaEvent && FakePlayerUtils.cantDamage(this.getOwnerFake(), entity))
+					continue;
 				// TODO gamerforEA code end
 				shock = true;
-				entity.attackEntityFrom(IC2DamageSource.electricity, (float) damage);
+				entity.attackEntityFrom(IC2DamageSource.electricity, damage);
 
 				for (int i = 0; i < damage; ++i)
-				{
-					this.worldObj.spawnParticle("reddust", entity.posX + (double) this.worldObj.rand.nextFloat(), entity.posY + (double) (this.worldObj.rand.nextFloat() * 2.0F), entity.posZ + (double) this.worldObj.rand.nextFloat(), 0.0D, 0.0D, 1.0D);
-				}
+					this.worldObj.spawnParticle("reddust", entity.posX + this.worldObj.rand.nextFloat(), entity.posY + this.worldObj.rand.nextFloat() * 2.0F, entity.posZ + this.worldObj.rand.nextFloat(), 0.0D, 0.0D, 1.0D);
 			}
 		}
 
@@ -125,22 +126,23 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 		return 400;
 	}
 
+	@Override
 	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
 	{
 		return true;
 	}
 
+	@Override
 	public double getDemandedEnergy()
 	{
-		return (double) this.maxEnergy - this.energy;
+		return this.maxEnergy - this.energy;
 	}
 
+	@Override
 	public double injectEnergy(ForgeDirection directionFrom, double amount, double voltage)
 	{
-		if (this.energy >= (double) this.maxEnergy)
-		{
+		if (this.energy >= this.maxEnergy)
 			return amount;
-		}
 		else
 		{
 			this.energy += amount;
@@ -148,6 +150,7 @@ public class TileEntityTesla extends TileEntityBlock implements IEnergySink
 		}
 	}
 
+	@Override
 	public int getSinkTier()
 	{
 		return 2;

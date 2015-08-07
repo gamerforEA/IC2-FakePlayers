@@ -16,7 +16,6 @@ import com.gamerforea.ic2.FakePlayerUtils;
 import ic2.api.event.ExplosionEvent;
 import ic2.api.tile.ExplosionWhitelist;
 import ic2.core.item.armor.ItemArmorHazmat;
-import ic2.core.network.NetworkManager;
 import ic2.core.util.ItemStackWrapper;
 import ic2.core.util.StackUtil;
 import ic2.core.util.Util;
@@ -89,19 +88,15 @@ public class ExplosionIC2 extends Explosion
 		this.type = type1;
 		this.igniter = igniter1;
 		this.radiationRange = radiationRange1;
-		this.maxDistance = (double) this.power / 0.4D;
+		this.maxDistance = this.power / 0.4D;
 		int maxDistanceInt = (int) Math.ceil(this.maxDistance);
 		this.areaSize = maxDistanceInt * 2;
 		this.areaX = Util.roundToNegInf(this.explosionX) - maxDistanceInt;
 		this.areaZ = Util.roundToNegInf(this.explosionZ) - maxDistanceInt;
 		if (this.isNuclear())
-		{
 			this.damageSource = IC2DamageSource.getNukeSource(this);
-		}
 		else
-		{
 			this.damageSource = DamageSource.setExplosionSource(this);
-		}
 
 		this.destroyedBlockPositions = new long[this.mapHeight][];
 	}
@@ -111,9 +106,10 @@ public class ExplosionIC2 extends Explosion
 		if (this.power > 0.0F)
 		{
 			// TODO gamerforEA code start
-			if (!EventConfig.explosionEnabled) return;
+			if (!EventConfig.explosionEnabled)
+				return;
 			// TODO gamerforEA code end
-			ExplosionEvent event = new ExplosionEvent(this.worldObj, this.exploder, this.explosionX, this.explosionY, this.explosionZ, (double) this.power, this.igniter, this.radiationRange, this.maxDistance);
+			ExplosionEvent event = new ExplosionEvent(this.worldObj, this.exploder, this.explosionX, this.explosionY, this.explosionZ, this.power, this.igniter, this.radiationRange, this.maxDistance);
 			if (!MinecraftForge.EVENT_BUS.post(event))
 			{
 				this.chunkCache = new ChunkCache(this.worldObj, (int) this.explosionX - this.areaSize / 2, (int) this.explosionY - this.areaSize / 2, (int) this.explosionZ - this.areaSize / 2, (int) this.explosionX + this.areaSize / 2, (int) this.explosionY + this.areaSize / 2, (int) this.explosionZ + this.areaSize / 2, 0);
@@ -130,28 +126,25 @@ public class ExplosionIC2 extends Explosion
 						{
 							boolean var31 = !this.entitiesInRange.isEmpty();
 							if (var31)
-							{
 								Collections.sort(this.entitiesInRange, new Comparator<EntityDamage>()
 								{
+									@Override
 									public int compare(EntityDamage a, EntityDamage b)
 									{
 										return a.distance - b.distance;
 									}
 								});
-							}
 
 							int var32 = (int) Math.ceil(3.141592653589793D / Math.atan(1.0D / this.maxDistance));
 
 							double blocksToDrop;
 							for (rng = 0; rng < 2 * var32; ++rng)
-							{
 								for (int var34 = 0; var34 < var32; ++var34)
 								{
-									blocksToDrop = 6.283185307179586D / (double) var32 * (double) rng;
-									double entry = 3.141592653589793D / (double) var32 * (double) var34;
-									this.shootRay(this.explosionX, this.explosionY, this.explosionZ, blocksToDrop, entry, (double) this.power, var31 && rng % 8 == 0 && var34 % 8 == 0);
+									blocksToDrop = 6.283185307179586D / var32 * rng;
+									double entry = 3.141592653589793D / var32 * var34;
+									this.shootRay(this.explosionX, this.explosionY, this.explosionZ, blocksToDrop, entry, this.power, var31 && rng % 8 == 0 && var34 % 8 == 0);
 								}
-							}
 
 							double xZposition;
 							Iterator var33;
@@ -166,9 +159,7 @@ public class ExplosionIC2 extends Explosion
 								{
 									EntityPlayer i$ = (EntityPlayer) var37;
 									if (this.isNuclear() && this.igniter != null && i$ == this.igniter && i$.getHealth() <= 0.0F)
-									{
 										IC2.achievements.issueAchievement(i$, "dieFromOwnNuke");
-									}
 								}
 
 								double var41 = Util.square(var36.motionX) + Util.square(var37.motionY) + Util.square(var37.motionZ);
@@ -180,7 +171,7 @@ public class ExplosionIC2 extends Explosion
 							int var47;
 							if (this.isNuclear() && this.radiationRange >= 1)
 							{
-								var33 = this.worldObj.getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getBoundingBox(this.explosionX - (double) this.radiationRange, this.explosionY - (double) this.radiationRange, this.explosionZ - (double) this.radiationRange, this.explosionX + (double) this.radiationRange, this.explosionY + (double) this.radiationRange, this.explosionZ + (double) this.radiationRange)).iterator();
+								var33 = this.worldObj.getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getBoundingBox(this.explosionX - this.radiationRange, this.explosionY - this.radiationRange, this.explosionZ - this.radiationRange, this.explosionX + this.radiationRange, this.explosionY + this.radiationRange, this.explosionZ + this.radiationRange)).iterator();
 
 								while (var33.hasNext())
 								{
@@ -188,22 +179,18 @@ public class ExplosionIC2 extends Explosion
 									if (!ItemArmorHazmat.hasCompleteHazmat(var38))
 									{
 										blocksToDrop = var38.getDistance(this.explosionX, this.explosionY, this.explosionZ);
-										int var44 = (int) (120.0D * ((double) this.radiationRange - blocksToDrop));
-										var47 = (int) (80.0D * ((double) (this.radiationRange / 3) - blocksToDrop));
+										int var44 = (int) (120.0D * (this.radiationRange - blocksToDrop));
+										var47 = (int) (80.0D * (this.radiationRange / 3 - blocksToDrop));
 										if (var44 >= 0)
-										{
 											var38.addPotionEffect(new PotionEffect(Potion.hunger.id, var44, 0));
-										}
 
 										if (var47 >= 0)
-										{
 											IC2Potion.radiation.applyTo(var38, var47, 0);
-										}
 									}
 								}
 							}
 
-							((NetworkManager) IC2.network.get()).initiateExplosionEffect(this.worldObj, this.explosionX, this.explosionY, this.explosionZ);
+							IC2.network.get().initiateExplosionEffect(this.worldObj, this.explosionX, this.explosionY, this.explosionZ);
 							Random var35 = this.worldObj.rand;
 							boolean var39 = this.worldObj.getGameRules().getGameRuleBooleanValue("doTileDrops");
 							HashMap var40 = new HashMap();
@@ -225,23 +212,24 @@ public class ExplosionIC2 extends Explosion
 										isw += this.areaX;
 										entry2 += this.areaZ;
 										// TODO gamerforEA code start
-										if (EventConfig.explosionEvent && FakePlayerUtils.isInPrivate(this.worldObj, isw, var42, entry2)) continue;
+										if (EventConfig.explosionEvent && FakePlayerUtils.isInPrivate(this.worldObj, isw, var42, entry2))
+											continue;
 										// TODO gamerforEA code end
 										Block count = this.chunkCache.getBlock(isw, var42, entry2);
 										if (this.power < 20.0F)
 										{
-											double stackSize = (double) ((float) isw + var35.nextFloat());
-											double itemStack = (double) ((float) var42 + var35.nextFloat());
-											double map = (double) ((float) entry2 + var35.nextFloat());
+											double stackSize = isw + var35.nextFloat();
+											double itemStack = var42 + var35.nextFloat();
+											double map = entry2 + var35.nextFloat();
 											double d3 = stackSize - this.explosionX;
 											double d4 = itemStack - this.explosionY;
 											double d5 = map - this.explosionZ;
-											double effectDistance = (double) MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
+											double effectDistance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
 											d3 /= effectDistance;
 											d4 /= effectDistance;
 											d5 /= effectDistance;
-											double d7 = 0.5D / (effectDistance / (double) this.power + 0.1D);
-											d7 *= (double) (var35.nextFloat() * var35.nextFloat() + 0.3F);
+											double d7 = 0.5D / (effectDistance / this.power + 0.1D);
+											d7 *= var35.nextFloat() * var35.nextFloat() + 0.3F;
 											d3 *= d7;
 											d4 *= d7;
 											d5 *= d7;
@@ -261,20 +249,14 @@ public class ExplosionIC2 extends Explosion
 												{
 													XZposition xZposition1 = new XZposition(isw / 2, entry2 / 2);
 													if (!var40.containsKey(xZposition1))
-													{
 														var40.put(xZposition1, new HashMap());
-													}
 
 													Map var56 = (Map) var40.get(xZposition1);
 													ItemStackWrapper isw1 = new ItemStackWrapper(var55);
 													if (!var56.containsKey(isw1))
-													{
 														var56.put(isw1, new DropData(var55.stackSize, var42));
-													}
 													else
-													{
 														var56.put(isw1, ((DropData) var56.get(isw1)).add(var55.stackSize, var42));
-													}
 												}
 											}
 										}
@@ -301,7 +283,7 @@ public class ExplosionIC2 extends Explosion
 									for (int var52 = ((DropData) var50.getValue()).n; var52 > 0; var52 -= var53)
 									{
 										var53 = Math.min(var52, 64);
-										EntityItem var54 = new EntityItem(this.worldObj, (double) ((float) var48.x + this.worldObj.rand.nextFloat()) * 2.0D, (double) ((DropData) var50.getValue()).maxY + 0.5D, (double) ((float) var48.z + this.worldObj.rand.nextFloat()) * 2.0D, StackUtil.copyWithSize(var51.stack, var53));
+										EntityItem var54 = new EntityItem(this.worldObj, (var48.x + this.worldObj.rand.nextFloat()) * 2.0D, ((DropData) var50.getValue()).maxY + 0.5D, (var48.z + this.worldObj.rand.nextFloat()) * 2.0D, StackUtil.copyWithSize(var51.stack, var53));
 										var54.delayBeforeCanPickup = 10;
 										this.worldObj.spawnEntityInWorld(var54);
 									}
@@ -330,7 +312,7 @@ public class ExplosionIC2 extends Explosion
 
 	private void destroyUnchecked(int x, int y, int z, boolean noDrop)
 	{
-		int index = (z - this.areaZ) * this.areaSize + (x - this.areaX);
+		int index = (z - this.areaZ) * this.areaSize + x - this.areaX;
 		index *= 2;
 		long[] array = this.destroyedBlockPositions[y];
 		if (array == null)
@@ -340,13 +322,9 @@ public class ExplosionIC2 extends Explosion
 		}
 
 		if (noDrop)
-		{
 			setAtIndex(index, array, 3);
-		}
 		else
-		{
 			setAtIndex(index, array, 1);
-		}
 
 	}
 
@@ -360,9 +338,9 @@ public class ExplosionIC2 extends Explosion
 		float fPhi = (float) phi;
 		float fTheta = (float) theta;
 		float sinTheta = MathHelper.sin(fTheta);
-		double deltaX = (double) (sinTheta * MathHelper.cos(fPhi));
-		double deltaY = (double) MathHelper.cos(fTheta);
-		double deltaZ = (double) (sinTheta * MathHelper.sin(fPhi));
+		double deltaX = sinTheta * MathHelper.cos(fPhi);
+		double deltaY = MathHelper.cos(fTheta);
+		double deltaZ = sinTheta * MathHelper.sin(fPhi);
 		// TODO gamerforEA code end
 		int step = 0;
 
@@ -370,43 +348,29 @@ public class ExplosionIC2 extends Explosion
 		{
 			int blockY = Util.roundToNegInf(y);
 			if (blockY < 0 || blockY >= this.mapHeight)
-			{
 				break;
-			}
 
 			int blockX = Util.roundToNegInf(x);
 			int blockZ = Util.roundToNegInf(z);
 			Block block = this.chunkCache.getBlock(blockX, blockY, blockZ);
 			double absorption = this.getAbsorption(block, blockX, blockY, blockZ);
 			if (absorption > 1000.0D && !ExplosionWhitelist.isBlockWhitelisted(block))
-			{
 				absorption = 0.5D;
-			}
 			else
 			{
 				if (absorption > power1)
-				{
 					break;
-				}
 
 				if (block == Blocks.stone || block != Blocks.air && !block.isAir(this.worldObj, blockX, blockY, blockZ))
-				{
 					this.destroyUnchecked(blockX, blockY, blockZ, power1 > 8.0D);
-				}
 			}
 
 			if (killEntities && (step + 4) % 8 == 0 && !this.entitiesInRange.isEmpty() && power1 >= 0.25D)
-			{
 				this.damageEntities(x, y, z, step, power1);
-			}
 
 			if (absorption > 10.0D)
-			{
 				for (int i = 0; i < 5; ++i)
-				{
 					this.shootRay(x, y, z, this.ExplosionRNG.nextDouble() * 2.0D * 3.141592653589793D, this.ExplosionRNG.nextDouble() * 3.141592653589793D, absorption * 0.4D, false);
-				}
-			}
 
 			power1 -= absorption;
 			x += deltaX;
@@ -423,28 +387,20 @@ public class ExplosionIC2 extends Explosion
 		if (block != Blocks.air && !block.isAir(this.worldObj, x, y, z))
 		{
 			if ((block == Blocks.water || block == Blocks.flowing_water) && this.type != Type.Normal)
-			{
 				++ret;
-			}
 			else
 			{
-				double extra = (double) (block.getExplosionResistance(this.exploder, this.worldObj, x, y, z, this.explosionX, this.explosionY, this.explosionZ) + 4.0F) * 0.3D;
+				double extra = (block.getExplosionResistance(this.exploder, this.worldObj, x, y, z, this.explosionX, this.explosionY, this.explosionZ) + 4.0F) * 0.3D;
 				if (this.type != Type.Heat)
-				{
 					ret += extra;
-				}
 				else
-				{
 					ret += extra * 6.0D;
-				}
 			}
 
 			return ret;
 		}
 		else
-		{
 			return ret;
-		}
 	}
 
 	private void damageEntities(double x, double y, double z, int step, double power)
@@ -460,36 +416,26 @@ public class ExplosionIC2 extends Explosion
 			do
 			{
 				index = (entry + entity) / 2;
-				int damage = ((EntityDamage) this.entitiesInRange.get(index)).distance;
+				int damage = this.entitiesInRange.get(index).distance;
 				if (damage < i)
-				{
 					entry = index + 1;
-				}
 				else if (damage > i)
-				{
 					entity = index - 1;
-				}
 				else
-				{
 					entity = index;
-				}
 			}
 			while (entry < entity);
 		}
 		else
-		{
 			index = 0;
-		}
 
 		int distanceMax = Util.square(step + 5);
 
 		for (i = index; i < this.entitiesInRange.size(); ++i)
 		{
-			EntityDamage var25 = (EntityDamage) this.entitiesInRange.get(i);
+			EntityDamage var25 = this.entitiesInRange.get(i);
 			if (var25.distance >= distanceMax)
-			{
 				break;
-			}
 
 			Entity var26 = var25.entity;
 			if (Util.square(var26.posX - x) + Util.square(var26.posY - y) + Util.square(var26.posZ - z) <= 25.0D)
@@ -518,6 +464,7 @@ public class ExplosionIC2 extends Explosion
 
 	}
 
+	@Override
 	public EntityLivingBase getExplosivePlacedBy()
 	{
 		return this.igniter;
@@ -548,11 +495,9 @@ public class ExplosionIC2 extends Explosion
 
 			for (int j = offset; j < 8; j += step)
 			{
-				int val = (int) (aval >> j & (long) ((1 << step) - 1));
+				int val = (int) (aval >> j & (1 << step) - 1);
 				if (val != 0)
-				{
 					return i * 8 + j;
-				}
 			}
 
 			offset = 0;
@@ -563,12 +508,12 @@ public class ExplosionIC2 extends Explosion
 
 	private static int getAtIndex(int index, long[] array, int step)
 	{
-		return (int) (array[index / 8] >>> index % 8 & (long) ((1 << step) - 1));
+		return (int) (array[index / 8] >>> index % 8 & (1 << step) - 1);
 	}
 
 	private static void setAtIndex(int index, long[] array, int value)
 	{
-		array[index / 8] |= (long) (value << index % 8);
+		array[index / 8] |= value << index % 8;
 	}
 
 	private static class EntityDamage
@@ -609,9 +554,7 @@ public class ExplosionIC2 extends Explosion
 		{
 			this.n += n1;
 			if (y > this.maxY)
-			{
 				this.maxY = y;
-			}
 
 			return this;
 		}
@@ -628,12 +571,11 @@ public class ExplosionIC2 extends Explosion
 			this.z = z1;
 		}
 
+		@Override
 		public boolean equals(Object obj)
 		{
 			if (!(obj instanceof XZposition))
-			{
 				return false;
-			}
 			else
 			{
 				XZposition xZposition = (XZposition) obj;
@@ -641,6 +583,7 @@ public class ExplosionIC2 extends Explosion
 			}
 		}
 
+		@Override
 		public int hashCode()
 		{
 			return this.x * 31 ^ this.z;

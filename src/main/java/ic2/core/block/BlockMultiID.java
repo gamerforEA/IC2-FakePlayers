@@ -59,13 +59,12 @@ public abstract class BlockMultiID extends BlockBase
 		super(internalName1, material, itemClass);
 	}
 
+	@Override
 	public int getFacing(IBlockAccess iBlockAccess, int x, int y, int z)
 	{
 		TileEntity te = this.getOwnTe(iBlockAccess, x, y, z);
 		if (te instanceof TileEntityBlock)
-		{
 			return ((TileEntityBlock) te).getFacing();
-		}
 		else
 		{
 			int meta = iBlockAccess.getBlockMetadata(x, y, z);
@@ -73,6 +72,7 @@ public abstract class BlockMultiID extends BlockBase
 		}
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerBlockIcons(IIconRegister iconRegister)
 	{
@@ -86,7 +86,6 @@ public abstract class BlockMultiID extends BlockBase
 			String name = IC2.textureDomain + ":" + textureFolder + this.getTextureName(index);
 
 			for (int active = 0; active < 2; ++active)
-			{
 				for (int side = 0; side < 6; ++side)
 				{
 					int subIndex = active * 6 + side;
@@ -95,11 +94,11 @@ public abstract class BlockMultiID extends BlockBase
 					this.textures[index][subIndex] = texture;
 					((TextureMap) iconRegister).setTextureEntry(subName, texture);
 				}
-			}
 		}
 
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(IBlockAccess iBlockAccess, int x, int y, int z, int side)
 	{
@@ -108,16 +107,12 @@ public abstract class BlockMultiID extends BlockBase
 		int meta = iBlockAccess.getBlockMetadata(x, y, z);
 		int index = this.getTextureIndex(meta);
 		if (index >= this.textures.length)
-		{
 			return null;
-		}
 		else
 		{
 			int subIndex = getTextureSubIndex(facing, side);
 			if (active)
-			{
 				subIndex += 6;
-			}
 
 			try
 			{
@@ -131,6 +126,7 @@ public abstract class BlockMultiID extends BlockBase
 		}
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(int side, int meta)
 	{
@@ -138,11 +134,8 @@ public abstract class BlockMultiID extends BlockBase
 		int index = this.getTextureIndex(meta);
 		int subIndex = getTextureSubIndex(facing, side);
 		if (index >= this.textures.length)
-		{
 			return null;
-		}
 		else
-		{
 			try
 			{
 				return this.textures[index][subIndex];
@@ -152,14 +145,15 @@ public abstract class BlockMultiID extends BlockBase
 				IC2.platform.displayError(var7, "Side: " + side + "\n" + "Block: " + this + "\n" + "Meta: " + meta + "\n" + "Facing: " + facing + "\n" + "Index: " + index + "\n" + "SubIndex: " + subIndex, new Object[0]);
 				return null;
 			}
-		}
 	}
 
+	@Override
 	public int getRenderType()
 	{
 		return IC2.platform.getRenderId("default");
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean shouldSideBeRendered(IBlockAccess blockAccess, int x, int y, int z, int side)
 	{
@@ -171,25 +165,23 @@ public abstract class BlockMultiID extends BlockBase
 	{
 		TileEntity te = this.getOwnTe(blockAccess, x, y, z);
 		if (te instanceof TileEntityBlock)
-		{
 			((TileEntityBlock) te).onRender();
-		}
 
 	}
 
+	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float a, float b, float c)
 	{
 		if (entityPlayer.isSneaking())
-		{
 			return false;
-		}
 		else
 		{
 			TileEntity te = this.getOwnTe(world, x, y, z);
-			return te instanceof IHasGui ? (IC2.platform.isSimulating() ? IC2.platform.launchGui(entityPlayer, (IHasGui) te) : true) : false;
+			return te instanceof IHasGui ? IC2.platform.isSimulating() ? IC2.platform.launchGui(entityPlayer, (IHasGui) te) : true : false;
 		}
 	}
 
+	@Override
 	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune)
 	{
 		ArrayList ret = super.getDrops(world, x, y, z, metadata, fortune);
@@ -218,15 +210,14 @@ public abstract class BlockMultiID extends BlockBase
 			{
 				ItemStack itemStack = var13.getStackInSlot(var12);
 				if (itemStack != null)
-				{
 					ret.add(itemStack);
-				}
 			}
 		}
 
 		return ret;
 	}
 
+	@Override
 	public void onBlockPreDestroy(World world, int x, int y, int z, int meta)
 	{
 		TileEntity te = this.getOwnTe(world, x, y, z);
@@ -235,9 +226,7 @@ public abstract class BlockMultiID extends BlockBase
 			TileEntityBlock i$ = (TileEntityBlock) te;
 			i$.onBlockBreak(this, meta);
 			if (i$.loaded)
-			{
 				i$.onUnloaded();
-			}
 		}
 
 		if (te != null)
@@ -256,44 +245,33 @@ public abstract class BlockMultiID extends BlockBase
 						{
 							ContainerBase container = (ContainerBase) player.openContainer;
 							if (container.base == te)
-							{
 								player.closeScreen();
-							}
 						}
 					}
 				}
 			}
 
 			if (tesBeforeBreak.size() >= 8)
-			{
 				tesBeforeBreak.pop();
-			}
 
 			tesBeforeBreak.push(te);
 		}
 
 		if (Ic2Items.copperOre != null && this.getUnlocalizedName().equals(Ic2Items.copperOre.getUnlocalizedName()))
-		{
 			this.dropXpOnBlockBreak(world, x, y, z, 1);
-		}
 
 		if (Ic2Items.tinOre != null && this.getUnlocalizedName().equals(Ic2Items.tinOre.getUnlocalizedName()))
-		{
 			this.dropXpOnBlockBreak(world, x, y, z, 1);
-		}
 
 		if (Ic2Items.uraniumOre != null && this.getUnlocalizedName().equals(Ic2Items.uraniumOre.getUnlocalizedName()))
-		{
 			this.dropXpOnBlockBreak(world, x, y, z, 2);
-		}
 
 		if (Ic2Items.leadOre != null && this.getUnlocalizedName().equals(Ic2Items.leadOre.getUnlocalizedName()))
-		{
 			this.dropXpOnBlockBreak(world, x, y, z, 1);
-		}
 
 	}
 
+	@Override
 	public void onBlockAdded(World world, int x, int y, int z)
 	{
 		Iterator it = tesBeforeBreak.descendingIterator();
@@ -310,6 +288,7 @@ public abstract class BlockMultiID extends BlockBase
 
 	}
 
+	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemStack)
 	{
 		if (IC2.platform.isSimulating())
@@ -319,12 +298,10 @@ public abstract class BlockMultiID extends BlockBase
 			{
 				IWrenchable te = (IWrenchable) tileEntity;
 				if (entityliving == null)
-				{
 					te.setFacing((short) 2);
-				}
 				else
 				{
-					int l = MathHelper.floor_double((double) (entityliving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+					int l = MathHelper.floor_double(entityliving.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
 					switch (l)
 					{
 						case 0:
@@ -342,35 +319,32 @@ public abstract class BlockMultiID extends BlockBase
 				}
 				// TODO gamerforEA code start
 				if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
-				{
 					((TileEntityBlock) te).ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
-				}
-				// TODO gamerforEA code end
 			}
 		}
 	}
 
+	@Override
 	public final boolean hasTileEntity(int metadata)
 	{
 		return true;
 	}
 
+	@Override
 	public boolean canCreatureSpawn(EnumCreatureType type, IBlockAccess world, int x, int y, int z)
 	{
 		return false;
 	}
 
+	@Override
 	public final TileEntity createTileEntity(World world, int metadata)
 	{
 		MutableObject ctorArgTypes = new MutableObject(emptyClassArray);
 		MutableObject ctorArgs = new MutableObject(emptyObjArray);
 		Class teClass = this.getTeClass(metadata, ctorArgTypes, ctorArgs);
 		if (teClass == null)
-		{
 			return null;
-		}
 		else
-		{
 			try
 			{
 				Constructor e = teClass.getConstructor((Class[]) ctorArgTypes.getValue());
@@ -380,7 +354,6 @@ public abstract class BlockMultiID extends BlockBase
 			{
 				throw new RuntimeException("Error constructing " + teClass + " with " + Arrays.asList((Object[]) ctorArgTypes.getValue()) + ", " + Arrays.asList((Object[]) ctorArgs.getValue()) + ".", var7);
 			}
-		}
 	}
 
 	public abstract Class<? extends TileEntity> getTeClass(int var1, MutableObject<Class<?>[]> var2, MutableObject<Object[]> var3);
@@ -394,9 +367,7 @@ public abstract class BlockMultiID extends BlockBase
 		{
 			Chunk expectedClass = Util.getLoadedChunk((World) blockAccess, x >> 4, z >> 4);
 			if (expectedClass == null)
-			{
 				return null;
-			}
 
 			block = expectedClass.getBlock(x & 15, y, z & 15);
 			meta = expectedClass.getBlockMetadata(x & 15, y, z & 15);
@@ -417,7 +388,7 @@ public abstract class BlockMultiID extends BlockBase
 			{
 				if (Util.inDev())
 				{
-					StackTraceElement[] world1 = (new Throwable()).getStackTrace();
+					StackTraceElement[] world1 = new Throwable().getStackTrace();
 					IC2.log.warn(LogCategory.Block, "Own tile entity query from %s to foreign block %s instead of %s at %s.", new Object[] { world1.length > 1 ? world1[1] : "?", block != null ? block.getClass() : null, this.getClass(), Util.formatPosition(blockAccess, x, y, z) });
 				}
 
@@ -426,9 +397,7 @@ public abstract class BlockMultiID extends BlockBase
 
 			IC2.log.warn(LogCategory.Block, "Mismatched tile entity at %s, got %s, expected %s.", new Object[] { Util.formatPosition(blockAccess, x, y, z), actualClass, expectedClass1 });
 			if (!(blockAccess instanceof World))
-			{
 				return null;
-			}
 
 			World world = (World) blockAccess;
 			te = this.createTileEntity(world, meta);
@@ -444,40 +413,35 @@ public abstract class BlockMultiID extends BlockBase
 		return te instanceof TileEntityBlock ? ((TileEntityBlock) te).getActive() : false;
 	}
 
+	@Override
 	public void getSubBlocks(Item j, CreativeTabs tabs, List itemList)
 	{
 		Item item = Item.getItemFromBlock(this);
 		if (!item.getHasSubtypes())
-		{
 			itemList.add(new ItemStack(this));
-		}
 		else
-		{
 			for (int i = 0; i < 16; ++i)
 			{
 				ItemStack is = new ItemStack(this, 1, i);
 				if (is.getItem().getUnlocalizedName(is) == null)
-				{
 					break;
-				}
 
 				itemList.add(is);
 			}
-		}
 
 	}
 
+	@Override
 	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z)
 	{
 		return new ItemStack(this, 1, world.getBlockMetadata(x, y, z));
 	}
 
+	@Override
 	public boolean rotateBlock(World worldObj, int x, int y, int z, ForgeDirection axis)
 	{
 		if (axis == ForgeDirection.UNKNOWN)
-		{
 			return false;
-		}
 		else
 		{
 			TileEntity tileEntity = this.getOwnTe(worldObj, x, y, z);
@@ -486,21 +450,18 @@ public abstract class BlockMultiID extends BlockBase
 				IWrenchable te = (IWrenchable) tileEntity;
 				int newFacing = ForgeDirection.getOrientation(te.getFacing()).getRotation(axis).ordinal();
 				if (te.wrenchCanSetFacing((EntityPlayer) null, newFacing))
-				{
 					te.setFacing((short) newFacing);
-				}
 			}
 
 			return false;
 		}
 	}
 
+	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block srcBlock)
 	{
 		TileEntity te = this.getOwnTe(world, x, y, z);
 		if (te instanceof TileEntityBlock)
-		{
 			((TileEntityBlock) te).onNeighborUpdate(srcBlock);
-		}
 	}
 }

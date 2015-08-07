@@ -56,45 +56,43 @@ public class ItemCell extends ItemIC2
 		FluidContainerRegistry.registerFluidContainer(FluidRegistry.LAVA, Ic2Items.lavaCell.copy(), Ic2Items.cell.copy());
 	}
 
+	@Override
 	public String getTextureFolder()
 	{
 		return "cell";
 	}
 
+	@Override
 	public String getUnlocalizedName(ItemStack stack)
 	{
-		InternalName ret = (InternalName) this.names.get(Integer.valueOf(stack.getItemDamage()));
+		InternalName ret = this.names.get(Integer.valueOf(stack.getItemDamage()));
 		return ret == null ? null : "ic2." + ret.name();
 	}
 
+	@Override
 	public void getSubItems(Item item, CreativeTabs tabs, List itemList)
 	{
 		for (int meta = 0; meta < 32767; ++meta)
 		{
 			ItemStack stack = new ItemStack(this, 1, meta);
 			if (this.getUnlocalizedName(stack) == null)
-			{
 				break;
-			}
 
 			itemList.add(stack);
 		}
 
 	}
 
+	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float xOffset, float yOffset, float zOffset)
 	{
 		if (!IC2.platform.isSimulating())
-		{
 			return false;
-		}
 		else
 		{
 			MovingObjectPosition mop = this.getMovingObjectPositionFromPlayer(world, player, true);
 			if (mop == null)
-			{
 				return false;
-			}
 			else
 			{
 				if (mop.typeOfHit == MovingObjectType.BLOCK)
@@ -103,22 +101,19 @@ public class ItemCell extends ItemIC2
 					y = mop.blockY;
 					z = mop.blockZ;
 					if (!world.canMineBlock(player, x, y, z))
-					{
 						return false;
-					}
 
 					if (!player.canPlayerEdit(x, y, z, mop.sideHit, stack))
-					{
 						return false;
-					}
 					// TODO gamerforEA code start
-					if (FakePlayerUtils.cantBreak(x, y, z, player)) return false;
+					if (FakePlayerUtils.cantBreak(x, y, z, player))
+						return false;
 					// TODO gamerforEA code end
 					if (stack.getItemDamage() == 0)
 					{
 						if (world.getBlockMetadata(x, y, z) == 0)
 						{
-							ItemStack fs = (ItemStack) this.cells.get(world.getBlock(x, y, z));
+							ItemStack fs = this.cells.get(world.getBlock(x, y, z));
 							if (fs != null && StackUtil.storeInventoryItem(fs.copy(), player, false))
 							{
 								world.setBlockToAir(x, y, z);
@@ -134,9 +129,7 @@ public class ItemCell extends ItemIC2
 						if (fluid != null && LiquidUtil.placeFluid(fluid, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, mop.sideHit, stack) && LiquidUtil.placeFluid(fluid, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
 						{
 							if (!player.capabilities.isCreativeMode)
-							{
 								--stack.stackSize;
-							}
 
 							return true;
 						}

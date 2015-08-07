@@ -74,18 +74,17 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		this.energyConsume = 512;
 		this.defaultTier = 3;
 		this.workTick = 20;
-		this.redstone = (Redstone) this.addComponent(new Redstone(this));
+		this.redstone = this.addComponent(new Redstone(this));
 	}
 
+	@Override
 	public void onLoaded()
 	{
 		super.onLoaded();
 		if (IC2.platform.isSimulating())
 		{
 			if (this.minelayer < 0)
-			{
 				this.minelayer = this.yCoord - 1;
-			}
 
 			this.setUpgradestat();
 		}
@@ -95,12 +94,11 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	private void chargeTool()
 	{
 		if (!this.scannerSlot.isEmpty())
-		{
 			this.energy -= ElectricItem.manager.charge(this.scannerSlot.get(), this.energy, 2, false, false);
-		}
 
 	}
 
+	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
@@ -110,51 +108,33 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		{
 			this.markDirty();
 			if (!this.getActive())
-			{
 				this.setActive(true);
-			}
 		}
 		else if (this.getActive())
-		{
 			this.setActive(false);
-		}
 
 	}
 
 	private boolean work()
 	{
-		if (this.energy < (double) this.energyConsume)
-		{
+		if (this.energy < this.energyConsume)
 			return false;
-		}
 		else if (this.redstone.hasRedstoneInput())
-		{
 			return false;
-		}
 		else if (this.minelayer == 0)
-		{
 			return false;
-		}
 		else if (this.scannerSlot.isEmpty())
-		{
 			return false;
-		}
 		else if (this.scannerSlot.get().getItem() instanceof ItemScanner && !((ItemScanner) this.scannerSlot.get().getItem()).haveChargeforScan(this.scannerSlot.get()))
-		{
 			return false;
-		}
 		else
 		{
 			byte range = 0;
 			if (this.scannerSlot.get().getItem() == Ic2Items.odScanner.getItem())
-			{
 				range = 16;
-			}
 
 			if (this.scannerSlot.get().getItem() == Ic2Items.ovScanner.getItem())
-			{
 				range = 32;
-			}
 
 			if (this.ticker == this.workTick)
 			{
@@ -163,14 +143,10 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 				while (this.minelayer > 0 && this.currectblockscanncount > 0)
 				{
 					if (this.xcounter == 99)
-					{
 						this.xcounter = 0 - range / 2;
-					}
 
 					if (this.zcounter == 99)
-					{
 						this.zcounter = 0 - range / 2;
-					}
 
 					if (this.xcounter <= range / 2)
 					{
@@ -189,9 +165,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 						}
 
 						if (this.scannerSlot.get().getItem() instanceof ItemScanner)
-						{
 							((ItemScanner) this.scannerSlot.get().getItem()).discharge(this.scannerSlot.get(), 64);
-						}
 
 						Block block = this.worldObj.getBlock(this.minetargetX, this.minelayer, this.minetargetZ);
 						if (!block.isAir(this.worldObj, this.minetargetX, this.minelayer, this.minetargetZ) && this.canMine(this.minetargetX, this.minelayer, this.minetargetZ, block))
@@ -213,9 +187,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 				this.ticker = 0;
 			}
 			else
-			{
 				++this.ticker;
-			}
 
 			return true;
 		}
@@ -224,23 +196,20 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public void doMine(Block block)
 	{
 		// TODO gamerforEA code start
-		if (EventConfig.advminerEvent && FakePlayerUtils.cantBreak(this.minetargetX, this.minelayer, this.minetargetZ, this.getOwnerFake())) return;
+		if (EventConfig.advminerEvent && FakePlayerUtils.cantBreak(this.minetargetX, this.minelayer, this.minetargetZ, this.getOwnerFake()))
+			return;
 		// TODO gamerforEA code end
 
 		if (this.silktouch && block.canSilkHarvest(this.worldObj, new Ic2Player(this.worldObj), this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))
 		{
 			if (Item.getItemFromBlock(block) != null && StackUtil.check(new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ))))
-			{
 				StackUtil.distribute(this, new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)), false);
-			}
 		}
 		else
-		{
 			StackUtil.distributeDrop(this, block.getDrops(this.worldObj, this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ), 0));
-		}
 
 		this.worldObj.setBlockToAir(this.minetargetX, this.minelayer, this.minetargetZ);
-		this.energy -= (double) this.energyConsume;
+		this.energy -= this.energyConsume;
 	}
 
 	public boolean canMine(int x, int y, int z, Block block)
@@ -256,43 +225,31 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 			{
 				Entry entry = (Entry) i$.next();
 				if (((IRecipeInput) entry.getKey()).matches(i))
-				{
 					++max;
-				}
 			}
 
 			if (max == 0)
-			{
 				return false;
-			}
 		}
 
 		if (!(block instanceof IFluidBlock) && !(block instanceof BlockFluidClassic) && !(block instanceof BlockStaticLiquid) && !(block instanceof BlockDynamicLiquid))
 		{
 			if (block.getBlockHardness(this.worldObj, x, y, z) < 0.0F)
-			{
 				return false;
-			}
 			else
 			{
 				if (this.silktouch && block.canSilkHarvest(this.worldObj, new Ic2Player(this.worldObj), this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))
 				{
 					if (Item.getItemFromBlock(block) == null)
-					{
 						return false;
-					}
 
 					if (!StackUtil.check(new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ))))
-					{
 						return false;
-					}
 
 					this.itemstack.add(new ItemStack(Item.getItemFromBlock(block), 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)));
 				}
 				else
-				{
 					this.itemstack.addAll(block.getDrops(this.worldObj, this.minetargetX, this.minelayer, this.minetargetZ, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ), 0));
-				}
 
 				if (!this.itemstack.isEmpty())
 				{
@@ -300,40 +257,29 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 					if (this.blacklist)
 					{
 						for (var9 = 0; var9 < this.ListSlot.size(); ++var9)
-						{
-							if (this.ListSlot.get(var9) != null && StackUtil.isStackEqual((ItemStack) this.itemstack.get(0), this.ListSlot.get(var9)))
-							{
+							if (this.ListSlot.get(var9) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(var9)))
 								return false;
-							}
-						}
 
 						return true;
 					}
 					else
 					{
 						for (var9 = 0; var9 < this.ListSlot.size(); ++var9)
-						{
-							if (this.ListSlot.get(var9) != null && StackUtil.isStackEqual((ItemStack) this.itemstack.get(0), this.ListSlot.get(var9)))
-							{
+							if (this.ListSlot.get(var9) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(var9)))
 								return true;
-							}
-						}
 
 						return false;
 					}
 				}
 				else
-				{
 					return false;
-				}
 			}
 		}
 		else
-		{
 			return false;
-		}
 	}
 
+	@Override
 	public void readFromNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.readFromNBT(nbtTagCompound);
@@ -344,6 +290,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		this.silktouch = nbtTagCompound.getBoolean("silktouch");
 	}
 
+	@Override
 	public void writeToNBT(NBTTagCompound nbtTagCompound)
 	{
 		super.writeToNBT(nbtTagCompound);
@@ -354,6 +301,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		nbtTagCompound.setBoolean("silktouch", this.silktouch);
 	}
 
+	@Override
 	public void onNetworkEvent(EntityPlayer player, int event)
 	{
 		switch (event)
@@ -368,15 +316,11 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 				break;
 			case 1:
 				if (!this.getActive())
-				{
 					this.blacklist = !this.blacklist;
-				}
 				break;
 			case 2:
 				if (!this.getActive())
-				{
 					this.silktouch = !this.silktouch;
-				}
 		}
 
 	}
@@ -390,30 +334,35 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 
 	private static int applyModifier(int base, int extra, double multiplier)
 	{
-		double ret = (double) Math.round(((double) base + (double) extra) * multiplier);
+		double ret = Math.round(((double) base + (double) extra) * multiplier);
 		return ret > 2.147483647E9D ? Integer.MAX_VALUE : (int) ret;
 	}
 
+	@Override
 	public ContainerBase<TileEntityAdvMiner> getGuiContainer(EntityPlayer entityPlayer)
 	{
 		return new ContainerAdvMiner(entityPlayer, this);
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public GuiScreen getGui(EntityPlayer entityPlayer, boolean isAdmin)
 	{
 		return new GuiAdvMiner(new ContainerAdvMiner(entityPlayer, this));
 	}
 
+	@Override
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
 	}
 
+	@Override
 	public double getEnergy()
 	{
 		return this.energy;
 	}
 
+	@Override
 	public boolean useEnergy(double amount)
 	{
 		if (this.energy >= amount)
@@ -422,11 +371,10 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
+	@Override
 	public String getInventoryName()
 	{
 		return "AdvMiner";
@@ -437,6 +385,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		return this.minelayer;
 	}
 
+	@Override
 	public ItemStack getWrenchDrop(EntityPlayer entityPlayer)
 	{
 		ItemStack ret = super.getWrenchDrop(entityPlayer);
@@ -444,12 +393,13 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		if (energyRetainedInStorageBlockDrops > 0.0F)
 		{
 			NBTTagCompound nbttagcompound = StackUtil.getOrCreateNbtData(ret);
-			nbttagcompound.setDouble("energy", this.energy * (double) energyRetainedInStorageBlockDrops);
+			nbttagcompound.setDouble("energy", this.energy * energyRetainedInStorageBlockDrops);
 		}
 
 		return ret;
 	}
 
+	@Override
 	public Set<UpgradableProperty> getUpgradableProperties()
 	{
 		return EnumSet.of(UpgradableProperty.Augmentable, UpgradableProperty.RedstoneSensitive, UpgradableProperty.Transformer);
