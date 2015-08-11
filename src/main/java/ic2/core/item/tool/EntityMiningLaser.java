@@ -229,7 +229,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 							{
 								entity.setFire(powerI * (this.smelt ? 2 : 1));
 							}
-
+							
 							if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
 							{
 								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
