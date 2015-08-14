@@ -105,10 +105,12 @@ public class ItemCell extends ItemIC2
 
 					if (!player.canPlayerEdit(x, y, z, mop.sideHit, stack))
 						return false;
+
 					// TODO gamerforEA code start
 					if (FakePlayerUtils.cantBreak(x, y, z, player))
 						return false;
 					// TODO gamerforEA code end
+
 					if (stack.getItemDamage() == 0)
 					{
 						if (world.getBlockMetadata(x, y, z) == 0)

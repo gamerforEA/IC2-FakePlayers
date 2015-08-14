@@ -1,5 +1,6 @@
 package ic2.core.item.tfbp;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 
@@ -70,7 +71,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 						if (!block.isAir(world, base, zm, xm) && (block == Blocks.dirt || block == Blocks.grass))
 						{
 							// TODO gamerforEA code start
-							if (FakePlayerUtils.cantBreak(base, zm, xm, player))
+							if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(base, zm, xm, player))
 								return false;
 							// TODO gamerforEA code end
 
@@ -99,7 +100,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 					return false;
 
 				// TODO gamerforEA code start
-				if (!FakePlayerUtils.cantBreak(x, y, z, player))
+				if (!EventConfig.terraEvent || !FakePlayerUtils.cantBreak(x, y, z, player))
 					// TODO gamerforEA code end
 					world.setBlock(x, y, z, Blocks.mycelium, 0, 7);
 			}
@@ -110,7 +111,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 			else
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y + 1, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
 					return false;
 				// TODO gamerforEA code end
 
@@ -136,7 +137,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 							if (block == Blocks.brown_mushroom || block == Blocks.red_mushroom)
 							{
 								// TODO gamerforEA code start
-								if (FakePlayerUtils.cantBreak(x, y + 1, z, player))
+								if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
 									continue;
 								// TODO gamerforEA code end
 

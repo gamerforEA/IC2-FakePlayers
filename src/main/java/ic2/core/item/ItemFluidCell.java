@@ -195,6 +195,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 		if (FakePlayerUtils.cantBreak(x, y, z, player))
 			return false;
 		// TODO gamerforEA code end
+
 		Block block = world.getBlock(x, y, z);
 		if (block instanceof IFluidBlock)
 		{

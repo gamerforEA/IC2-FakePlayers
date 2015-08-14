@@ -1,5 +1,6 @@
 package ic2.core.item.tfbp;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 
@@ -48,7 +49,7 @@ public class ItemTFBPDesertification extends ItemTFBP implements ITerraformingBP
 		else if (!TileEntityTerra.switchGround(world, Blocks.dirt, Blocks.sand, x, y, z, false, player) && !TileEntityTerra.switchGround(world, Blocks.grass, Blocks.sand, x, y, z, false, player) && !TileEntityTerra.switchGround(world, Blocks.farmland, Blocks.sand, x, y, z, false, player)) // TODO gamerforEA add EntityPlayer
 		{
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantBreak(x, y, z, player))
+			if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 				return false;
 			// TODO gamerforEA code end
 

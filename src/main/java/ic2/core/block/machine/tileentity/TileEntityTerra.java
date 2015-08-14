@@ -1,5 +1,6 @@
 package ic2.core.block.machine.tileentity;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 
@@ -191,7 +192,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 					else
 					{
 						// TODO gamerforEA code start
-						if (FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 							return false;
 						// TODO gamerforEA code end
 
@@ -214,7 +215,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 					else
 					{
 						// TODO gamerforEA code start
-						if (FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 							return false;
 						// TODO gamerforEA code end
 

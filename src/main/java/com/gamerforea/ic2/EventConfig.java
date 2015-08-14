@@ -9,6 +9,7 @@ import net.minecraftforge.common.config.Configuration;
 
 public class EventConfig
 {
+	public static boolean terraEvent = true;
 	public static boolean pumpEvent = true;
 	public static boolean minerEvent = true;
 	public static boolean advminerEvent = true;
@@ -21,6 +22,7 @@ public class EventConfig
 	public static boolean plasmaEnabled = false;
 	public static boolean radiationEnabled = false;
 	public static boolean explosionEnabled = false;
+	public static boolean laserscatterEnabled = true;
 
 	static
 	{
@@ -29,6 +31,7 @@ public class EventConfig
 			File mainDirectory = FMLCommonHandler.instance().getMinecraftServerInstance().getFile(".");
 			Configuration config = new Configuration(new File(mainDirectory, "config/Events/IC2.cfg"));
 			config.load();
+			terraEvent = config.getBoolean("terraEvent", CATEGORY_GENERAL, terraEvent, "Терраформер (замена/установка блоков)");
 			pumpEvent = config.getBoolean("pumpEvent", CATEGORY_GENERAL, pumpEvent, "Помпа (выкачивание жидкости)");
 			minerEvent = config.getBoolean("minerEvent", CATEGORY_GENERAL, minerEvent, "Буровая установка (разрушение блоков)");
 			advminerEvent = config.getBoolean("advMinerEvent", CATEGORY_GENERAL, advminerEvent, "Продвинутая буровая установка (разрушение блоков)");
@@ -41,6 +44,7 @@ public class EventConfig
 			plasmaEnabled = config.getBoolean("plasmaEnabled", "other", plasmaEnabled, "Плазменная пушка");
 			radiationEnabled = config.getBoolean("radiationEnabled", "other", radiationEnabled, "Радиация");
 			explosionEnabled = config.getBoolean("explosionEnabled", "other", explosionEnabled, "Взрывы");
+			laserscatterEnabled = config.getBoolean("laserscatterEnabled", "other", laserscatterEnabled, "Шахтёрский лазер (режим \"Разброс\")");
 			config.save();
 		}
 		catch (Throwable throwable)

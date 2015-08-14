@@ -329,7 +329,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	{
 		this.upgradeSlot.onChanged();
 		this.setTier(applyModifier(this.defaultTier, this.upgradeSlot.extraTier, 1.0D));
-		this.blockscanncount = 5 * this.upgradeSlot.augmentation;
+		this.blockscanncount = 5 * (this.upgradeSlot.augmentation + 1);
 	}
 
 	private static int applyModifier(int base, int extra, double multiplier)

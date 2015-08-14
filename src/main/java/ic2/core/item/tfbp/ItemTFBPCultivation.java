@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 
@@ -94,7 +95,7 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 			if (block == Blocks.dirt)
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 					return false;
 				// TODO gamerforEA code end
 
@@ -116,7 +117,7 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 			if (plant == Blocks.wheat)
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y - 1, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y - 1, z, player))
 					return false;
 				// TODO gamerforEA code end
 
@@ -124,7 +125,7 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 			}
 
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantBreak(x, y, z, player))
+			if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 				return false;
 			// TODO gamerforEA code end
 

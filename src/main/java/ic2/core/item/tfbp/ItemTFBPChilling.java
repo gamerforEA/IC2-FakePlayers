@@ -1,5 +1,6 @@
 package ic2.core.item.tfbp;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 
@@ -64,7 +65,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 					if (blockBelow == Blocks.water || blockBelow == Blocks.flowing_water)
 					{
 						// TODO gamerforEA code start
-						if (FakePlayerUtils.cantBreak(x, y - 1, z, player))
+						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y - 1, z, player))
 							return false;
 						// TODO gamerforEA code end
 
@@ -75,7 +76,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 				else if (block == Blocks.snow_layer && this.isSurroundedBySnow(world, x, y, z, player)) // TODO gamerforEA add EntityPlayer
 				{
 					// TODO gamerforEA code start
-					if (FakePlayerUtils.cantBreak(x, y, z, player))
+					if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 						return false;
 					// TODO gamerforEA code end
 
@@ -88,7 +89,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 				else
 				{
 					// TODO gamerforEA code start
-					if (FakePlayerUtils.cantBreak(x, y + 1, z, player))
+					if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
 						return false;
 					// TODO gamerforEA code end
 
@@ -99,7 +100,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 			else
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 					return false;
 				// TODO gamerforEA code end
 
@@ -128,7 +129,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 				if (Blocks.snow_layer.canPlaceBlockAt(world, x, y + 1, z) || block == Blocks.ice)
 				{
 					// TODO gamerforEA code start
-					if (FakePlayerUtils.cantBreak(x, y + 1, z, player))
+					if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
 						return false;
 					// TODO gamerforEA code end
 

@@ -3,6 +3,7 @@ package ic2.core.item.tfbp;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 
@@ -89,7 +90,7 @@ public class ItemTFBPFlatification extends ItemTFBP implements ITerraformingBPFa
 			else if (y < yCoord)
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y + 1, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
 					return false;
 				// TODO gamerforEA code end
 
@@ -99,7 +100,7 @@ public class ItemTFBPFlatification extends ItemTFBP implements ITerraformingBPFa
 			else if (this.canRemove(world.getBlock(x, y, z)))
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 					return false;
 				// TODO gamerforEA code end
 

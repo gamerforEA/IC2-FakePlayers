@@ -1,5 +1,6 @@
 package ic2.core.item.tfbp;
 
+import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 
@@ -87,7 +88,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 					else if (block == Blocks.log)
 					{
 						// TODO gamerforEA code start
-						if (FakePlayerUtils.cantBreak(x, y + 1, z, player))
+						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
 							return false;
 						// TODO gamerforEA code end
 
@@ -103,7 +104,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 					else if (block == Blocks.wheat)
 					{
 						// TODO gamerforEA code start
-						if (FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 							return false;
 						// TODO gamerforEA code end
 
@@ -113,7 +114,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 					else if (block == Blocks.fire)
 					{
 						// TODO gamerforEA code start
-						if (FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 							return false;
 						// TODO gamerforEA code end
 
@@ -134,7 +135,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 		if (oldBlock.isAir(world, x, y, z))
 		{
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantBreak(x, y, z, player))
+			if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 				return;
 			// TODO gamerforEA code end
 
@@ -153,7 +154,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 			if (block == Blocks.dirt)
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
 					return false;
 				// TODO gamerforEA code end
 
@@ -163,7 +164,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 			else if (block == Blocks.grass)
 			{
 				// TODO gamerforEA code start
-				if (FakePlayerUtils.cantBreak(x, y + 1, z, player))
+				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
 					return false;
 				// TODO gamerforEA code end
 

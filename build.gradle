@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2.2.760"
+version = "2.2.763"
 group= "ic2"
 archivesBaseName = "industrialcraft-2"
 
@@ -34,6 +34,10 @@ dependencies {
 }
 
 jar {
-	from zipTree('lib/industrialcraft-2-2.2.760-experimental.jar')
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+	from zipTree('lib/industrialcraft-2-' + version + '-experimental.jar')
+	from zipTree('lib/WorldGuardEventWrapper.jar').matching {
+		include('com/gamerforea/wgew/cauldron/event/**.class')
+	}
 }
