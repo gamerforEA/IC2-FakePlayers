@@ -19,9 +19,9 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2.2.763"
+version = "2-2.2.765-experimental"
 group= "ic2"
-archivesBaseName = "industrialcraft-2"
+archivesBaseName = "industrialcraft"
 
 minecraft {
     version = "1.7.10-10.13.4.1490-1.7.10"
@@ -36,7 +36,7 @@ dependencies {
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-	from zipTree('lib/industrialcraft-2-' + version + '-experimental.jar')
+	from zipTree('lib/' + archivesBaseName + '-' + version + '.jar')
 	from zipTree('lib/WorldGuardEventWrapper.jar').matching {
 		include('com/gamerforea/wgew/cauldron/event/**.class')
 	}

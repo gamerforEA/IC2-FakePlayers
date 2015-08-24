@@ -7,7 +7,7 @@ import java.io.File;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraftforge.common.config.Configuration;
 
-public class EventConfig
+public final class EventConfig
 {
 	public static boolean terraEvent = true;
 	public static boolean pumpEvent = true;

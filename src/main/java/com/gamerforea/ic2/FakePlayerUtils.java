@@ -24,23 +24,25 @@ public final class FakePlayerUtils
 
 	public static final FakePlayer getModFake(World world)
 	{
-		if (player.get() == null)
+		FakePlayer fake = player.get();
+
+		if (fake == null)
 		{
-			GameProfile profile = new GameProfile(UUID.fromString("6c788982-d6ca-11e4-b9d6-1681e6b88ec1"), "[IC2]");
-			player = new WeakReference<FakePlayer>(create(world, profile));
+			GameProfile profile = new GameProfile(UUID.fromString("9edd1d69-49c2-4884-83f5-7e9fd20b3ef1"), "[ComputerCraft]");
+			player = new WeakReference<FakePlayer>(fake = create(world, profile));
 		}
 		else
-			player.get().worldObj = world;
+			fake.worldObj = world;
 
-		return player.get();
+		return fake;
 	}
 
-	public static FakePlayer create(World world, GameProfile profile)
+	public static final FakePlayer create(World world, GameProfile profile)
 	{
 		return FakePlayerFactory.get((WorldServer) world, profile);
 	}
 
-	public static boolean cantBreak(int x, int y, int z, EntityPlayer player)
+	public static final boolean cantBreak(int x, int y, int z, EntityPlayer player)
 	{
 		try
 		{
@@ -56,7 +58,7 @@ public final class FakePlayerUtils
 		}
 	}
 
-	public static boolean cantDamage(Entity damager, Entity damagee)
+	public static final boolean cantDamage(Entity damager, Entity damagee)
 	{
 		try
 		{
@@ -71,7 +73,7 @@ public final class FakePlayerUtils
 		}
 	}
 
-	public static boolean isInPrivate(World world, int x, int y, int z)
+	public static final boolean isInPrivate(World world, int x, int y, int z)
 	{
 		try
 		{

@@ -13,7 +13,6 @@ import ic2.api.network.INetworkItemEventListener;
 import ic2.core.IC2;
 import ic2.core.audio.PositionSpec;
 import ic2.core.init.InternalName;
-import ic2.core.network.NetworkManager;
 import ic2.core.util.StackUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -42,6 +41,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 		this.tier = 3;
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean par4)
 	{
@@ -78,6 +78,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 		list.add(StatCollector.translateToLocalFormatted("ic2.tooltip.mode", new Object[] { mode }));
 	}
 
+	@Override
 	public List<String> getHudInfo(ItemStack itemStack)
 	{
 		LinkedList info = new LinkedList();
@@ -88,12 +89,11 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 		return info;
 	}
 
+	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player)
 	{
 		if (!IC2.platform.isSimulating())
-		{
 			return stack;
-		}
 		else
 		{
 			NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(stack);
@@ -106,39 +106,29 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 			}
 			else
 			{
-				int consume = (new int[] { 1250, 100, 5000, 0, 2500, 10000, 5000 })[laserSetting];
-				if (!ElectricItem.manager.use(stack, (double) consume, player))
-				{
+				int consume = new int[] { 1250, 100, 5000, 0, 2500, 10000, 5000 }[laserSetting];
+				if (!ElectricItem.manager.use(stack, consume, player))
 					return stack;
-				}
 
 				switch (laserSetting)
 				{
 					case 0:
 						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false))
-						{
-							((NetworkManager) IC2.network.get()).initiateItemEvent(player, stack, 0, true);
-						}
+							IC2.network.get().initiateItemEvent(player, stack, 0, true);
 						break;
 					case 1:
 						if (this.shootLaser(world, player, stack, 4.0F, 5.0F, 1, false, false))
-						{
-							((NetworkManager) IC2.network.get()).initiateItemEvent(player, stack, 1, true);
-						}
+							IC2.network.get().initiateItemEvent(player, stack, 1, true);
 						break;
 					case 2:
 						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 20.0F, Integer.MAX_VALUE, false, false))
-						{
-							((NetworkManager) IC2.network.get()).initiateItemEvent(player, stack, 2, true);
-						}
+							IC2.network.get().initiateItemEvent(player, stack, 2, true);
 					case 3:
 					default:
 						break;
 					case 4:
 						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 8.0F, Integer.MAX_VALUE, false, true))
-						{
-							((NetworkManager) IC2.network.get()).initiateItemEvent(player, stack, 4, true);
-						}
+							IC2.network.get().initiateItemEvent(player, stack, 4, true);
 						break;
 					case 5:
 						// TODO gamerforEA code start
@@ -147,20 +137,14 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 						// TODO gamerforEA code end
 
 						for (int x = -2; x <= 2; ++x)
-						{
 							for (int y = -2; y <= 2; ++y)
-							{
-								this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, false, false, (double) (player.rotationYaw + 20.0F * (float) x), (double) (player.rotationPitch + 20.0F * (float) y));
-							}
-						}
+								this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, false, false, player.rotationYaw + 20.0F * x, player.rotationPitch + 20.0F * y);
 
-						((NetworkManager) IC2.network.get()).initiateItemEvent(player, stack, 5, true);
+						IC2.network.get().initiateItemEvent(player, stack, 5, true);
 						break;
 					case 6:
 						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, true, false))
-						{
-							((NetworkManager) IC2.network.get()).initiateItemEvent(player, stack, 6, true);
-						}
+							IC2.network.get().initiateItemEvent(player, stack, 6, true);
 				}
 			}
 
@@ -168,29 +152,22 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 		}
 	}
 
+	@Override
 	public boolean onItemUseFirst(ItemStack itemstack, EntityPlayer entityPlayer, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ)
 	{
 		if (!IC2.platform.isSimulating())
-		{
 			return false;
-		}
 		else
 		{
 			NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(itemstack);
 			if (!IC2.keyboard.isModeSwitchKeyDown(entityPlayer) && nbtData.getInteger("laserSetting") == 3)
-			{
-				if (Math.abs(entityPlayer.posY + (double) entityPlayer.getEyeHeight() - 0.1D - ((double) y + 0.5D)) < 1.5D)
+				if (Math.abs(entityPlayer.posY + entityPlayer.getEyeHeight() - 0.1D - (y + 0.5D)) < 1.5D)
 				{
-					if (ElectricItem.manager.use(itemstack, 3000.0D, entityPlayer) && this.shootLaser(world, entityPlayer, itemstack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false, (double) entityPlayer.rotationYaw, 0.0D, (double) y + 0.5D))
-					{
-						((NetworkManager) IC2.network.get()).initiateItemEvent(entityPlayer, itemstack, 3, true);
-					}
+					if (ElectricItem.manager.use(itemstack, 3000.0D, entityPlayer) && this.shootLaser(world, entityPlayer, itemstack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false, entityPlayer.rotationYaw, 0.0D, y + 0.5D))
+						IC2.network.get().initiateItemEvent(entityPlayer, itemstack, 3, true);
 				}
 				else
-				{
 					IC2.platform.messagePlayer(entityPlayer, "Mining laser aiming angle too steep", new Object[0]);
-				}
-			}
 
 			return false;
 		}
@@ -198,12 +175,12 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 
 	public boolean shootLaser(World world, EntityLivingBase entityliving, ItemStack laseritem, float range, float power, int blockBreaks, boolean explosive, boolean smelt)
 	{
-		return this.shootLaser(world, entityliving, laseritem, range, power, blockBreaks, explosive, smelt, (double) entityliving.rotationYaw, (double) entityliving.rotationPitch);
+		return this.shootLaser(world, entityliving, laseritem, range, power, blockBreaks, explosive, smelt, entityliving.rotationYaw, entityliving.rotationPitch);
 	}
 
 	public boolean shootLaser(World world, EntityLivingBase entityliving, ItemStack laseritem, float range, float power, int blockBreaks, boolean explosive, boolean smelt, double yawDeg, double pitchDeg)
 	{
-		return this.shootLaser(world, entityliving, laseritem, range, power, blockBreaks, explosive, smelt, yawDeg, pitchDeg, entityliving.posY + (double) entityliving.getEyeHeight() - 0.1D);
+		return this.shootLaser(world, entityliving, laseritem, range, power, blockBreaks, explosive, smelt, yawDeg, pitchDeg, entityliving.posY + entityliving.getEyeHeight() - 0.1D);
 	}
 
 	public boolean shootLaser(World world, EntityLivingBase entityliving, ItemStack laseritem, float range, float power, int blockBreaks, boolean explosive, boolean smelt, double yawDeg, double pitchDeg, double y)
@@ -217,17 +194,17 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public EnumRarity getRarity(ItemStack stack)
 	{
 		return EnumRarity.uncommon;
 	}
 
+	@Override
 	public void onNetworkEvent(ItemStack stack, EntityPlayer player, int event)
 	{
 		switch (event)
