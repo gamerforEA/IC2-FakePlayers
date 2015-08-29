@@ -121,9 +121,9 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	}
 
 	@Override
-	public void updateEntity()
+	public void updateEntityServer()
 	{
-		super.updateEntity();
+		super.updateEntityServer();
 		this.chargeTools();
 
 		for (int i = 0; i < this.upgradeSlot.size(); ++i)

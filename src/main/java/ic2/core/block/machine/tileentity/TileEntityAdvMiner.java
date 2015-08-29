@@ -99,9 +99,9 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	}
 
 	@Override
-	public void updateEntity()
+	public void updateEntityServer()
 	{
-		super.updateEntity();
+		super.updateEntityServer();
 		this.chargeTool();
 		this.setUpgradestat();
 		if (this.work())

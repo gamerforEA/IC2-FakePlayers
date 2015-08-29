@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2-2.2.765-experimental"
+version = "2-2.2.767-experimental"
 group= "ic2"
 archivesBaseName = "industrialcraft"
 
@@ -34,6 +34,11 @@ dependencies {
 }
 
 jar {
+	manifest {
+		attributes 'FMLCorePlugin': 'ic2.core.coremod.IC2core'
+		attributes 'FMLCorePluginContainsFMLMod': 'true'
+    }
+
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
 	from zipTree('lib/' + archivesBaseName + '-' + version + '.jar')

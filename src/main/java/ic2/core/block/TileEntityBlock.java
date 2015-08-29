@@ -2,8 +2,11 @@ package ic2.core.block;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 import java.util.Vector;
@@ -21,9 +24,8 @@ import ic2.api.network.INetworkUpdateListener;
 import ic2.api.tile.IWrenchable;
 import ic2.core.IC2;
 import ic2.core.ITickCallback;
-import ic2.core.Ic2Items;
 import ic2.core.block.comp.TileEntityComponent;
-import ic2.core.migration.BlockMigrate;
+import ic2.core.util.LogCategory;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -33,16 +35,18 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 
-public class TileEntityBlock extends TileEntity implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
+public abstract class TileEntityBlock extends TileEntity implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
 {
 	private static final List<TileEntityComponent> emptyComponents = Arrays.asList(new TileEntityComponent[0]);
-	private List<TileEntityComponent> components;
-	public int tileEntityId;
+	private Map<String, TileEntityComponent> components;
+	private List<TileEntityComponent> updatableComponents;
 	private boolean active = false;
 	private short facing = 0;
 	public boolean prevActive = false;
 	public short prevFacing = 0;
-	public boolean loaded = false;
+	private boolean loaded = false;
+	private boolean enableWorldTick;
+	private static final Map<Class<?>, TileEntityBlock.TickSubscription> tickSubscriptions = new HashMap();
 	@SideOnly(Side.CLIENT)
 	private IIcon[] lastRenderIcons;
 	private int tesrMask;
@@ -65,7 +69,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	// TODO gamerforEA code end
 
 	@Override
-	public void validate()
+	public final void validate()
 	{
 		super.validate();
 		IC2.tickHandler.addSingleTickCallback(this.worldObj, new ITickCallback()
@@ -76,7 +80,7 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 				if (!TileEntityBlock.this.isInvalid() && world.blockExists(TileEntityBlock.this.xCoord, TileEntityBlock.this.yCoord, TileEntityBlock.this.zCoord))
 				{
 					TileEntityBlock.this.onLoaded();
-					if (!TileEntityBlock.this.isInvalid() && TileEntityBlock.this.enableUpdateEntity())
+					if (!TileEntityBlock.this.isInvalid() && (TileEntityBlock.this.enableWorldTick || TileEntityBlock.this.updatableComponents != null))
 						world.loadedTileEntityList.add(TileEntityBlock.this);
 				}
 			}
@@ -84,38 +88,38 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	}
 
 	@Override
-	public void invalidate()
+	public final void invalidate()
 	{
-		if (this.loaded)
-			this.onUnloaded();
-
+		this.onUnloaded();
 		super.invalidate();
 	}
 
 	@Override
-	public void onChunkUnload()
+	public final void onChunkUnload()
 	{
-		if (this.loaded)
-			this.onUnloaded();
-
+		this.onUnloaded();
 		super.onChunkUnload();
 	}
 
 	public void onLoaded()
 	{
 		this.loaded = true;
-		Block block = this.getBlockType();
-		if (block instanceof BlockMigrate)
-			((BlockMigrate) block).migrate(this.worldObj, this.xCoord, this.yCoord, this.zCoord);
-
+		this.enableWorldTick = this.requiresWorldTick();
 		if (this.components != null)
 		{
-			Iterator i$ = this.components.iterator();
+			Iterator i$ = this.components.values().iterator();
 
 			while (i$.hasNext())
 			{
 				TileEntityComponent component = (TileEntityComponent) i$.next();
 				component.onLoaded();
+				if (component.enableWorldTick())
+				{
+					if (this.updatableComponents == null)
+						this.updatableComponents = new ArrayList(4);
+
+					this.updatableComponents.add(component);
+				}
 			}
 		}
 
@@ -123,33 +127,51 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 
 	public void onUnloaded()
 	{
-		this.loaded = false;
-		if (this.components != null)
+		if (this.loaded)
 		{
-			Iterator i$ = this.components.iterator();
-
-			while (i$.hasNext())
+			this.loaded = false;
+			if (this.components != null)
 			{
-				TileEntityComponent component = (TileEntityComponent) i$.next();
-				component.onUnloaded();
-			}
-		}
+				Iterator i$ = this.components.values().iterator();
 
+				while (i$.hasNext())
+				{
+					TileEntityComponent component = (TileEntityComponent) i$.next();
+					component.onUnloaded();
+				}
+			}
+
+		}
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound)
+	public void readFromNBT(NBTTagCompound nbt)
 	{
-		super.readFromNBT(nbttagcompound);
-		this.tileEntityId = nbttagcompound.getInteger("tileEntityId");
-		this.prevFacing = this.facing = nbttagcompound.getShort("facing");
-		this.prevActive = this.active = nbttagcompound.getBoolean("active");
+		super.readFromNBT(nbt);
+		this.prevFacing = this.facing = nbt.getShort("facing");
+		this.prevActive = this.active = nbt.getBoolean("active");
+		if (this.components != null && nbt.hasKey("components", 10))
+		{
+			NBTTagCompound componentsNbt = nbt.getCompoundTag("components");
+			Iterator i$ = componentsNbt.func_150296_c().iterator();
+
+			while (i$.hasNext())
+			{
+				String name = (String) i$.next();
+				NBTTagCompound componentNbt = componentsNbt.getCompoundTag(name);
+				TileEntityComponent component = this.components.get(name);
+				if (component == null)
+					IC2.log.warn(LogCategory.Block, "Can\'t find component {} while loading {}.", new Object[] { name, this });
+				else
+					component.readFromNbt(componentNbt);
+			}
+		}
 
 		// TODO gamerforEA code start
-		String uuid = nbttagcompound.getString("ownerUUID");
+		String uuid = nbt.getString("ownerUUID");
 		if (!Strings.isNullOrEmpty(uuid))
 		{
-			String name = nbttagcompound.getString("ownerName");
+			String name = nbt.getString("ownerName");
 			if (!Strings.isNullOrEmpty(name))
 				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
 		}
@@ -157,18 +179,38 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbttagcompound)
+	public void writeToNBT(NBTTagCompound nbt)
 	{
-		super.writeToNBT(nbttagcompound);
-		nbttagcompound.setInteger("tileEntityId", this.tileEntityId);
-		nbttagcompound.setShort("facing", this.facing);
-		nbttagcompound.setBoolean("active", this.active);
+		super.writeToNBT(nbt);
+		nbt.setShort("facing", this.facing);
+		nbt.setBoolean("active", this.active);
+		NBTTagCompound componentsNbt = null;
+		if (this.components != null)
+		{
+			Iterator i$ = this.components.entrySet().iterator();
+
+			while (i$.hasNext())
+			{
+				Entry entry = (Entry) i$.next();
+				NBTTagCompound componentNbt = ((TileEntityComponent) entry.getValue()).writeToNbt();
+				if (componentNbt != null)
+				{
+					if (componentsNbt == null)
+					{
+						componentsNbt = new NBTTagCompound();
+						nbt.setTag("components", componentsNbt);
+					}
+
+					componentsNbt.setTag((String) entry.getKey(), componentNbt);
+				}
+			}
+		}
 
 		// TODO gamerforEA code start
 		if (this.ownerProfile != null)
 		{
-			nbttagcompound.setString("ownerUUID", this.ownerProfile.getId().toString());
-			nbttagcompound.setString("ownerName", this.ownerProfile.getName());
+			nbt.setString("ownerUUID", this.ownerProfile.getId().toString());
+			nbt.setString("ownerName", this.ownerProfile.getName());
 		}
 		// TODO gamerforEA code end
 	}
@@ -179,9 +221,33 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 		return false;
 	}
 
-	public boolean enableUpdateEntity()
+	@Override
+	public final void updateEntity()
 	{
-		return false;
+		if (this.updatableComponents != null)
+		{
+			Iterator i$ = this.updatableComponents.iterator();
+
+			while (i$.hasNext())
+			{
+				TileEntityComponent component = (TileEntityComponent) i$.next();
+				component.onWorldTick();
+			}
+		}
+
+		if (this.enableWorldTick)
+			if (this.worldObj.isRemote)
+				this.updateEntityClient();
+			else
+				this.updateEntityServer();
+	}
+
+	public void updateEntityClient()
+	{
+	}
+
+	public void updateEntityServer()
+	{
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -195,12 +261,6 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 			this.lastRenderIcons[side] = block.getIcon(this.worldObj, this.xCoord, this.yCoord, this.zCoord, side);
 
 		this.tesrMask = 0;
-	}
-
-	@Override
-	public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z)
-	{
-		return !(oldBlock instanceof BlockMigrate) || !(newBlock instanceof BlockTileEntity);
 	}
 
 	public boolean getActive()
@@ -227,7 +287,6 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 	public List<String> getNetworkedFields()
 	{
 		Vector ret = new Vector(2);
-		ret.add("tileEntityId");
 		ret.add("active");
 		ret.add("facing");
 		return ret;
@@ -337,28 +396,35 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 
 	public void adjustDrops(List<ItemStack> drops, int fortune)
 	{
-		drops.set(0, new ItemStack(Ic2Items.teBlock.getItem(), 1, this.tileEntityId));
 	}
 
-	protected <T extends TileEntityComponent> T addComponent(T component)
+	protected final <T extends TileEntityComponent> T addComponent(T component)
+	{
+		return this.addComponent(component.getDefaultName(), component);
+	}
+
+	protected final <T extends TileEntityComponent> T addComponent(String name, T component)
 	{
 		if (this.components == null)
-			this.components = new ArrayList(4);
+			this.components = new HashMap(4);
 
-		this.components.add(component);
-		return component;
+		TileEntityComponent prev = this.components.put(name, component);
+		if (prev != null)
+			throw new RuntimeException("ambiguous component name " + name + " when adding " + component + ", already used by " + prev + ".");
+		else
+			return component;
 	}
 
-	public Iterable<TileEntityComponent> getComponents()
+	public final Iterable<TileEntityComponent> getComponents()
 	{
-		return this.components == null ? emptyComponents : this.components;
+		return this.components == null ? emptyComponents : this.components.values();
 	}
 
 	public void onNeighborUpdate(Block srcBlock)
 	{
 		if (this.components != null)
 		{
-			Iterator i$ = this.components.iterator();
+			Iterator i$ = this.components.values().iterator();
 
 			while (i$.hasNext())
 			{
@@ -367,5 +433,75 @@ public class TileEntityBlock extends TileEntity implements INetworkDataProvider,
 			}
 		}
 
+	}
+
+	private final boolean requiresWorldTick()
+	{
+		Class cls = this.getClass();
+		TileEntityBlock.TickSubscription subscription = tickSubscriptions.get(cls);
+		if (subscription == null)
+		{
+			boolean hasUpdateClient = false;
+
+			boolean hasUpdateServer;
+			for (hasUpdateServer = false; cls != TileEntityBlock.class && (!hasUpdateClient || !hasUpdateServer); cls = cls.getSuperclass())
+			{
+				boolean found;
+				if (!hasUpdateClient)
+				{
+					found = true;
+
+					try
+					{
+						cls.getDeclaredMethod("updateEntityClient", new Class[0]);
+					}
+					catch (NoSuchMethodException var8)
+					{
+						found = false;
+					}
+
+					if (found)
+						hasUpdateClient = true;
+				}
+
+				if (!hasUpdateServer)
+				{
+					found = true;
+
+					try
+					{
+						cls.getDeclaredMethod("updateEntityServer", new Class[0]);
+					}
+					catch (NoSuchMethodException var7)
+					{
+						found = false;
+					}
+
+					if (found)
+						hasUpdateServer = true;
+				}
+			}
+
+			if (hasUpdateClient)
+			{
+				if (hasUpdateServer)
+					subscription = TileEntityBlock.TickSubscription.Both;
+				else
+					subscription = TileEntityBlock.TickSubscription.Client;
+			}
+			else if (hasUpdateServer)
+				subscription = TileEntityBlock.TickSubscription.Server;
+			else
+				subscription = TileEntityBlock.TickSubscription.None;
+
+			tickSubscriptions.put(this.getClass(), subscription);
+		}
+
+		return this.worldObj.isRemote ? subscription == TileEntityBlock.TickSubscription.Both || subscription == TileEntityBlock.TickSubscription.Client : subscription == TileEntityBlock.TickSubscription.Both || subscription == TileEntityBlock.TickSubscription.Server;
+	}
+
+	private static enum TickSubscription
+	{
+		None, Client, Server, Both;
 	}
 }

@@ -87,9 +87,9 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	}
 
 	@Override
-	public void updateEntity()
+	public void updateEntityServer()
 	{
-		super.updateEntity();
+		super.updateEntityServer();
 		boolean needsInvUpdate = false;
 		if (this.canoperate() && this.energy >= this.energyConsume * this.operationLength)
 			if (this.progress < this.operationLength)

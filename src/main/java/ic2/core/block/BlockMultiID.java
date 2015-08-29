@@ -95,7 +95,6 @@ public abstract class BlockMultiID extends BlockBase
 					((TextureMap) iconRegister).setTextureEntry(subName, texture);
 				}
 		}
-
 	}
 
 	@Override
@@ -225,8 +224,7 @@ public abstract class BlockMultiID extends BlockBase
 		{
 			TileEntityBlock i$ = (TileEntityBlock) te;
 			i$.onBlockBreak(this, meta);
-			if (i$.loaded)
-				i$.onUnloaded();
+			i$.onUnloaded();
 		}
 
 		if (te != null)
@@ -317,9 +315,12 @@ public abstract class BlockMultiID extends BlockBase
 							te.setFacing((short) 4);
 					}
 				}
+
 				// TODO gamerforEA code start
 				if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
 					((TileEntityBlock) te).ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
+				// TODO gamerforEA code end
+				;
 			}
 		}
 	}
@@ -463,5 +464,6 @@ public abstract class BlockMultiID extends BlockBase
 		TileEntity te = this.getOwnTe(world, x, y, z);
 		if (te instanceof TileEntityBlock)
 			((TileEntityBlock) te).onNeighborUpdate(srcBlock);
+
 	}
 }

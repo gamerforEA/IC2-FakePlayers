@@ -40,9 +40,9 @@ public class TileEntityTerra extends TileEntityElectricMachine
 	}
 
 	@Override
-	public void updateEntity()
+	public void updateEntityServer()
 	{
-		super.updateEntity();
+		super.updateEntityServer();
 		boolean newActive = false;
 		if (!this.tfbpSlot.isEmpty())
 		{
@@ -52,6 +52,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 				newActive = true;
 				int x = this.xCoord;
 				int z = this.zCoord;
+				boolean range = true;
 				int var6;
 				if (this.lastY > -1)
 				{
@@ -95,6 +96,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 		}
 		else if (!newActive && this.getActive() && this.inactiveTicks++ > 30)
 			this.setActive(false);
+
 	}
 
 	@Override
@@ -181,13 +183,13 @@ public class TileEntityTerra extends TileEntityElectricMachine
 		if (upwards)
 		{
 			++y;
-			int y1 = y;
+			int var9 = y;
 
 			while (true)
 			{
 				Block block1 = world.getBlock(x, y - 1, z);
 				if (block1 != from)
-					if (y1 == y)
+					if (var9 == y)
 						return false;
 					else
 					{
