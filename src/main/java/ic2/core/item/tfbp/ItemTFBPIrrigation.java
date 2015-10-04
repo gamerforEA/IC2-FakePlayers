@@ -1,8 +1,8 @@
 package ic2.core.item.tfbp;
 
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.core.Ic2Items;
 import ic2.core.block.BlockRubSapling;
@@ -38,17 +38,17 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, FakePlayerUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
 	}
 
 	public void createLeaves(World world, int x, int y, int z, Block oldBlock, int meta)
 	{
-		this.createLeaves(world, x, y, z, oldBlock, meta, FakePlayerUtils.getModFake(world));
+		this.createLeaves(world, x, y, z, oldBlock, meta, ModUtils.getModFake(world));
 	}
 
 	public boolean spreadGrass(World world, int x, int y, int z)
 	{
-		return this.spreadGrass(world, x, y, z, FakePlayerUtils.getModFake(world));
+		return this.spreadGrass(world, x, y, z, ModUtils.getModFake(world));
 	}
 	// TODO gamerforEA code end
 
@@ -88,7 +88,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 					else if (block == Blocks.log)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
+						if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y + 1, z))
 							return false;
 						// TODO gamerforEA code end
 
@@ -104,7 +104,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 					else if (block == Blocks.wheat)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 							return false;
 						// TODO gamerforEA code end
 
@@ -114,7 +114,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 					else if (block == Blocks.fire)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 							return false;
 						// TODO gamerforEA code end
 
@@ -135,7 +135,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 		if (oldBlock.isAir(world, x, y, z))
 		{
 			// TODO gamerforEA code start
-			if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+			if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 				return;
 			// TODO gamerforEA code end
 
@@ -154,7 +154,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 			if (block == Blocks.dirt)
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+				if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 					return false;
 				// TODO gamerforEA code end
 
@@ -164,7 +164,7 @@ public class ItemTFBPIrrigation extends ItemTFBP implements ITerraformingBPFakeP
 			else if (block == Blocks.grass)
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
+				if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y + 1, z))
 					return false;
 				// TODO gamerforEA code end
 

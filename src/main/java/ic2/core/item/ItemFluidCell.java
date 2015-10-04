@@ -3,7 +3,7 @@ package ic2.core.item;
 import java.util.Iterator;
 import java.util.List;
 
-import com.gamerforea.ic2.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -87,11 +87,17 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 					x = position.blockX;
 					y = position.blockY;
 					z = position.blockZ;
+
 					if (!world.canMineBlock(player, x, y, z))
 						return false;
 
 					if (!player.canPlayerEdit(x, y, z, position.sideHit, stack))
 						return false;
+
+					// TODO gamerforEA code start
+					if (EventUtils.cantBreak(player, x, y, z))
+						return false;
+					// TODO gamerforEA code end
 
 					if (this.collectFluidBlock(stack, player, world, x, y, z))
 						return true;
@@ -123,16 +129,18 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 	public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList)
 	{
 		itemList.add(Ic2Items.FluidCell.copy());
-		Iterator i$ = FluidRegistry.getRegisteredFluidIDs().values().iterator();
+		Iterator i$ = FluidRegistry.getRegisteredFluids().values().iterator();
 
 		while (i$.hasNext())
 		{
-			int fluidId = ((Integer) i$.next()).intValue();
-			ItemStack stack = Ic2Items.FluidCell.copy();
-			this.fill(stack, new FluidStack(fluidId, Integer.MAX_VALUE), true);
-			itemList.add(stack);
+			Fluid fluid = (Fluid) i$.next();
+			if (fluid != null)
+			{
+				ItemStack stack = Ic2Items.FluidCell.copy();
+				this.fill(stack, new FluidStack(fluid, Integer.MAX_VALUE), true);
+				itemList.add(stack);
+			}
 		}
-
 	}
 
 	private boolean interactWithTank(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side)
@@ -191,11 +199,6 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 
 	private boolean collectFluidBlock(ItemStack stack, EntityPlayer player, World world, int x, int y, int z)
 	{
-		// TODO gamerforEA code start
-		if (FakePlayerUtils.cantBreak(x, y, z, player))
-			return false;
-		// TODO gamerforEA code end
-
 		Block block = world.getBlock(x, y, z);
 		if (block instanceof IFluidBlock)
 		{

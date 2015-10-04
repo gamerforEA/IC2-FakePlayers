@@ -1,154 +1,72 @@
 package ic2.core.block.machine.tileentity;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
 import ic2.core.IC2;
 import ic2.core.IC2DamageSource;
 import ic2.core.block.TileEntityBlock;
+import ic2.core.block.comp.Energy;
+import ic2.core.block.comp.Redstone;
 import ic2.core.item.armor.ItemArmorHazmat;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.world.WorldServer;
 
-public class TileEntityTesla extends TileEntityBlock implements IEnergySink
+public class TileEntityTesla extends TileEntityBlock
 {
-	public double energy = 0.0D;
-	public int ticker = 0;
-	public int maxEnergy = 10000;
-	public boolean addedToEnergyNet = false;
+	protected final Redstone redstone;
+	protected final Energy energy;
+	private int ticker;
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound)
+	public TileEntityTesla()
 	{
-		super.readFromNBT(nbttagcompound);
-
-		try
-		{
-			this.energy = nbttagcompound.getDouble("energy");
-		}
-		catch (Exception var3)
-		{
-			this.energy = nbttagcompound.getShort("energy");
-		}
+		this.ticker = IC2.random.nextInt(32);
+		this.redstone = this.addComponent(new Redstone(this));
+		this.energy = this.addComponent(Energy.asBasicSink(this, 10000.0D, 2));
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbttagcompound)
-	{
-		super.writeToNBT(nbttagcompound);
-		nbttagcompound.setDouble("energy", this.energy);
-	}
-
-	@Override
-	public void onLoaded()
-	{
-		super.onLoaded();
-		if (IC2.platform.isSimulating())
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-			this.addedToEnergyNet = true;
-		}
-
-	}
-
-	@Override
-	public void onUnloaded()
-	{
-		if (IC2.platform.isSimulating() && this.addedToEnergyNet)
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			this.addedToEnergyNet = false;
-		}
-
-		super.onUnloaded();
-	}
-
-	@Override
-	public void updateEntityServer()
+	protected void updateEntityServer()
 	{
 		super.updateEntityServer();
-		if (this.redstoned() && this.energy >= getCost())
-		{
-			int damage = (int) this.energy / getCost();
-			--this.energy;
-			if (this.ticker++ % 32 == 0 && this.shock(damage))
-				this.energy = 0.0D;
-
-		}
-	}
-
-	public boolean shock(int damage)
-	{
-		boolean shock = false;
-		List list1 = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 4, this.yCoord - 4, this.zCoord - 4, this.xCoord + 5, this.yCoord + 5, this.zCoord + 5));
-
-		for (int l = 0; l < list1.size(); ++l)
-		{
-			EntityLivingBase victim = (EntityLivingBase) list1.get(l);
-			if (!ItemArmorHazmat.hasCompleteHazmat(victim))
+		if (this.redstone.hasRedstoneInput())
+			if (this.energy.useEnergy(1.0D) && this.ticker++ % 32 == 0)
 			{
-				// TODO gamerforEA code start
-				if (EventConfig.teslaEvent && FakePlayerUtils.cantDamage(this.getOwnerFake(), victim))
-					continue;
-				// TODO gamerforEA code end
-
-				shock = true;
-				victim.attackEntityFrom(IC2DamageSource.electricity, damage);
-
-				for (int i = 0; i < damage; ++i)
-					this.worldObj.spawnParticle("reddust", victim.posX + this.worldObj.rand.nextFloat(), victim.posY + this.worldObj.rand.nextFloat() * 2.0F, victim.posZ + this.worldObj.rand.nextFloat(), 0.0D, 0.0D, 1.0D);
+				int damage = (int) this.energy.getEnergy() / 400;
+				if (damage > 0 && this.shock(damage))
+					this.energy.useEnergy(damage * 400);
 			}
-		}
-
-		return shock;
 	}
 
-	public boolean redstoned()
+	protected boolean shock(int damage)
 	{
-		return this.worldObj.isBlockIndirectlyGettingPowered(this.xCoord, this.yCoord, this.zCoord) || this.worldObj.isBlockIndirectlyGettingPowered(this.xCoord, this.yCoord, this.zCoord);
-	}
+		boolean r = true;
+		List entities = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 4, this.yCoord - 4, this.zCoord - 4, this.xCoord + 4 + 1, this.yCoord + 4 + 1, this.zCoord + 4 + 1));
+		Iterator i$ = entities.iterator();
 
-	public static int getCost()
-	{
-		return 400;
-	}
-
-	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
-	{
-		return true;
-	}
-
-	@Override
-	public double getDemandedEnergy()
-	{
-		return this.maxEnergy - this.energy;
-	}
-
-	@Override
-	public double injectEnergy(ForgeDirection directionFrom, double amount, double voltage)
-	{
-		if (this.energy >= this.maxEnergy)
-			return amount;
-		else
+		EntityLivingBase entity;
+		do
 		{
-			this.energy += amount;
-			return 0.0D;
+			if (!i$.hasNext())
+				return false;
+			entity = (EntityLivingBase) i$.next();
 		}
-	}
+		// TODO gamerforEA add condition [2, 3]
+		while (ItemArmorHazmat.hasCompleteHazmat(entity) || EventConfig.teslaEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity) || !entity.attackEntityFrom(IC2DamageSource.electricity, damage));
 
-	@Override
-	public int getSinkTier()
-	{
-		return 2;
+		if (this.worldObj instanceof WorldServer)
+		{
+			WorldServer world = (WorldServer) this.worldObj;
+			Random rnd = world.rand;
+			for (int i = 0; i < damage; ++i)
+				world.func_147487_a("reddust", entity.posX + rnd.nextFloat() - 0.5D, entity.posY + rnd.nextFloat() * 2.0F - 1.0D, entity.posZ + rnd.nextFloat() - 0.5D, 0, 0.10000000149011612D, 0.10000000149011612D, 1.0D, 1.0D);
+		}
+
+		return true;
 	}
 }

@@ -5,8 +5,8 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -121,7 +121,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	}
 
 	@Override
-	public void updateEntityServer()
+	protected void updateEntityServer()
 	{
 		super.updateEntityServer();
 		this.chargeTools();
@@ -471,7 +471,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			this.energy -= energyCost;
 
 			// TODO gamerforEA code start
-			if (EventConfig.minerEvent && FakePlayerUtils.cantBreak(x, y, z, this.getOwnerFake()))
+			if (EventConfig.minerEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
 				return false;
 			// TODO gamerforEA code end
 

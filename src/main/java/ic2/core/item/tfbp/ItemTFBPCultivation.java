@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Random;
 
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
@@ -72,12 +72,12 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, FakePlayerUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
 	}
 
 	public boolean growPlantsOn(World world, int x, int y, int z, Block block)
 	{
-		return this.growPlantsOn(world, x, y, z, block, FakePlayerUtils.getModFake(world));
+		return this.growPlantsOn(world, x, y, z, block, ModUtils.getModFake(world));
 	}
 	// TODO gamerforEA code end
 
@@ -95,7 +95,7 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 			if (block == Blocks.dirt)
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+				if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 					return false;
 				// TODO gamerforEA code end
 
@@ -117,7 +117,7 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 			if (plant == Blocks.wheat)
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y - 1, z, player))
+				if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y - 1, z))
 					return false;
 				// TODO gamerforEA code end
 
@@ -125,7 +125,7 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 			}
 
 			// TODO gamerforEA code start
-			if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+			if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 				return false;
 			// TODO gamerforEA code end
 

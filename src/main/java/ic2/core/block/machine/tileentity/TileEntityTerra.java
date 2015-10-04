@@ -1,8 +1,8 @@
 package ic2.core.block.machine.tileentity;
 
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.api.item.ITerraformingBP;
 import ic2.core.IC2;
@@ -40,7 +40,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 	}
 
 	@Override
-	public void updateEntityServer()
+	protected void updateEntityServer()
 	{
 		super.updateEntityServer();
 		boolean newActive = false;
@@ -71,7 +71,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 				}
 
 				// TODO gamerforEA code replace, old code: if (tfbp.terraform(this.worldObj, x, z, this.yCoord))
-				if (tfbp instanceof ITerraformingBPFakePlayer ? ((ITerraformingBPFakePlayer) tfbp).terraform(this.worldObj, x, z, this.yCoord, this.getOwnerFake()) : tfbp.terraform(this.worldObj, x, z, this.yCoord))
+				if (tfbp instanceof ITerraformingBPFakePlayer ? ((ITerraformingBPFakePlayer) tfbp).terraform(this.worldObj, x, z, this.yCoord, this.fake.getPlayer()) : tfbp.terraform(this.worldObj, x, z, this.yCoord))
 				// TODO gamerforEA code end
 				{
 					this.energy -= tfbp.getConsume();
@@ -174,7 +174,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 	// TODO gamerforEA code start
 	public static boolean switchGround(World world, Block from, Block to, int x, int y, int z, boolean upwards)
 	{
-		return switchGround(world, from, to, x, y, z, upwards, FakePlayerUtils.getModFake(world));
+		return switchGround(world, from, to, x, y, z, upwards, ModUtils.getModFake(world));
 	}
 	// TODO gamerforEA code end
 
@@ -194,7 +194,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 					else
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 							return false;
 						// TODO gamerforEA code end
 
@@ -217,7 +217,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 					else
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+						if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 							return false;
 						// TODO gamerforEA code end
 

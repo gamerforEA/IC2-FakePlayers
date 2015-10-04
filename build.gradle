@@ -1,35 +1,35 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-    }
+	repositories {
+		mavenCentral()
+		maven {
+			name = "forge"
+			url = "http://files.minecraftforge.net/maven"
+		}
+		maven {
+			name = "sonatype"
+			url = "https://oss.sonatype.org/content/repositories/snapshots/"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+	}
 }
 
 apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2-2.2.767-experimental"
+version = "2-2.2.780-experimental"
 group= "ic2"
 archivesBaseName = "industrialcraft"
 
 minecraft {
-    version = "1.7.10-10.13.4.1490-1.7.10"
-    runDir = "eclipse"
+	version = "1.7.10-10.13.4.1492-1.7.10"
+	runDir = "eclipse"
 }
 
 dependencies {
-	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar', 'lib/EJML-core-0.26.jar')
+	compile files('lib/EJML-core-0.26.jar')
 	compile fileTree(dir: 'lib', include: '*-dev.jar')
 }
 
@@ -40,9 +40,5 @@ jar {
     }
 
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
 	from zipTree('lib/' + archivesBaseName + '-' + version + '.jar')
-	from zipTree('lib/WorldGuardEventWrapper.jar').matching {
-		include('com/gamerforea/wgew/cauldron/event/**.class')
-	}
 }

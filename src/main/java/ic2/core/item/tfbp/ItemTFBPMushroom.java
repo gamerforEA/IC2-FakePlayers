@@ -1,8 +1,8 @@
 package ic2.core.item.tfbp;
 
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.core.block.machine.tileentity.TileEntityTerra;
 import ic2.core.init.InternalName;
@@ -37,12 +37,12 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, FakePlayerUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
 	}
 
 	public boolean growBlockWithDependancy(World world, int x, int y, int z, Block target, Block dependancy)
 	{
-		return this.growBlockWithDependancy(world, x, y, z, target, dependancy, FakePlayerUtils.getModFake(world));
+		return this.growBlockWithDependancy(world, x, y, z, target, dependancy, ModUtils.getModFake(world));
 	}
 	// TODO gamerforEA code end
 
@@ -71,7 +71,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 						if (!block.isAir(world, base, zm, xm) && (block == Blocks.dirt || block == Blocks.grass))
 						{
 							// TODO gamerforEA code start
-							if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(base, zm, xm, player))
+							if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, base, zm, xm))
 								return false;
 							// TODO gamerforEA code end
 
@@ -100,7 +100,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 					return false;
 
 				// TODO gamerforEA code start
-				if (!EventConfig.terraEvent || !FakePlayerUtils.cantBreak(x, y, z, player))
+				if (!EventConfig.terraEvent || !ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 					// TODO gamerforEA code end
 					world.setBlock(x, y, z, Blocks.mycelium, 0, 7);
 			}
@@ -111,7 +111,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 			else
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
+				if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y + 1, z))
 					return false;
 				// TODO gamerforEA code end
 
@@ -137,7 +137,7 @@ public class ItemTFBPMushroom extends ItemTFBP implements ITerraformingBPFakePla
 							if (block == Blocks.brown_mushroom || block == Blocks.red_mushroom)
 							{
 								// TODO gamerforEA code start
-								if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
+								if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y + 1, z))
 									continue;
 								// TODO gamerforEA code end
 

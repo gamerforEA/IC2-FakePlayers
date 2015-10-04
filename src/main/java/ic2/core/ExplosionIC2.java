@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
 import ic2.api.event.ExplosionEvent;
 import ic2.api.tile.ExplosionWhitelist;
@@ -109,6 +109,7 @@ public class ExplosionIC2 extends Explosion
 			if (!EventConfig.explosionEnabled)
 				return;
 			// TODO gamerforEA code end
+
 			ExplosionEvent event = new ExplosionEvent(this.worldObj, this.exploder, this.explosionX, this.explosionY, this.explosionZ, this.power, this.igniter, this.radiationRange, this.maxDistance);
 			if (!MinecraftForge.EVENT_BUS.post(event))
 			{
@@ -211,10 +212,12 @@ public class ExplosionIC2 extends Explosion
 										int isw = i$1 - entry2 * this.areaSize;
 										isw += this.areaX;
 										entry2 += this.areaZ;
+
 										// TODO gamerforEA code start
-										if (EventConfig.explosionEvent && FakePlayerUtils.isInPrivate(this.worldObj, isw, var42, entry2))
+										if (EventConfig.explosionEvent && EventUtils.isInPrivate(this.worldObj, isw, var42, entry2))
 											continue;
 										// TODO gamerforEA code end
+
 										Block count = this.chunkCache.getBlock(isw, var42, entry2);
 										if (this.power < 20.0F)
 										{

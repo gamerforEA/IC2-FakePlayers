@@ -8,14 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.UUID;
 import java.util.Vector;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
-import com.gamerforea.ic2.FakePlayerUtils;
-import com.google.common.base.Strings;
-import com.mojang.authlib.GameProfile;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
+import com.gamerforea.ic2.ModUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -33,11 +32,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.FakePlayer;
 
 public abstract class TileEntityBlock extends TileEntity implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
 {
 	private static final List<TileEntityComponent> emptyComponents = Arrays.asList(new TileEntityComponent[0]);
+	private static final List<Entry<String, TileEntityComponent>> emptyNamedComponents = new ArrayList();
 	private Map<String, TileEntityComponent> components;
 	private List<TileEntityComponent> updatableComponents;
 	private boolean active = false;
@@ -54,18 +53,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 	private static final int defaultTesrTtl = 500;
 
 	// TODO gamerforEA code start
-	public GameProfile ownerProfile;
-	private FakePlayer ownerFake;
-
-	public FakePlayer getOwnerFake()
-	{
-		if (this.ownerFake != null)
-			return this.ownerFake;
-		else if (this.ownerProfile != null)
-			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else
-			return FakePlayerUtils.getModFake(this.worldObj);
-	}
+	public final FakePlayerContainer fake = new FakePlayerContainerTileEntity(ModUtils.getModFake(this.worldObj), this);
 	// TODO gamerforEA code end
 
 	@Override
@@ -168,13 +156,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		}
 
 		// TODO gamerforEA code start
-		String uuid = nbt.getString("ownerUUID");
-		if (!Strings.isNullOrEmpty(uuid))
-		{
-			String name = nbt.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name))
-				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
-		}
+		this.fake.readFromNBT(nbt);
 		// TODO gamerforEA code end
 	}
 
@@ -207,11 +189,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		}
 
 		// TODO gamerforEA code start
-		if (this.ownerProfile != null)
-		{
-			nbt.setString("ownerUUID", this.ownerProfile.getId().toString());
-			nbt.setString("ownerName", this.ownerProfile.getName());
-		}
+		this.fake.writeToNBT(nbt);
 		// TODO gamerforEA code end
 	}
 
@@ -242,11 +220,11 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 				this.updateEntityServer();
 	}
 
-	public void updateEntityClient()
+	protected void updateEntityClient()
 	{
 	}
 
-	public void updateEntityServer()
+	protected void updateEntityServer()
 	{
 	}
 
@@ -415,9 +393,19 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 			return component;
 	}
 
+	public TileEntityComponent getComponent(String name)
+	{
+		return this.components == null ? null : (TileEntityComponent) this.components.get(name);
+	}
+
 	public final Iterable<TileEntityComponent> getComponents()
 	{
 		return this.components == null ? emptyComponents : this.components.values();
+	}
+
+	public final Iterable<Entry<String, TileEntityComponent>> getNamedComponents()
+	{
+		return this.components == null ? emptyNamedComponents : this.components.entrySet();
 	}
 
 	public void onNeighborUpdate(Block srcBlock)

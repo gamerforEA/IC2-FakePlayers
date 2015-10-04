@@ -5,12 +5,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
-import com.google.common.base.Strings;
-import com.mojang.authlib.GameProfile;
+import com.gamerforea.ic2.ModUtils;
 
 import cpw.mods.fml.common.registry.IThrowableEntity;
 import ic2.api.event.LaserEvent;
@@ -39,7 +39,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
 
 public class EntityMiningLaser extends Entity implements IThrowableEntity
 {
@@ -55,18 +54,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	private int ticksInAir;
 
 	// TODO gamerforEA code start
-	public GameProfile ownerProfile;
-	private FakePlayer ownerFake;
-
-	public FakePlayer getOwnerFake()
-	{
-		if (this.ownerFake != null)
-			return this.ownerFake;
-		else if (this.ownerProfile != null)
-			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else
-			return FakePlayerUtils.getModFake(this.worldObj);
-	}
+	public final FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.getModFake(this.worldObj), this);
 	// TODO gamerforEA code end
 
 	public EntityMiningLaser(World world)
@@ -128,9 +116,10 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		this.power = power;
 		this.blockBreaks = blockBreaks;
 		this.explosive = explosive;
+
 		// TODO gamerforEA code start
 		if (entityliving instanceof EntityPlayer)
-			this.ownerProfile = ((EntityPlayer) entityliving).getGameProfile();
+			this.fake.profile = ((EntityPlayer) entityliving).getGameProfile();
 		// TODO gamerforEA code end
 	}
 
@@ -229,12 +218,12 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 							{
 								entity.setFire(powerI * (this.smelt ? 2 : 1));
 							}
-							
+
 							if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
 							{
 								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
 							} */
-							if (EventConfig.laserEvent && FakePlayerUtils.cantDamage(this.getOwnerFake(), event.hitentity))
+							if (EventConfig.laserEvent && EventUtils.cantDamage(this.fake.getPlayer(), event.hitentity))
 							{
 								this.setDead();
 								return;
@@ -252,7 +241,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 					LaserEvent.LaserHitsBlockEvent event = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit, 0.9F, true, true);
 					MinecraftForge.EVENT_BUS.post(event);
 					// TODO gamerforEA code start
-					if (EventConfig.laserEvent && FakePlayerUtils.cantBreak(event.x, event.y, event.z, this.getOwnerFake()))
+					if (EventConfig.laserEvent && EventUtils.cantBreak(this.fake.getPlayer(), event.x, event.y, event.z))
 					{
 						this.setDead();
 						return;
@@ -344,11 +333,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	public void writeEntityToNBT(NBTTagCompound nbt)
 	{
 		// TODO gamerforEA code start
-		if (this.ownerProfile != null)
-		{
-			nbt.setString("ownerUUID", this.ownerProfile.getId().toString());
-			nbt.setString("ownerName", this.ownerProfile.getName());
-		}
+		this.fake.writeToNBT(nbt);
 		// TODO gamerforEA code end
 	}
 
@@ -356,13 +341,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	public void readEntityFromNBT(NBTTagCompound nbt)
 	{
 		// TODO gamerforEA code start
-		String uuid = nbt.getString("ownerUUID");
-		if (!Strings.isNullOrEmpty(uuid))
-		{
-			String name = nbt.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name))
-				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
-		}
+		this.fake.readFromNBT(nbt);
 		// TODO gamerforEA code end
 	}
 

@@ -5,7 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.gamerforea.ic2.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
@@ -107,7 +107,7 @@ public class ItemCell extends ItemIC2
 						return false;
 
 					// TODO gamerforEA code start
-					if (FakePlayerUtils.cantBreak(x, y, z, player))
+					if (EventUtils.cantBreak(player, x, y, z))
 						return false;
 					// TODO gamerforEA code end
 

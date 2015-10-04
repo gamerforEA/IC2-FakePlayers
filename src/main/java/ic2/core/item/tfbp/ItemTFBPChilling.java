@@ -1,8 +1,8 @@
 package ic2.core.item.tfbp;
 
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.core.block.machine.tileentity.TileEntityTerra;
 import ic2.core.init.InternalName;
@@ -34,17 +34,17 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, FakePlayerUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
 	}
 
 	public boolean isSurroundedBySnow(World world, int x, int y, int z)
 	{
-		return this.isSurroundedBySnow(world, x, y, z, FakePlayerUtils.getModFake(world));
+		return this.isSurroundedBySnow(world, x, y, z, ModUtils.getModFake(world));
 	}
 
 	public boolean isSnowHere(World world, int x, int y, int z)
 	{
-		return this.isSnowHere(world, x, y, z, FakePlayerUtils.getModFake(world));
+		return this.isSnowHere(world, x, y, z, ModUtils.getModFake(world));
 	}
 	// TODO gamerforEA code end
 
@@ -65,7 +65,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 					if (blockBelow == Blocks.water || blockBelow == Blocks.flowing_water)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y - 1, z, player))
+						if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y - 1, z))
 							return false;
 						// TODO gamerforEA code end
 
@@ -76,7 +76,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 				else if (block == Blocks.snow_layer && this.isSurroundedBySnow(world, x, y, z, player)) // TODO gamerforEA add EntityPlayer
 				{
 					// TODO gamerforEA code start
-					if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+					if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 						return false;
 					// TODO gamerforEA code end
 
@@ -89,7 +89,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 				else
 				{
 					// TODO gamerforEA code start
-					if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
+					if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y + 1, z))
 						return false;
 					// TODO gamerforEA code end
 
@@ -100,7 +100,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 			else
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y, z, player))
+				if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y, z))
 					return false;
 				// TODO gamerforEA code end
 
@@ -129,7 +129,7 @@ public class ItemTFBPChilling extends ItemTFBP implements ITerraformingBPFakePla
 				if (Blocks.snow_layer.canPlaceBlockAt(world, x, y + 1, z) || block == Blocks.ice)
 				{
 					// TODO gamerforEA code start
-					if (EventConfig.terraEvent && FakePlayerUtils.cantBreak(x, y + 1, z, player))
+					if (EventConfig.terraEvent && ModUtils.cantBreakOrNotInPrivate(player, x, y + 1, z))
 						return false;
 					// TODO gamerforEA code end
 

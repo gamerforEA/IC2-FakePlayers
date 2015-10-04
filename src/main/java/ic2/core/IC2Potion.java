@@ -12,7 +12,7 @@ import net.minecraft.potion.PotionEffect;
 
 public class IC2Potion extends Potion
 {
-	public static final IC2Potion radiation = new IC2Potion(24, true, 5149489, new ItemStack[0]);
+	public static IC2Potion radiation;
 	private final List<ItemStack> curativeItems;
 
 	public static void init()
@@ -22,10 +22,10 @@ public class IC2Potion extends Potion
 		radiation.setEffectiveness(0.25D);
 	}
 
-	public IC2Potion(int id, boolean badEffect, int liquidColor, ItemStack... curativeItems)
+	public IC2Potion(int id1, boolean badEffect, int liquidColor, ItemStack... curativeItems1)
 	{
-		super(id, badEffect, liquidColor);
-		this.curativeItems = Arrays.asList(curativeItems);
+		super(id1, badEffect, liquidColor);
+		this.curativeItems = Arrays.asList(curativeItems1);
 	}
 
 	@Override
@@ -37,6 +37,7 @@ public class IC2Potion extends Potion
 			if (!EventConfig.radiationEnabled)
 				return;
 			// TODO gamerforEA code end
+
 			entity.attackEntityFrom(IC2DamageSource.radiation, amplifier / 100 + 0.5F);
 		}
 	}
@@ -59,6 +60,7 @@ public class IC2Potion extends Potion
 		if (!EventConfig.radiationEnabled)
 			return;
 		// TODO gamerforEA code end
+
 		PotionEffect effect = new PotionEffect(this.id, duration, amplifier);
 		effect.setCurativeItems(this.curativeItems);
 		entity.addPotionEffect(effect);

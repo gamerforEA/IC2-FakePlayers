@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -99,7 +99,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	}
 
 	@Override
-	public void updateEntityServer()
+	protected void updateEntityServer()
 	{
 		super.updateEntityServer();
 		this.chargeTool();
@@ -196,7 +196,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public void doMine(Block block)
 	{
 		// TODO gamerforEA code start
-		if (EventConfig.advminerEvent && FakePlayerUtils.cantBreak(this.minetargetX, this.minelayer, this.minetargetZ, this.getOwnerFake()))
+		if (EventConfig.advminerEvent && EventUtils.cantBreak(this.fake.getPlayer(), this.minetargetX, this.minelayer, this.minetargetZ))
 			return;
 		// TODO gamerforEA code end
 

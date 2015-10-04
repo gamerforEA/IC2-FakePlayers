@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
 
 import cpw.mods.fml.common.registry.IThrowableEntity;
 import ic2.core.ExplosionIC2;
@@ -105,6 +105,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			return;
 		}
 		// TODO gamerforEA code end
+
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;
@@ -220,9 +221,10 @@ public class EntityParticle extends Entity implements IThrowableEntity
 					if (smelted != null && smelted.getItem() instanceof ItemBlock)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
+						if (EventConfig.plasmaEvent && EventUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
 							return;
 						// TODO gamerforEA code end
+
 						this.worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, ((ItemBlock) smelted.getItem()).field_150939_a, smelted.getItemDamage(), 3);
 					}
 					else
@@ -233,10 +235,12 @@ public class EntityParticle extends Entity implements IThrowableEntity
 							int x = hit.blockX - side.offsetX;
 							int y = hit.blockY - side.offsetY;
 							int z = hit.blockZ - side.offsetZ;
+
 							// TODO gamerforEA code start
-							if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, x, y, z))
+							if (EventConfig.plasmaEvent && EventUtils.isInPrivate(this.worldObj, x, y, z))
 								return;
 							// TODO gamerforEA code end
+
 							this.worldObj.setBlock(x, y, z, Blocks.fire);
 						}
 					}
@@ -244,9 +248,10 @@ public class EntityParticle extends Entity implements IThrowableEntity
 				else
 				{
 					// TODO gamerforEA code start
-					if (EventConfig.plasmaEvent && FakePlayerUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
+					if (EventConfig.plasmaEvent && EventUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
 						return;
 					// TODO gamerforEA code end
+
 					this.worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
 				}
 			}

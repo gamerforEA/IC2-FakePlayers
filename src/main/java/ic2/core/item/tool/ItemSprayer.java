@@ -3,8 +3,9 @@ package ic2.core.item.tool;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.FakePlayerUtils;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.api.item.IBoxable;
 import ic2.core.IC2;
@@ -202,7 +203,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 	// TODO gamerforEA code start
 	public int sprayFoam(World world, int x, int y, int z, boolean[] directions, Target target, int maxFoamBlocks)
 	{
-		return this.sprayFoam(world, x, y, z, directions, target, maxFoamBlocks, FakePlayerUtils.getModFake(world));
+		return this.sprayFoam(world, x, y, z, directions, target, maxFoamBlocks, ModUtils.getModFake(world));
 	}
 	// TODO gamerforEA code end
 
@@ -233,9 +234,10 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 			for (ChunkPosition pos : place)
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.sprayerEvent && FakePlayerUtils.cantBreak(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, player))
+				if (EventConfig.sprayerEvent && EventUtils.cantBreak(player, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ))
 					continue;
 				// TODO gamerforEA code end
+
 				Block targetBlock = world.getBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
 				if (StackUtil.equals(targetBlock, Ic2Items.scaffold))
 				{
