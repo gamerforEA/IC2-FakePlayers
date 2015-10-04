@@ -12,7 +12,7 @@ import net.minecraftforge.common.util.FakePlayer;
 
 public final class ModUtils
 {
-	private static final GameProfile profile = new GameProfile(UUID.fromString("6c788982-d6ca-11e4-b9d6-1681e6b88ec1"), "[IC2]");
+	public static final GameProfile profile = new GameProfile(UUID.fromString("6c788982-d6ca-11e4-b9d6-1681e6b88ec1"), "[IC2]");
 	private static FakePlayer player = null;
 
 	public static final FakePlayer getModFake(World world)

@@ -53,7 +53,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 	private static final int defaultTesrTtl = 500;
 
 	// TODO gamerforEA code start
-	public final FakePlayerContainer fake = new FakePlayerContainerTileEntity(ModUtils.getModFake(this.worldObj), this);
+	public final FakePlayerContainer fake = new FakePlayerContainerTileEntity(ModUtils.profile, this);
 	// TODO gamerforEA code end
 
 	@Override

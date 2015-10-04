@@ -54,7 +54,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	private int ticksInAir;
 
 	// TODO gamerforEA code start
-	public final FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.getModFake(this.worldObj), this);
+	public final FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.profile, this);
 	// TODO gamerforEA code end
 
 	public EntityMiningLaser(World world)
