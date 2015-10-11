@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2-2.2.780-experimental"
+version = "2-2.2.782-experimental"
 group= "ic2"
 archivesBaseName = "industrialcraft"
 

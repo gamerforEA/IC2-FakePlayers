@@ -162,7 +162,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 				{
 					amount = handler.fill(dir, fs, false);
 					if (amount <= 0)
-						return false;
+						return true;
 					else
 					{
 						fs = LiquidUtil.drainContainerStack(stack, player, amount, false);
@@ -172,7 +172,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 							return true;
 						}
 						else
-							return false;
+							return true;
 					}
 				}
 				else
@@ -183,7 +183,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 					{
 						amount = LiquidUtil.fillContainerStack(stack, player, input, false);
 						if (amount <= 0)
-							return false;
+							return true;
 						else
 						{
 							handler.drain(dir, amount, true);
@@ -191,7 +191,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 						}
 					}
 					else
-						return false;
+						return true;
 				}
 			}
 		}
