@@ -1,6 +1,5 @@
 package ic2.core.item;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.gamerforea.eventhelper.util.EventUtils;
@@ -129,18 +128,14 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 	public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList)
 	{
 		itemList.add(Ic2Items.FluidCell.copy());
-		Iterator i$ = FluidRegistry.getRegisteredFluids().values().iterator();
 
-		while (i$.hasNext())
-		{
-			Fluid fluid = (Fluid) i$.next();
+		for (Fluid fluid : FluidRegistry.getRegisteredFluids().values())
 			if (fluid != null)
 			{
 				ItemStack stack = Ic2Items.FluidCell.copy();
 				this.fill(stack, new FluidStack(fluid, Integer.MAX_VALUE), true);
 				itemList.add(stack);
 			}
-		}
 	}
 
 	private boolean interactWithTank(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side)
@@ -157,27 +152,9 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 				IFluidHandler handler = (IFluidHandler) te;
 				ForgeDirection dir = ForgeDirection.getOrientation(side);
 				FluidStack fs = this.getFluid(stack);
-				int amount;
-				if (fs != null && (!player.isSneaking() || fs.amount >= this.capacity))
+				if (fs == null || player.isSneaking() && fs.amount < this.capacity)
 				{
-					amount = handler.fill(dir, fs, false);
-					if (amount <= 0)
-						return true;
-					else
-					{
-						fs = LiquidUtil.drainContainerStack(stack, player, amount, false);
-						if (fs != null && fs.amount > 0)
-						{
-							handler.fill(dir, fs, true);
-							return true;
-						}
-						else
-							return true;
-					}
-				}
-				else
-				{
-					amount = fs == null ? this.capacity : this.capacity - fs.amount;
+					int amount = fs == null ? this.capacity : this.capacity - fs.amount;
 					FluidStack input = handler.drain(dir, amount, false);
 					if (input != null && input.amount > 0)
 					{
@@ -193,6 +170,23 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 					else
 						return true;
 				}
+				else
+				{
+					int amount = handler.fill(dir, fs, false);
+					if (amount <= 0)
+						return true;
+					else
+					{
+						fs = LiquidUtil.drainContainerStack(stack, player, amount, false);
+						if (fs != null && fs.amount > 0)
+						{
+							handler.fill(dir, fs, true);
+							return true;
+						}
+						else
+							return true;
+					}
+				}
 			}
 		}
 	}
@@ -202,15 +196,15 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 		Block block = world.getBlock(x, y, z);
 		if (block instanceof IFluidBlock)
 		{
-			IFluidBlock fluidBlock = (IFluidBlock) block;
-			if (fluidBlock.canDrain(world, x, y, z))
+			IFluidBlock liquid = (IFluidBlock) block;
+			if (liquid.canDrain(world, x, y, z))
 			{
-				FluidStack fluid = fluidBlock.drain(world, x, y, z, false);
+				FluidStack fluid = liquid.drain(world, x, y, z, false);
 				int amount = LiquidUtil.fillContainerStack(stack, player, fluid, true);
 				if (amount == fluid.amount)
 				{
 					LiquidUtil.fillContainerStack(stack, player, fluid, false);
-					fluidBlock.drain(world, x, y, z, true);
+					liquid.drain(world, x, y, z, true);
 					return true;
 				}
 			}
@@ -239,5 +233,12 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 		}
 
 		return false;
+	}
+
+	public static ItemStack getUniversalFluidCell(FluidStack fluidStack)
+	{
+		ItemStack stack = Ic2Items.FluidCell.copy();
+		((ItemFluidCell) Ic2Items.FluidCell.getItem()).fill(stack, new FluidStack(fluidStack.getFluid(), fluidStack.amount), true);
+		return stack;
 	}
 }

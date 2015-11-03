@@ -19,12 +19,12 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2-2.2.782-experimental"
+version = "2-2.2.791-experimental"
 group= "ic2"
 archivesBaseName = "industrialcraft"
 
 minecraft {
-	version = "1.7.10-10.13.4.1492-1.7.10"
+	version = "1.7.10-10.13.4.1541-1.7.10"
 	runDir = "eclipse"
 }
 
