@@ -1,6 +1,5 @@
 package ic2.core.item.tool;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.gamerforea.eventhelper.util.EventUtils;
@@ -47,36 +46,36 @@ public class ItemToolPainter extends ItemIC2 implements IBoxable
 	}
 
 	@Override
-	public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float a, float b, float c)
+	public boolean onItemUseFirst(ItemStack itemstack, EntityPlayer entityplayer, World world, int i, int j, int k, int side, float a, float b, float c)
 	{
-		PaintEvent event = new PaintEvent(world, x, y, z, side, this.color);
+		PaintEvent event = new PaintEvent(world, i, j, k, side, this.color);
 		MinecraftForge.EVENT_BUS.post(event);
 		if (event.painted)
 		{
 			if (IC2.platform.isSimulating())
-				this.damagePainter(player);
+				this.damagePainter(entityplayer);
 
 			if (IC2.platform.isRendering())
-				IC2.audioManager.playOnce(player, PositionSpec.Hand, "Tools/Painter.ogg", true, IC2.audioManager.getDefaultVolume());
+				IC2.audioManager.playOnce(entityplayer, PositionSpec.Hand, "Tools/Painter.ogg", true, IC2.audioManager.getDefaultVolume());
 
 			return IC2.platform.isSimulating();
 		}
 		else
 		{
 			// TODO gamerforEA code start
-			if (EventUtils.cantBreak(player, x, y, z))
+			if (EventUtils.cantBreak(entityplayer, i, j, k))
 				return false;
 			// TODO gamerforEA code end
 
-			Block block = world.getBlock(x, y, z);
+			Block block = world.getBlock(i, j, k);
 			int targetMeta = BlockColored.func_150031_c(this.color);
-			if (!block.recolourBlock(world, x, y, z, ForgeDirection.VALID_DIRECTIONS[side], targetMeta) && !this.colorBlock(world, x, y, z, block, targetMeta))
+			if (!block.recolourBlock(world, i, j, k, ForgeDirection.VALID_DIRECTIONS[side], targetMeta) && !this.colorBlock(world, i, j, k, block, targetMeta))
 				return false;
 			else
 			{
-				this.damagePainter(player);
+				this.damagePainter(entityplayer);
 				if (IC2.platform.isRendering())
-					IC2.audioManager.playOnce(player, PositionSpec.Hand, "Tools/Painter.ogg", true, IC2.audioManager.getDefaultVolume());
+					IC2.audioManager.playOnce(entityplayer, PositionSpec.Hand, "Tools/Painter.ogg", true, IC2.audioManager.getDefaultVolume());
 
 				return IC2.platform.isSimulating();
 			}
@@ -176,19 +175,12 @@ public class ItemToolPainter extends ItemIC2 implements IBoxable
 			if (nbtData.getBoolean("autoRefill"))
 				for (int l = 0; l < player.inventory.mainInventory.length; ++l)
 					if (player.inventory.mainInventory[l] != null)
-					{
-						Iterator i$ = OreDictionary.getOres(dyes[this.color]).iterator();
-
-						while (i$.hasNext())
-						{
-							ItemStack ore = (ItemStack) i$.next();
+						for (ItemStack ore : OreDictionary.getOres(dyes[this.color]))
 							if (ore.isItemEqual(player.inventory.mainInventory[l]))
 							{
 								dyeIS = l;
 								break;
 							}
-						}
-					}
 
 			if (dyeIS == -1)
 				player.inventory.mainInventory[player.inventory.currentItem] = Ic2Items.painter.copy();

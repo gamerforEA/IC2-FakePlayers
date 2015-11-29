@@ -54,9 +54,9 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	private TileEntityMiner miner = null;
 	public boolean redstonePowered = false;
 	public final InvSlotCharge chargeSlot = new InvSlotCharge(this, 0, 1);
-	public final InvSlotConsumableLiquid containerSlot;
-	public final InvSlotOutput outputSlot;
-	public final InvSlotUpgrade upgradeSlot;
+	public final InvSlotConsumableLiquid containerSlot = new InvSlotConsumableLiquid(this, "containerSlot", 1, InvSlot.Access.I, 1, InvSlot.InvSide.TOP, InvSlotConsumableLiquid.OpType.Fill);
+	public final InvSlotOutput outputSlot = new InvSlotOutput(this, "output", 2, 1);
+	public final InvSlotUpgrade upgradeSlot = new InvSlotUpgrade(this, "upgrade", 3, 4);
 	public short progress = 0;
 	public int operationLength;
 	public float guiProgress;
@@ -64,9 +64,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	public TileEntityPump()
 	{
 		super(20, 1, 1, 8);
-		this.containerSlot = new InvSlotConsumableLiquid(this, "containerSlot", 1, InvSlot.Access.I, 1, InvSlot.InvSide.TOP, InvSlotConsumableLiquid.OpType.Fill);
-		this.outputSlot = new InvSlotOutput(this, "output", 2, 1);
-		this.upgradeSlot = new InvSlotUpgrade(this, "upgrade", 3, 4);
 		this.defaultEnergyConsume = this.energyConsume = 1;
 		this.defaultOperationLength = this.operationLength = 20;
 		this.defaultTier = 1;
@@ -103,12 +100,12 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 				this.operate(false);
 			}
 
-		MutableObject output = new MutableObject();
-		if (this.containerSlot.transferFromTank(this.fluidTank, output, true) && (output.getValue() == null || this.outputSlot.canAdd((ItemStack) output.getValue())))
+		MutableObject<ItemStack> output = new MutableObject();
+		if (this.containerSlot.transferFromTank(this.fluidTank, output, true) && (output.getValue() == null || this.outputSlot.canAdd(output.getValue())))
 		{
 			this.containerSlot.transferFromTank(this.fluidTank, output, false);
 			if (output.getValue() != null)
-				this.outputSlot.add((ItemStack) output.getValue());
+				this.outputSlot.add(output.getValue());
 		}
 
 		for (int i = 0; i < this.upgradeSlot.size(); ++i)
@@ -140,40 +137,35 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		if (this.miner == null || this.miner.isInvalid())
 		{
 			this.miner = null;
-			Direction[] liquid = Direction.directions;
-			int dir = liquid.length;
 
-			for (int i$ = 0; i$ < dir; ++i$)
-			{
-				Direction dir1 = liquid[i$];
-				if (dir1 != Direction.YP)
+			for (Direction dir : Direction.directions)
+				if (dir != Direction.YP)
 				{
-					TileEntity te = dir1.applyToTileEntity(this);
+					TileEntity te = dir.applyToTileEntity(this);
 					if (te instanceof TileEntityMiner)
 					{
 						this.miner = (TileEntityMiner) te;
 						break;
 					}
 				}
-			}
 		}
 
-		FluidStack var7 = null;
+		FluidStack liquid = null;
 		if (this.miner != null)
 		{
 			if (this.miner.canProvideLiquid)
-				var7 = this.pump(this.miner.liquidX, this.miner.liquidY, this.miner.liquidZ, sim, this.miner);
+				liquid = this.pump(this.miner.liquidX, this.miner.liquidY, this.miner.liquidZ, sim, this.miner);
 		}
 		else
 		{
-			ForgeDirection var8 = ForgeDirection.getOrientation(this.getFacing());
-			var7 = this.pump(this.xCoord + var8.offsetX, this.yCoord + var8.offsetY, this.zCoord + var8.offsetZ, sim, this.miner);
+			ForgeDirection dir = ForgeDirection.getOrientation(this.getFacing());
+			liquid = this.pump(this.xCoord + dir.offsetX, this.yCoord + dir.offsetY, this.zCoord + dir.offsetZ, sim, this.miner);
 		}
 
-		if (var7 != null && this.getFluidTank().fill(var7, false) > 0)
+		if (liquid != null && this.getFluidTank().fill(liquid, false) > 0)
 		{
 			if (!sim)
-				this.getFluidTank().fill(var7, true);
+				this.getFluidTank().fill(liquid, true);
 
 			return true;
 		}
@@ -303,33 +295,33 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 		double energyStorageMultiplier = 1.0D;
 		int extraTier = 0;
 
-		for (int previousProgress = 0; previousProgress < this.upgradeSlot.size(); ++previousProgress)
+		for (int i = 0; i < this.upgradeSlot.size(); ++i)
 		{
-			ItemStack stack = this.upgradeSlot.get(previousProgress);
+			ItemStack stack = this.upgradeSlot.get(i);
 			if (stack != null && stack.getItem() instanceof IUpgradeItem)
 			{
-				IUpgradeItem stackOpLen = (IUpgradeItem) stack.getItem();
-				extraProcessTime += stackOpLen.getExtraProcessTime(stack, this) * stack.stackSize;
-				processTimeMultiplier *= Math.pow(stackOpLen.getProcessTimeMultiplier(stack, this), stack.stackSize);
-				extraEnergyDemand += stackOpLen.getExtraEnergyDemand(stack, this) * stack.stackSize;
-				energyDemandMultiplier *= Math.pow(stackOpLen.getEnergyDemandMultiplier(stack, this), stack.stackSize);
-				extraEnergyStorage += stackOpLen.getExtraEnergyStorage(stack, this) * stack.stackSize;
-				energyStorageMultiplier *= Math.pow(stackOpLen.getEnergyStorageMultiplier(stack, this), stack.stackSize);
-				extraTier += stackOpLen.getExtraTier(stack, this) * stack.stackSize;
+				IUpgradeItem upgrade = (IUpgradeItem) stack.getItem();
+				extraProcessTime += upgrade.getExtraProcessTime(stack, this) * stack.stackSize;
+				processTimeMultiplier *= Math.pow(upgrade.getProcessTimeMultiplier(stack, this), stack.stackSize);
+				extraEnergyDemand += upgrade.getExtraEnergyDemand(stack, this) * stack.stackSize;
+				energyDemandMultiplier *= Math.pow(upgrade.getEnergyDemandMultiplier(stack, this), stack.stackSize);
+				extraEnergyStorage += upgrade.getExtraEnergyStorage(stack, this) * stack.stackSize;
+				energyStorageMultiplier *= Math.pow(upgrade.getEnergyStorageMultiplier(stack, this), stack.stackSize);
+				extraTier += upgrade.getExtraTier(stack, this) * stack.stackSize;
 			}
 		}
 
-		double var15 = (double) this.progress / (double) this.operationLength;
-		double var16 = ((double) this.defaultOperationLength + (double) extraProcessTime) * 64.0D * processTimeMultiplier;
-		this.operationsPerTick = (int) Math.min(Math.ceil(64.0D / var16), 2.147483647E9D);
-		this.operationLength = (int) Math.round(var16 * this.operationsPerTick / 64.0D);
+		double previousProgress = (double) this.progress / (double) this.operationLength;
+		double stackOpLen = ((double) this.defaultOperationLength + (double) extraProcessTime) * 64.0D * processTimeMultiplier;
+		this.operationsPerTick = (int) Math.min(Math.ceil(64.0D / stackOpLen), 2.147483647E9D);
+		this.operationLength = (int) Math.round(stackOpLen * this.operationsPerTick / 64.0D);
 		this.energyConsume = applyModifier(this.defaultEnergyConsume, extraEnergyDemand, energyDemandMultiplier);
 		this.setTier(applyModifier(this.defaultTier, extraTier, 1.0D));
 		this.maxEnergy = applyModifier(this.defaultEnergyStorage, extraEnergyStorage + this.operationLength * this.energyConsume, energyStorageMultiplier);
 		if (this.operationLength < 1)
 			this.operationLength = 1;
 
-		this.progress = (short) (int) Math.floor(var15 * this.operationLength + 0.1D);
+		this.progress = (short) (int) Math.floor(previousProgress * this.operationLength + 0.1D);
 	}
 
 	private static int applyModifier(int base, int extra, double multiplier)

@@ -81,7 +81,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 	@Override
 	public List<String> getHudInfo(ItemStack itemStack)
 	{
-		LinkedList info = new LinkedList();
+		List<String> info = new LinkedList();
 		NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(itemStack);
 		String mode = StatCollector.translateToLocal(getModeString(nbtData.getInteger("laserSetting")));
 		info.addAll(super.getHudInfo(itemStack));

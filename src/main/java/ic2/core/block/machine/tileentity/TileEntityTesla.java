@@ -1,7 +1,5 @@
 package ic2.core.block.machine.tileentity;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import com.gamerforea.eventhelper.util.EventUtils;
@@ -19,16 +17,9 @@ import net.minecraft.world.WorldServer;
 
 public class TileEntityTesla extends TileEntityBlock
 {
-	protected final Redstone redstone;
-	protected final Energy energy;
-	private int ticker;
-
-	public TileEntityTesla()
-	{
-		this.ticker = IC2.random.nextInt(32);
-		this.redstone = this.addComponent(new Redstone(this));
-		this.energy = this.addComponent(Energy.asBasicSink(this, 10000.0D, 2));
-	}
+	protected final Redstone redstone = this.addComponent(new Redstone(this));
+	protected final Energy energy = this.addComponent(Energy.asBasicSink(this, 10000.0D, 2));
+	private int ticker = IC2.random.nextInt(32);
 
 	@Override
 	protected void updateEntityServer()
@@ -45,28 +36,24 @@ public class TileEntityTesla extends TileEntityBlock
 
 	protected boolean shock(int damage)
 	{
-		boolean r = true;
-		List entities = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 4, this.yCoord - 4, this.zCoord - 4, this.xCoord + 4 + 1, this.yCoord + 4 + 1, this.zCoord + 4 + 1));
-		Iterator i$ = entities.iterator();
+		int r = 4;
 
-		EntityLivingBase entity;
-		do
-		{
-			if (!i$.hasNext())
-				return false;
-			entity = (EntityLivingBase) i$.next();
-		}
-		// TODO gamerforEA add condition [2, 3]
-		while (ItemArmorHazmat.hasCompleteHazmat(entity) || EventConfig.teslaEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity) || !entity.attackEntityFrom(IC2DamageSource.electricity, damage));
+		for (EntityLivingBase entity : (Iterable<EntityLivingBase>) this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 4, this.yCoord - 4, this.zCoord - 4, this.xCoord + 4 + 1, this.yCoord + 4 + 1, this.zCoord + 4 + 1)))
+			// TODO gamerforEA add condition [2, 3]
+			if (!ItemArmorHazmat.hasCompleteHazmat(entity) || EventConfig.teslaEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity) || entity.attackEntityFrom(IC2DamageSource.electricity, damage))
+			{
+				if (this.worldObj instanceof WorldServer)
+				{
+					WorldServer world = (WorldServer) this.worldObj;
+					Random rnd = world.rand;
 
-		if (this.worldObj instanceof WorldServer)
-		{
-			WorldServer world = (WorldServer) this.worldObj;
-			Random rnd = world.rand;
-			for (int i = 0; i < damage; ++i)
-				world.func_147487_a("reddust", entity.posX + rnd.nextFloat() - 0.5D, entity.posY + rnd.nextFloat() * 2.0F - 1.0D, entity.posZ + rnd.nextFloat() - 0.5D, 0, 0.10000000149011612D, 0.10000000149011612D, 1.0D, 1.0D);
-		}
+					for (int i = 0; i < damage; ++i)
+						world.func_147487_a("reddust", entity.posX + rnd.nextFloat() - 0.5D, entity.posY + rnd.nextFloat() * 2.0F - 1.0D, entity.posZ + rnd.nextFloat() - 0.5D, 0, 0.10000000149011612D, 0.10000000149011612D, 1.0D, 1.0D);
+				}
 
-		return true;
+				return true;
+			}
+
+		return false;
 	}
 }

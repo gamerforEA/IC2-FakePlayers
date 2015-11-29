@@ -86,7 +86,6 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 					x = position.blockX;
 					y = position.blockY;
 					z = position.blockZ;
-
 					if (!world.canMineBlock(player, x, y, z))
 						return false;
 
@@ -136,6 +135,7 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 				this.fill(stack, new FluidStack(fluid, Integer.MAX_VALUE), true);
 				itemList.add(stack);
 			}
+
 	}
 
 	private boolean interactWithTank(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side)

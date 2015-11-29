@@ -3,7 +3,6 @@ package ic2.core.block;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,8 +34,8 @@ import net.minecraft.world.World;
 
 public abstract class TileEntityBlock extends TileEntity implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
 {
-	private static final List<TileEntityComponent> emptyComponents = Arrays.asList(new TileEntityComponent[0]);
-	private static final List<Entry<String, TileEntityComponent>> emptyNamedComponents = new ArrayList();
+	private static final List<TileEntityComponent> emptyComponents = Arrays.asList();
+	private static final List<Entry<String, TileEntityComponent>> emptyNamedComponents = Arrays.asList();
 	private Map<String, TileEntityComponent> components;
 	private List<TileEntityComponent> updatableComponents;
 	private boolean active = false;
@@ -70,6 +69,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 					TileEntityBlock.this.onLoaded();
 					if (!TileEntityBlock.this.isInvalid() && (TileEntityBlock.this.enableWorldTick || TileEntityBlock.this.updatableComponents != null))
 						world.loadedTileEntityList.add(TileEntityBlock.this);
+
 				}
 			}
 		});
@@ -94,12 +94,8 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		this.loaded = true;
 		this.enableWorldTick = this.requiresWorldTick();
 		if (this.components != null)
-		{
-			Iterator i$ = this.components.values().iterator();
-
-			while (i$.hasNext())
+			for (TileEntityComponent component : this.components.values())
 			{
-				TileEntityComponent component = (TileEntityComponent) i$.next();
 				component.onLoaded();
 				if (component.enableWorldTick())
 				{
@@ -109,7 +105,6 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 					this.updatableComponents.add(component);
 				}
 			}
-		}
 
 	}
 
@@ -119,15 +114,8 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		{
 			this.loaded = false;
 			if (this.components != null)
-			{
-				Iterator i$ = this.components.values().iterator();
-
-				while (i$.hasNext())
-				{
-					TileEntityComponent component = (TileEntityComponent) i$.next();
+				for (TileEntityComponent component : this.components.values())
 					component.onUnloaded();
-				}
-			}
 
 		}
 	}
@@ -141,11 +129,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		if (this.components != null && nbt.hasKey("components", 10))
 		{
 			NBTTagCompound componentsNbt = nbt.getCompoundTag("components");
-			Iterator i$ = componentsNbt.func_150296_c().iterator();
 
-			while (i$.hasNext())
+			for (String name : (Iterable<String>) componentsNbt.func_150296_c())
 			{
-				String name = (String) i$.next();
 				NBTTagCompound componentNbt = componentsNbt.getCompoundTag(name);
 				TileEntityComponent component = this.components.get(name);
 				if (component == null)
@@ -168,13 +154,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		nbt.setBoolean("active", this.active);
 		NBTTagCompound componentsNbt = null;
 		if (this.components != null)
-		{
-			Iterator i$ = this.components.entrySet().iterator();
-
-			while (i$.hasNext())
+			for (Entry<String, TileEntityComponent> entry : this.components.entrySet())
 			{
-				Entry entry = (Entry) i$.next();
-				NBTTagCompound componentNbt = ((TileEntityComponent) entry.getValue()).writeToNbt();
+				NBTTagCompound componentNbt = entry.getValue().writeToNbt();
 				if (componentNbt != null)
 				{
 					if (componentsNbt == null)
@@ -183,10 +165,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 						nbt.setTag("components", componentsNbt);
 					}
 
-					componentsNbt.setTag((String) entry.getKey(), componentNbt);
+					componentsNbt.setTag(entry.getKey(), componentNbt);
 				}
 			}
-		}
 
 		// TODO gamerforEA code start
 		this.fake.writeToNBT(nbt);
@@ -203,21 +184,15 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 	public final void updateEntity()
 	{
 		if (this.updatableComponents != null)
-		{
-			Iterator i$ = this.updatableComponents.iterator();
-
-			while (i$.hasNext())
-			{
-				TileEntityComponent component = (TileEntityComponent) i$.next();
+			for (TileEntityComponent component : this.updatableComponents)
 				component.onWorldTick();
-			}
-		}
 
 		if (this.enableWorldTick)
 			if (this.worldObj.isRemote)
 				this.updateEntityClient();
 			else
 				this.updateEntityServer();
+
 	}
 
 	protected void updateEntityClient()
@@ -264,7 +239,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 	@Override
 	public List<String> getNetworkedFields()
 	{
-		Vector ret = new Vector(2);
+		List<String> ret = new Vector(2);
 		ret.add("active");
 		ret.add("facing");
 		return ret;
@@ -411,21 +386,14 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 	public void onNeighborUpdate(Block srcBlock)
 	{
 		if (this.components != null)
-		{
-			Iterator i$ = this.components.values().iterator();
-
-			while (i$.hasNext())
-			{
-				TileEntityComponent component = (TileEntityComponent) i$.next();
+			for (TileEntityComponent component : this.components.values())
 				component.onNeighborUpdate(srcBlock);
-			}
-		}
 
 	}
 
 	private final boolean requiresWorldTick()
 	{
-		Class cls = this.getClass();
+		Class<?> cls = this.getClass();
 		TileEntityBlock.TickSubscription subscription = tickSubscriptions.get(cls);
 		if (subscription == null)
 		{
@@ -434,10 +402,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 			boolean hasUpdateServer;
 			for (hasUpdateServer = false; cls != TileEntityBlock.class && (!hasUpdateClient || !hasUpdateServer); cls = cls.getSuperclass())
 			{
-				boolean found;
 				if (!hasUpdateClient)
 				{
-					found = true;
+					boolean found = true;
 
 					try
 					{
@@ -454,7 +421,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 
 				if (!hasUpdateServer)
 				{
-					found = true;
+					boolean found = true;
 
 					try
 					{

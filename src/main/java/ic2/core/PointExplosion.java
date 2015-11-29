@@ -1,7 +1,5 @@
 package ic2.core;
 
-import java.util.List;
-
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 
@@ -24,13 +22,13 @@ public class PointExplosion extends Explosion
 	private final float dropRate;
 	private final int entityDamage;
 
-	public PointExplosion(World world, Entity entity, EntityLivingBase exploder, double x, double y, double z, float power, float dropRate, int entityDamage)
+	public PointExplosion(World world1, Entity entity, EntityLivingBase exploder, double x, double y, double z, float power, float dropRate1, int entityDamage1)
 	{
-		super(world, exploder, x, y, z, power);
-		this.world = world;
+		super(world1, exploder, x, y, z, power);
+		this.world = world1;
 		this.entity = entity;
-		this.dropRate = dropRate;
-		this.entityDamage = entityDamage;
+		this.dropRate = dropRate1;
+		this.entityDamage = entityDamage1;
 	}
 
 	@Override
@@ -60,8 +58,7 @@ public class PointExplosion extends Explosion
 						}
 					}
 
-			List<Entity> entities = this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D));
-			for (Entity entity : entities)
+			for (Entity entity : (Iterable<Entity>) this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D)))
 			{
 				// TODO gamerforEA code start
 				if (EventUtils.isInPrivate(entity))

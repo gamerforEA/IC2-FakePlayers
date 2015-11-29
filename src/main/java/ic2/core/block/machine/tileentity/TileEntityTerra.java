@@ -52,22 +52,21 @@ public class TileEntityTerra extends TileEntityElectricMachine
 				newActive = true;
 				int x = this.xCoord;
 				int z = this.zCoord;
-				boolean range = true;
-				int var6;
+				int range = 1;
 				if (this.lastY > -1)
 				{
-					var6 = tfbp.getRange() / 10;
-					x = this.lastX - this.worldObj.rand.nextInt(var6 + 1) + this.worldObj.rand.nextInt(var6 + 1);
-					z = this.lastZ - this.worldObj.rand.nextInt(var6 + 1) + this.worldObj.rand.nextInt(var6 + 1);
+					range = tfbp.getRange() / 10;
+					x = this.lastX - this.worldObj.rand.nextInt(range + 1) + this.worldObj.rand.nextInt(range + 1);
+					z = this.lastZ - this.worldObj.rand.nextInt(range + 1) + this.worldObj.rand.nextInt(range + 1);
 				}
 				else
 				{
 					if (this.failedAttempts > 4)
 						this.failedAttempts = 4;
 
-					var6 = tfbp.getRange() * (this.failedAttempts + 1) / 5;
-					x = x - this.worldObj.rand.nextInt(var6 + 1) + this.worldObj.rand.nextInt(var6 + 1);
-					z = z - this.worldObj.rand.nextInt(var6 + 1) + this.worldObj.rand.nextInt(var6 + 1);
+					range = tfbp.getRange() * (this.failedAttempts + 1) / 5;
+					x = x - this.worldObj.rand.nextInt(range + 1) + this.worldObj.rand.nextInt(range + 1);
+					z = z - this.worldObj.rand.nextInt(range + 1) + this.worldObj.rand.nextInt(range + 1);
 				}
 
 				// TODO gamerforEA code replace, old code: if (tfbp.terraform(this.worldObj, x, z, this.yCoord))
@@ -178,18 +177,19 @@ public class TileEntityTerra extends TileEntityElectricMachine
 	}
 	// TODO gamerforEA code end
 
-	public static boolean switchGround(World world, Block from, Block to, int x, int y, int z, boolean upwards, EntityPlayer player) // TODO gamerforEA add EntityPlayer
+	// TODO gamerforEA add EntityPlayer
+	public static boolean switchGround(World world, Block from, Block to, int x, int y, int z, boolean upwards, EntityPlayer player)
 	{
 		if (upwards)
 		{
 			++y;
-			int var9 = y;
+			int saveY = y;
 
 			while (true)
 			{
-				Block block1 = world.getBlock(x, y - 1, z);
-				if (block1 != from)
-					if (var9 == y)
+				Block block = world.getBlock(x, y - 1, z);
+				if (block != from)
+					if (saveY == y)
 						return false;
 					else
 					{

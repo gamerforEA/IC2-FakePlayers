@@ -2,7 +2,6 @@ package ic2.core.block.machine.tileentity;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -48,33 +47,26 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	private final List<ItemStack> itemstack = new ArrayList();
 	private int currectblockscanncount;
 	private int blockscanncount;
-	public final int defaultTier;
-	public final int workTick;
+	public final int defaultTier = 3;
+	public final int workTick = 20;
 	public boolean blacklist = true;
 	public boolean silktouch = false;
 	public boolean redstonePowered = false;
-	public int energyConsume;
+	public int energyConsume = 512;
 	public int xcounter = 99;
 	public int zcounter = 99;
 	private int minelayer = -1;
 	private int minetargetX = -1;
 	private int minetargetZ = -1;
 	private short ticker = 0;
-	public final InvSlotConsumableId scannerSlot;
-	public final InvSlotUpgrade upgradeSlot;
-	public final InvSlot ListSlot;
-	protected final Redstone redstone;
+	public final InvSlotConsumableId scannerSlot = new InvSlotConsumableId(this, "scanner", 1, InvSlot.Access.IO, 1, InvSlot.InvSide.BOTTOM, new Item[] { Ic2Items.odScanner.getItem(), Ic2Items.ovScanner.getItem() });
+	public final InvSlotUpgrade upgradeSlot = new InvSlotUpgrade(this, "upgrade", 3, 4);
+	public final InvSlot ListSlot = new InvSlot(this, "list", 8, (InvSlot.Access) null, 15);
+	protected final Redstone redstone = this.addComponent(new Redstone(this));
 
 	public TileEntityAdvMiner()
 	{
 		super(4000000, 3, 0);
-		this.scannerSlot = new InvSlotConsumableId(this, "scanner", 1, InvSlot.Access.IO, 1, InvSlot.InvSide.BOTTOM, new Item[] { Ic2Items.odScanner.getItem(), Ic2Items.ovScanner.getItem() });
-		this.upgradeSlot = new InvSlotUpgrade(this, "upgrade", 3, 4);
-		this.ListSlot = new InvSlot(this, "list", 8, (InvSlot.Access) null, 15);
-		this.energyConsume = 512;
-		this.defaultTier = 3;
-		this.workTick = 20;
-		this.redstone = this.addComponent(new Redstone(this));
 	}
 
 	@Override
@@ -129,7 +121,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 			return false;
 		else
 		{
-			byte range = 0;
+			int range = 0;
 			if (this.scannerSlot.get().getItem() == Ic2Items.odScanner.getItem())
 				range = 16;
 
@@ -217,16 +209,12 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 		this.itemstack.clear();
 		if (block.hasTileEntity(this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ)))
 		{
-			ItemStack i = new ItemStack(block, 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ));
+			ItemStack stack = new ItemStack(block, 1, this.worldObj.getBlockMetadata(this.minetargetX, this.minelayer, this.minetargetZ));
 			int max = 0;
-			Iterator i$ = IC2.valuableOres.entrySet().iterator();
 
-			while (i$.hasNext())
-			{
-				Entry entry = (Entry) i$.next();
-				if (((IRecipeInput) entry.getKey()).matches(i))
+			for (Entry<IRecipeInput, Integer> entry : IC2.valuableOres.entrySet())
+				if (entry.getKey().matches(stack))
 					++max;
-			}
 
 			if (max == 0)
 				return false;
@@ -253,19 +241,18 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 
 				if (!this.itemstack.isEmpty())
 				{
-					int var9;
 					if (this.blacklist)
 					{
-						for (var9 = 0; var9 < this.ListSlot.size(); ++var9)
-							if (this.ListSlot.get(var9) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(var9)))
+						for (int i = 0; i < this.ListSlot.size(); ++i)
+							if (this.ListSlot.get(i) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(i)))
 								return false;
 
 						return true;
 					}
 					else
 					{
-						for (var9 = 0; var9 < this.ListSlot.size(); ++var9)
-							if (this.ListSlot.get(var9) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(var9)))
+						for (int i = 0; i < this.ListSlot.size(); ++i)
+							if (this.ListSlot.get(i) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(i)))
 								return true;
 
 						return false;

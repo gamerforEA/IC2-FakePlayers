@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -114,195 +113,159 @@ public class ExplosionIC2 extends Explosion
 			if (!MinecraftForge.EVENT_BUS.post(event))
 			{
 				this.chunkCache = new ChunkCache(this.worldObj, (int) this.explosionX - this.areaSize / 2, (int) this.explosionY - this.areaSize / 2, (int) this.explosionZ - this.areaSize / 2, (int) this.explosionX + this.areaSize / 2, (int) this.explosionY + this.areaSize / 2, (int) this.explosionZ + this.areaSize / 2, 0);
-				List entities = this.worldObj.getEntitiesWithinAABBExcludingEntity((Entity) null, AxisAlignedBB.getBoundingBox(this.explosionX - this.maxDistance, this.explosionY - this.maxDistance, this.explosionZ - this.maxDistance, this.explosionX + this.maxDistance, this.explosionY + this.maxDistance, this.explosionZ + this.maxDistance));
-				Iterator entitiesAreInRange = entities.iterator();
 
-				while (true)
-				{
-					Entity steps;
-					int rng;
-					do
+				for (Entity entity : (Iterable<Entity>) this.worldObj.getEntitiesWithinAABBExcludingEntity((Entity) null, AxisAlignedBB.getBoundingBox(this.explosionX - this.maxDistance, this.explosionY - this.maxDistance, this.explosionZ - this.maxDistance, this.explosionX + this.maxDistance, this.explosionY + this.maxDistance, this.explosionZ + this.maxDistance)))
+					if (entity instanceof EntityLivingBase || entity instanceof EntityItem)
 					{
-						if (!entitiesAreInRange.hasNext())
+						int distance = (int) (Util.square(entity.posX - this.explosionX) + Util.square(entity.posY - this.explosionY) + Util.square(entity.posZ - this.explosionZ));
+						double health = getEntityHealth(entity);
+						this.entitiesInRange.add(new EntityDamage(entity, distance, health));
+					}
+
+				boolean entitiesAreInRange = !this.entitiesInRange.isEmpty();
+				if (entitiesAreInRange)
+					Collections.sort(this.entitiesInRange, new Comparator<EntityDamage>()
+					{
+						@Override
+						public int compare(EntityDamage a, EntityDamage b)
 						{
-							boolean var31 = !this.entitiesInRange.isEmpty();
-							if (var31)
-								Collections.sort(this.entitiesInRange, new Comparator<EntityDamage>()
-								{
-									@Override
-									public int compare(EntityDamage a, EntityDamage b)
-									{
-										return a.distance - b.distance;
-									}
-								});
+							return a.distance - b.distance;
+						}
+					});
 
-							int var32 = (int) Math.ceil(3.141592653589793D / Math.atan(1.0D / this.maxDistance));
+				int steps = (int) Math.ceil(3.141592653589793D / Math.atan(1.0D / this.maxDistance));
 
-							double blocksToDrop;
-							for (rng = 0; rng < 2 * var32; ++rng)
-								for (int var34 = 0; var34 < var32; ++var34)
-								{
-									blocksToDrop = 6.283185307179586D / var32 * rng;
-									double entry = 3.141592653589793D / var32 * var34;
-									this.shootRay(this.explosionX, this.explosionY, this.explosionZ, blocksToDrop, entry, this.power, var31 && rng % 8 == 0 && var34 % 8 == 0);
-								}
+				for (int phi_n = 0; phi_n < 2 * steps; ++phi_n)
+					for (int theta_n = 0; theta_n < steps; ++theta_n)
+					{
+						double phi = 6.283185307179586D / steps * phi_n;
+						double theta = 3.141592653589793D / steps * theta_n;
+						this.shootRay(this.explosionX, this.explosionY, this.explosionZ, phi, theta, this.power, entitiesAreInRange && phi_n % 8 == 0 && theta_n % 8 == 0);
+					}
 
-							double xZposition;
-							Iterator var33;
-							EntityDamage var36;
-							Entity var37;
-							for (var33 = this.entitiesInRange.iterator(); var33.hasNext(); var37.motionZ += var36.motionZ * xZposition)
-							{
-								var36 = (EntityDamage) var33.next();
-								var37 = var36.entity;
-								var37.attackEntityFrom(this.damageSource, (float) var36.damage);
-								if (var37 instanceof EntityPlayer)
-								{
-									EntityPlayer i$ = (EntityPlayer) var37;
-									if (this.isNuclear() && this.igniter != null && i$ == this.igniter && i$.getHealth() <= 0.0F)
-										IC2.achievements.issueAchievement(i$, "dieFromOwnNuke");
-								}
+				for (EntityDamage entry : this.entitiesInRange)
+				{
+					Entity entity = entry.entity;
+					entity.attackEntityFrom(this.damageSource, (float) entry.damage);
+					if (entity instanceof EntityPlayer)
+					{
+						EntityPlayer entityPlayer = (EntityPlayer) entity;
+						if (this.isNuclear() && this.igniter != null && entityPlayer == this.igniter && entityPlayer.getHealth() <= 0.0F)
+							IC2.achievements.issueAchievement(entityPlayer, "dieFromOwnNuke");
+					}
 
-								double var41 = Util.square(var36.motionX) + Util.square(var37.motionY) + Util.square(var37.motionZ);
-								xZposition = var41 > 3600.0D ? Math.sqrt(3600.0D / var41) : 1.0D;
-								var37.motionX += var36.motionX * xZposition;
-								var37.motionY += var36.motionY * xZposition;
-							}
+					double motionSq = Util.square(entry.motionX) + Util.square(entity.motionY) + Util.square(entity.motionZ);
+					double reduction = motionSq > 3600.0D ? Math.sqrt(3600.0D / motionSq) : 1.0D;
+					entity.motionX += entry.motionX * reduction;
+					entity.motionY += entry.motionY * reduction;
+					entity.motionZ += entry.motionZ * reduction;
+				}
 
-							int var47;
-							if (this.isNuclear() && this.radiationRange >= 1)
-							{
-								var33 = this.worldObj.getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getBoundingBox(this.explosionX - this.radiationRange, this.explosionY - this.radiationRange, this.explosionZ - this.radiationRange, this.explosionX + this.radiationRange, this.explosionY + this.radiationRange, this.explosionZ + this.radiationRange)).iterator();
+				if (this.isNuclear() && this.radiationRange >= 1)
+					for (EntityLiving entity : (Iterable<EntityLiving>) this.worldObj.getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getBoundingBox(this.explosionX - this.radiationRange, this.explosionY - this.radiationRange, this.explosionZ - this.radiationRange, this.explosionX + this.radiationRange, this.explosionY + this.radiationRange, this.explosionZ + this.radiationRange)))
+						if (!ItemArmorHazmat.hasCompleteHazmat(entity))
+						{
+							double distance = entity.getDistance(this.explosionX, this.explosionY, this.explosionZ);
+							int hungerLength = (int) (120.0D * (this.radiationRange - distance));
+							int poisonLength = (int) (80.0D * (this.radiationRange / 3 - distance));
+							if (hungerLength >= 0)
+								entity.addPotionEffect(new PotionEffect(Potion.hunger.id, hungerLength, 0));
 
-								while (var33.hasNext())
-								{
-									EntityLiving var38 = (EntityLiving) var33.next();
-									if (!ItemArmorHazmat.hasCompleteHazmat(var38))
-									{
-										blocksToDrop = var38.getDistance(this.explosionX, this.explosionY, this.explosionZ);
-										int var44 = (int) (120.0D * (this.radiationRange - blocksToDrop));
-										var47 = (int) (80.0D * (this.radiationRange / 3 - blocksToDrop));
-										if (var44 >= 0)
-											var38.addPotionEffect(new PotionEffect(Potion.hunger.id, var44, 0));
-
-										if (var47 >= 0)
-											IC2Potion.radiation.applyTo(var38, var47, 0);
-									}
-								}
-							}
-
-							IC2.network.get().initiateExplosionEffect(this.worldObj, this.explosionX, this.explosionY, this.explosionZ);
-							Random var35 = this.worldObj.rand;
-							boolean var39 = this.worldObj.getGameRules().getGameRuleBooleanValue("doTileDrops");
-							HashMap var40 = new HashMap();
-							this.worldObj.playSoundEffect(this.explosionX, this.explosionY, this.explosionZ, "random.explode", 4.0F, (1.0F + (var35.nextFloat() - var35.nextFloat()) * 0.2F) * 0.7F);
-
-							int var53;
-							for (int var42 = 0; var42 < this.destroyedBlockPositions.length; ++var42)
-							{
-								long[] var45 = this.destroyedBlockPositions[var42];
-								if (var45 != null)
-								{
-									var47 = -2;
-
-									while ((var47 = nextSetIndex(var47 + 2, var45, 2)) != -1)
-									{
-										int i$1 = var47 / 2;
-										int entry2 = i$1 / this.areaSize;
-										int isw = i$1 - entry2 * this.areaSize;
-										isw += this.areaX;
-										entry2 += this.areaZ;
-
-										// TODO gamerforEA code start
-										if (EventConfig.explosionEvent && EventUtils.isInPrivate(this.worldObj, isw, var42, entry2))
-											continue;
-										// TODO gamerforEA code end
-
-										Block count = this.chunkCache.getBlock(isw, var42, entry2);
-										if (this.power < 20.0F)
-										{
-											double stackSize = isw + var35.nextFloat();
-											double itemStack = var42 + var35.nextFloat();
-											double map = entry2 + var35.nextFloat();
-											double d3 = stackSize - this.explosionX;
-											double d4 = itemStack - this.explosionY;
-											double d5 = map - this.explosionZ;
-											double effectDistance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
-											d3 /= effectDistance;
-											d4 /= effectDistance;
-											d5 /= effectDistance;
-											double d7 = 0.5D / (effectDistance / this.power + 0.1D);
-											d7 *= var35.nextFloat() * var35.nextFloat() + 0.3F;
-											d3 *= d7;
-											d4 *= d7;
-											d5 *= d7;
-											this.worldObj.spawnParticle("explode", (stackSize + this.explosionX) / 2.0D, (itemStack + this.explosionY) / 2.0D, (map + this.explosionZ) / 2.0D, d3, d4, d5);
-											this.worldObj.spawnParticle("smoke", stackSize, itemStack, map, d3, d4, d5);
-										}
-
-										if (var39 && getAtIndex(var47, var45, 2) == 1)
-										{
-											var53 = this.chunkCache.getBlockMetadata(isw, var42, entry2);
-											Iterator entityitem = count.getDrops(this.worldObj, isw, var42, entry2, var53, 0).iterator();
-
-											while (entityitem.hasNext())
-											{
-												ItemStack var55 = (ItemStack) entityitem.next();
-												if (var35.nextFloat() <= this.explosionDropRate)
-												{
-													XZposition xZposition1 = new XZposition(isw / 2, entry2 / 2);
-													if (!var40.containsKey(xZposition1))
-														var40.put(xZposition1, new HashMap());
-
-													Map var56 = (Map) var40.get(xZposition1);
-													ItemStackWrapper isw1 = new ItemStackWrapper(var55);
-													if (!var56.containsKey(isw1))
-														var56.put(isw1, new DropData(var55.stackSize, var42));
-													else
-														var56.put(isw1, ((DropData) var56.get(isw1)).add(var55.stackSize, var42));
-												}
-											}
-										}
-
-										this.worldObj.setBlockToAir(isw, var42, entry2);
-										count.onBlockDestroyedByExplosion(this.worldObj, isw, var42, entry2, this);
-									}
-								}
-							}
-
-							Iterator var43 = var40.entrySet().iterator();
-
-							while (var43.hasNext())
-							{
-								Entry var46 = (Entry) var43.next();
-								XZposition var48 = (XZposition) var46.getKey();
-								Iterator var49 = ((Map) var46.getValue()).entrySet().iterator();
-
-								while (var49.hasNext())
-								{
-									Entry var50 = (Entry) var49.next();
-									ItemStackWrapper var51 = (ItemStackWrapper) var50.getKey();
-
-									for (int var52 = ((DropData) var50.getValue()).n; var52 > 0; var52 -= var53)
-									{
-										var53 = Math.min(var52, 64);
-										EntityItem var54 = new EntityItem(this.worldObj, (var48.x + this.worldObj.rand.nextFloat()) * 2.0D, ((DropData) var50.getValue()).maxY + 0.5D, (var48.z + this.worldObj.rand.nextFloat()) * 2.0D, StackUtil.copyWithSize(var51.stack, var53));
-										var54.delayBeforeCanPickup = 10;
-										this.worldObj.spawnEntityInWorld(var54);
-									}
-								}
-							}
-
-							return;
+							if (poisonLength >= 0)
+								IC2Potion.radiation.applyTo(entity, poisonLength, 0);
 						}
 
-						steps = (Entity) entitiesAreInRange.next();
-					}
-					while (!(steps instanceof EntityLivingBase) && !(steps instanceof EntityItem));
+				IC2.network.get().initiateExplosionEffect(this.worldObj, this.explosionX, this.explosionY, this.explosionZ);
+				Random rng = this.worldObj.rand;
+				boolean doDrops = this.worldObj.getGameRules().getGameRuleBooleanValue("doTileDrops");
+				Map<XZposition, Map<ItemStackWrapper, DropData>> blocksToDrop = new HashMap();
+				this.worldObj.playSoundEffect(this.explosionX, this.explosionY, this.explosionZ, "random.explode", 4.0F, (1.0F + (rng.nextFloat() - rng.nextFloat()) * 0.2F) * 0.7F);
 
-					rng = (int) (Util.square(steps.posX - this.explosionX) + Util.square(steps.posY - this.explosionY) + Util.square(steps.posZ - this.explosionZ));
-					double doDrops = getEntityHealth(steps);
-					this.entitiesInRange.add(new EntityDamage(steps, rng, doDrops));
+				for (int y = 0; y < this.destroyedBlockPositions.length; ++y)
+				{
+					long[] bitSet = this.destroyedBlockPositions[y];
+					if (bitSet != null)
+					{
+						int index = -2;
+
+						while ((index = nextSetIndex(index + 2, bitSet, 2)) != -1)
+						{
+							int realIndex = index / 2;
+							int z = realIndex / this.areaSize;
+							int x = realIndex - z * this.areaSize;
+							x = x + this.areaX;
+							z = z + this.areaZ;
+
+							// TODO gamerforEA code start
+							if (EventConfig.explosionEvent && EventUtils.isInPrivate(this.worldObj, x, y, z))
+								continue;
+							// TODO gamerforEA code end
+
+							Block block = this.chunkCache.getBlock(x, y, z);
+							if (this.power < 20.0F)
+							{
+								double effectX = x + rng.nextFloat();
+								double effectY = y + rng.nextFloat();
+								double effectZ = z + rng.nextFloat();
+								double d3 = effectX - this.explosionX;
+								double d4 = effectY - this.explosionY;
+								double d5 = effectZ - this.explosionZ;
+								double effectDistance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
+								d3 = d3 / effectDistance;
+								d4 = d4 / effectDistance;
+								d5 = d5 / effectDistance;
+								double d7 = 0.5D / (effectDistance / this.power + 0.1D);
+								d7 = d7 * (rng.nextFloat() * rng.nextFloat() + 0.3F);
+								d3 = d3 * d7;
+								d4 = d4 * d7;
+								d5 = d5 * d7;
+								this.worldObj.spawnParticle("explode", (effectX + this.explosionX) / 2.0D, (effectY + this.explosionY) / 2.0D, (effectZ + this.explosionZ) / 2.0D, d3, d4, d5);
+								this.worldObj.spawnParticle("smoke", effectX, effectY, effectZ, d3, d4, d5);
+							}
+
+							if (doDrops && getAtIndex(index, bitSet, 2) == 1)
+							{
+								int meta = this.chunkCache.getBlockMetadata(x, y, z);
+
+								for (ItemStack itemStack : block.getDrops(this.worldObj, x, y, z, meta, 0))
+									if (rng.nextFloat() <= this.explosionDropRate)
+									{
+										XZposition xZposition = new XZposition(x / 2, z / 2);
+										if (!blocksToDrop.containsKey(xZposition))
+											blocksToDrop.put(xZposition, new HashMap());
+
+										Map<ItemStackWrapper, DropData> map = blocksToDrop.get(xZposition);
+										ItemStackWrapper isw = new ItemStackWrapper(itemStack);
+										if (!map.containsKey(isw))
+											map.put(isw, new DropData(itemStack.stackSize, y));
+										else
+											map.put(isw, map.get(isw).add(itemStack.stackSize, y));
+									}
+							}
+
+							this.worldObj.setBlockToAir(x, y, z);
+							block.onBlockDestroyedByExplosion(this.worldObj, x, y, z, this);
+						}
+					}
+				}
+
+				for (Entry<XZposition, Map<ItemStackWrapper, DropData>> entry : blocksToDrop.entrySet())
+				{
+					XZposition xZposition = entry.getKey();
+
+					for (Entry<ItemStackWrapper, DropData> entry2 : entry.getValue().entrySet())
+					{
+						ItemStackWrapper isw = entry2.getKey();
+
+						int stackSize;
+						for (int count = entry2.getValue().n; count > 0; count -= stackSize)
+						{
+							stackSize = Math.min(count, 64);
+							EntityItem entityitem = new EntityItem(this.worldObj, (xZposition.x + this.worldObj.rand.nextFloat()) * 2.0D, entry2.getValue().maxY + 0.5D, (xZposition.z + this.worldObj.rand.nextFloat()) * 2.0D, StackUtil.copyWithSize(isw.stack, stackSize));
+							entityitem.delayBeforeCanPickup = 10;
+							this.worldObj.spawnEntityInWorld(entityitem);
+						}
+					}
 				}
 			}
 		}
@@ -316,7 +279,7 @@ public class ExplosionIC2 extends Explosion
 	private void destroyUnchecked(int x, int y, int z, boolean noDrop)
 	{
 		int index = (z - this.areaZ) * this.areaSize + x - this.areaX;
-		index *= 2;
+		index = index * 2;
 		long[] array = this.destroyedBlockPositions[y];
 		if (array == null)
 		{
@@ -328,16 +291,14 @@ public class ExplosionIC2 extends Explosion
 			setAtIndex(index, array, 3);
 		else
 			setAtIndex(index, array, 1);
-
 	}
 
 	private void shootRay(double x, double y, double z, double phi, double theta, double power1, boolean killEntities)
 	{
 		/* TODO gamerforEA code optimize, old code:
-		double sinTheta = Math.sin(theta);
-		double deltaX = sinTheta * Math.cos(phi);
+		double deltaX = Math.sin(theta) * Math.cos(phi);
 		double deltaY = Math.cos(theta);
-		double deltaZ = sinTheta * Math.sin(phi); */
+		double deltaZ = Math.sin(theta) * Math.sin(phi); */
 		float fPhi = (float) phi;
 		float fTheta = (float) theta;
 		float sinTheta = MathHelper.sin(fTheta);
@@ -345,6 +306,7 @@ public class ExplosionIC2 extends Explosion
 		double deltaY = MathHelper.cos(fTheta);
 		double deltaZ = sinTheta * MathHelper.sin(fPhi);
 		// TODO gamerforEA code end
+
 		int step = 0;
 
 		while (true)
@@ -409,54 +371,55 @@ public class ExplosionIC2 extends Explosion
 	private void damageEntities(double x, double y, double z, int step, double power)
 	{
 		int index;
-		int i;
 		if (step != 4)
 		{
-			i = Util.square(step - 5);
-			int entry = 0;
-			int entity = this.entitiesInRange.size() - 1;
+			int distanceMin = Util.square(step - 5);
+			int indexStart = 0;
+			int indexEnd = this.entitiesInRange.size() - 1;
 
-			do
+			while (true)
 			{
-				index = (entry + entity) / 2;
-				int damage = this.entitiesInRange.get(index).distance;
-				if (damage < i)
-					entry = index + 1;
-				else if (damage > i)
-					entity = index - 1;
+				index = (indexStart + indexEnd) / 2;
+				int distance = this.entitiesInRange.get(index).distance;
+				if (distance < distanceMin)
+					indexStart = index + 1;
+				else if (distance > distanceMin)
+					indexEnd = index - 1;
 				else
-					entity = index;
+					indexEnd = index;
+
+				if (indexStart >= indexEnd)
+					break;
 			}
-			while (entry < entity);
 		}
 		else
 			index = 0;
 
 		int distanceMax = Util.square(step + 5);
 
-		for (i = index; i < this.entitiesInRange.size(); ++i)
+		for (int i = index; i < this.entitiesInRange.size(); ++i)
 		{
-			EntityDamage var25 = this.entitiesInRange.get(i);
-			if (var25.distance >= distanceMax)
+			EntityDamage entry = this.entitiesInRange.get(i);
+			if (entry.distance >= distanceMax)
 				break;
 
-			Entity var26 = var25.entity;
-			if (Util.square(var26.posX - x) + Util.square(var26.posY - y) + Util.square(var26.posZ - z) <= 25.0D)
+			Entity entity = entry.entity;
+			if (Util.square(entity.posX - x) + Util.square(entity.posY - y) + Util.square(entity.posZ - z) <= 25.0D)
 			{
-				double var27 = 4.0D * power;
-				var25.damage += var27;
-				var25.health -= var27;
-				double dx = var26.posX - this.explosionX;
-				double dy = var26.posY - this.explosionY;
-				double dz = var26.posZ - this.explosionZ;
+				double damage = 4.0D * power;
+				entry.damage += damage;
+				entry.health -= damage;
+				double dx = entity.posX - this.explosionX;
+				double dy = entity.posY - this.explosionY;
+				double dz = entity.posZ - this.explosionZ;
 				double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-				var25.motionX += dx / distance * 0.0875D * power;
-				var25.motionY += dy / distance * 0.0875D * power;
-				var25.motionZ += dz / distance * 0.0875D * power;
-				if (var25.health <= 0.0D)
+				entry.motionX += dx / distance * 0.0875D * power;
+				entry.motionY += dy / distance * 0.0875D * power;
+				entry.motionZ += dz / distance * 0.0875D * power;
+				if (entry.health <= 0.0D)
 				{
-					var26.attackEntityFrom(this.damageSource, (float) var25.damage);
-					if (!var26.isEntityAlive())
+					entity.attackEntityFrom(this.damageSource, (float) entry.damage);
+					if (!entity.isEntityAlive())
 					{
 						this.entitiesInRange.remove(i);
 						--i;
@@ -519,6 +482,27 @@ public class ExplosionIC2 extends Explosion
 		array[index / 8] |= value << index % 8;
 	}
 
+	private static class DropData
+	{
+		int n;
+		int maxY;
+
+		DropData(int n1, int y)
+		{
+			this.n = n1;
+			this.maxY = y;
+		}
+
+		public DropData add(int n1, int y)
+		{
+			this.n += n1;
+			if (y > this.maxY)
+				this.maxY = y;
+
+			return this;
+		}
+	}
+
 	private static class EntityDamage
 	{
 		final Entity entity;
@@ -540,27 +524,6 @@ public class ExplosionIC2 extends Explosion
 	public static enum Type
 	{
 		Normal, Heat, Nuclear;
-	}
-
-	private static class DropData
-	{
-		int n;
-		int maxY;
-
-		DropData(int n1, int y)
-		{
-			this.n = n1;
-			this.maxY = y;
-		}
-
-		public DropData add(int n1, int y)
-		{
-			this.n += n1;
-			if (y > this.maxY)
-				this.maxY = y;
-
-			return this;
-		}
 	}
 
 	private static class XZposition

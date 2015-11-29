@@ -2,7 +2,6 @@ package ic2.core.item.tool;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -46,7 +45,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	public float power;
 	public int blockBreaks;
 	public boolean explosive;
-	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock)));
+	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(new Block[] { Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock) }));
 	public static final double laserSpeed = 1.0D;
 	public EntityLivingBase owner;
 	public boolean headingSet;
@@ -102,14 +101,11 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		this.yOffset = 0.0F;
 		double yaw = Math.toRadians(yawDeg);
 		double pitch = Math.toRadians(pitchDeg);
-		double sinYaw = Math.sin(yaw);
-		double cosYaw = Math.cos(yaw);
-		double cosPitch = Math.cos(pitch);
-		double x = entityliving.posX - cosYaw * 0.16D;
-		double z = entityliving.posZ - sinYaw * 0.16D;
-		double startMotionX = -sinYaw * cosPitch;
+		double x = entityliving.posX - Math.cos(yaw) * 0.16D;
+		double z = entityliving.posZ - Math.sin(yaw) * 0.16D;
+		double startMotionX = -Math.sin(yaw) * Math.cos(pitch);
 		double startMotionY = -Math.sin(pitch);
-		double startMotionZ = cosYaw * cosPitch;
+		double startMotionZ = Math.cos(yaw) * Math.cos(pitch);
 		this.setPosition(x, y, z);
 		this.setLaserHeading(startMotionX, startMotionY, startMotionZ, 1.0D);
 		this.range = range;
@@ -149,22 +145,15 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	public void onUpdate()
 	{
 		super.onUpdate();
-		if (IC2.platform.isSimulating() && (this.range < 1.0F || this.power <= 0.0F || this.blockBreaks <= 0))
-		{
-			if (this.explosive)
-				this.explode();
-
-			this.setDead();
-		}
-		else
+		if (!IC2.platform.isSimulating() || this.range >= 1.0F && this.power > 0.0F && this.blockBreaks > 0)
 		{
 			++this.ticksInAir;
 			Vec3 oldPosition = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
 			Vec3 newPosition = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-			MovingObjectPosition mop = this.worldObj.func_147447_a(oldPosition, newPosition, false, true, false);
+			MovingObjectPosition movingobjectposition = this.worldObj.func_147447_a(oldPosition, newPosition, false, true, false);
 			oldPosition = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-			if (mop != null)
-				newPosition = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+			if (movingobjectposition != null)
+				newPosition = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
 			else
 				newPosition = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
 
@@ -172,31 +161,30 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
 			double d = 0.0D;
 
-			float resis;
-			for (int tEvent = 0; tEvent < list.size(); ++tEvent)
+			for (int l = 0; l < list.size(); ++l)
 			{
-				Entity entity1 = (Entity) list.get(tEvent);
+				Entity entity1 = (Entity) list.get(l);
 				if (entity1.canBeCollidedWith() && (entity1 != this.owner || this.ticksInAir >= 5))
 				{
-					resis = 0.3F;
-					AxisAlignedBB axis = entity1.boundingBox.expand(resis, resis, resis);
-					MovingObjectPosition mop1 = axis.calculateIntercept(oldPosition, newPosition);
-					if (mop1 != null)
+					float f4 = 0.3F;
+					AxisAlignedBB axisalignedbb1 = entity1.boundingBox.expand(f4, f4, f4);
+					MovingObjectPosition movingobjectposition1 = axisalignedbb1.calculateIntercept(oldPosition, newPosition);
+					if (movingobjectposition1 != null)
 					{
-						double distance = oldPosition.distanceTo(mop1.hitVec);
-						if (distance < d || d == 0.0D)
+						double d1 = oldPosition.distanceTo(movingobjectposition1.hitVec);
+						if (d1 < d || d == 0.0D)
 						{
 							entity = entity1;
-							d = distance;
+							d = d1;
 						}
 					}
 				}
 			}
 
 			if (entity != null)
-				mop = new MovingObjectPosition(entity);
+				movingobjectposition = new MovingObjectPosition(entity);
 
-			if (mop != null && IC2.platform.isSimulating())
+			if (movingobjectposition != null && IC2.platform.isSimulating())
 			{
 				if (this.explosive)
 				{
@@ -205,32 +193,27 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 					return;
 				}
 
-				if (mop.entityHit != null)
+				if (movingobjectposition.entityHit != null)
 				{
-					LaserEvent.LaserHitsEntityEvent event = new LaserEvent.LaserHitsEntityEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, mop.entityHit);
-					MinecraftForge.EVENT_BUS.post(event);
-					if (this.takeDataFromEvent(event))
+					LaserEvent.LaserHitsEntityEvent tEvent = new LaserEvent.LaserHitsEntityEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, movingobjectposition.entityHit);
+					MinecraftForge.EVENT_BUS.post(tEvent);
+					if (this.takeDataFromEvent(tEvent))
 					{
-						int powerI = (int) this.power;
-						if (powerI > 0)
+						int damage = (int) this.power;
+						if (damage > 0)
 							/* TODO gamerforEA code replace, old code:
 							if (entity != null)
 							{
-								entity.setFire(powerI * (this.smelt ? 2 : 1));
-							}
-							
-							if (event.hitentity.attackEntityFrom((new EntityDamageSourceIndirect("arrow", this, this.owner)).setProjectile(), (float) powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
-							{
-								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
+								entity.setFire(damage * (this.smelt ? 2 : 1));
 							} */
-							if (EventConfig.laserEvent && EventUtils.cantDamage(this.fake.getPlayer(), event.hitentity))
+							if (EventConfig.laserEvent && EventUtils.cantDamage(this.fake.getPlayer(), tEvent.hitentity))
 							{
 								this.setDead();
 								return;
 							}
 							else
 							// TODO gamerforEA code end
-							if (event.hitentity.attackEntityFrom(new EntityDamageSourceIndirect("arrow", this, this.owner).setProjectile(), powerI) && this.owner instanceof EntityPlayer && (event.hitentity instanceof EntityDragon && ((EntityDragon) event.hitentity).getHealth() <= 0.0F || event.hitentity instanceof EntityDragonPart && ((EntityDragonPart) event.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) event.hitentity).entityDragonObj).getHealth() <= 0.0F))
+							if (tEvent.hitentity.attackEntityFrom(new EntityDamageSourceIndirect("arrow", this, this.owner).setProjectile(), damage) && this.owner instanceof EntityPlayer && (tEvent.hitentity instanceof EntityDragon && ((EntityDragon) tEvent.hitentity).getHealth() <= 0.0F || tEvent.hitentity instanceof EntityDragonPart && ((EntityDragonPart) tEvent.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) tEvent.hitentity).entityDragonObj).getHealth() <= 0.0F))
 								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
 
 						this.setDead();
@@ -238,59 +221,55 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 				}
 				else
 				{
-					LaserEvent.LaserHitsBlockEvent event = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit, 0.9F, true, true);
-					MinecraftForge.EVENT_BUS.post(event);
+					LaserEvent.LaserHitsBlockEvent tEvent = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ, movingobjectposition.sideHit, 0.9F, true, true);
+					MinecraftForge.EVENT_BUS.post(tEvent);
 					// TODO gamerforEA code start
-					if (EventConfig.laserEvent && EventUtils.cantBreak(this.fake.getPlayer(), event.x, event.y, event.z))
+					if (EventConfig.laserEvent && EventUtils.cantBreak(this.fake.getPlayer(), tEvent.x, tEvent.y, tEvent.z))
 					{
 						this.setDead();
 						return;
 					}
 					else
 					// TODO gamerforEA code end
-					if (this.takeDataFromEvent(event))
+					if (this.takeDataFromEvent(tEvent))
 					{
-						Block block = this.worldObj.getBlock(event.x, event.y, event.z);
-						if (block != null && block != Blocks.glass && block != Blocks.glass_pane && !StackUtil.equals(block, Ic2Items.reinforcedGlass))
-							if (!this.canMine(block))
+						Block tBlock = this.worldObj.getBlock(tEvent.x, tEvent.y, tEvent.z);
+						if (tBlock != null && tBlock != Blocks.glass && tBlock != Blocks.glass_pane && !StackUtil.equals(tBlock, Ic2Items.reinforcedGlass))
+							if (!this.canMine(tBlock))
 								this.setDead();
 							else if (IC2.platform.isSimulating())
 							{
-								resis = 0.0F;
-								resis = block.getExplosionResistance(this, this.worldObj, event.x, event.y, event.z, this.posX, this.posY, this.posZ) + 0.3F;
+								float resis = 0.0F;
+								resis = tBlock.getExplosionResistance(this, this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.posX, this.posY, this.posZ) + 0.3F;
 								this.power -= resis / 10.0F;
 								if (this.power >= 0.0F)
 								{
-									if (block.getMaterial() != Material.tnt && block.getMaterial() != MaterialIC2TNT.instance)
+									if (tBlock.getMaterial() != Material.tnt && tBlock.getMaterial() != MaterialIC2TNT.instance)
 									{
 										if (this.smelt)
-											if (block.getMaterial() == Material.wood)
-												event.dropBlock = false;
+											if (tBlock.getMaterial() == Material.wood)
+												tEvent.dropBlock = false;
 											else
-											{
-												Iterator var27 = block.getDrops(this.worldObj, event.x, event.y, event.z, this.worldObj.getBlockMetadata(event.x, event.y, event.z), 0).iterator();
-
-												while (var27.hasNext())
+												for (ItemStack isa : tBlock.getDrops(this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.worldObj.getBlockMetadata(tEvent.x, tEvent.y, tEvent.z), 0))
 												{
-													ItemStack var28 = (ItemStack) var27.next();
-													ItemStack var29 = FurnaceRecipes.smelting().getSmeltingResult(var28);
-													if (var29 != null)
+													ItemStack is = FurnaceRecipes.smelting().getSmeltingResult(isa);
+													if (is != null)
 													{
-														Block newBlock = StackUtil.getBlock(var29);
-														if (newBlock != null && newBlock != block)
+														Block newBlock = StackUtil.getBlock(is);
+														if (newBlock != null && newBlock != tBlock)
 														{
-															event.removeBlock = false;
-															event.dropBlock = false;
-															this.worldObj.setBlock(event.x, event.y, event.z, newBlock, var29.getItemDamage(), 7);
+															tEvent.removeBlock = false;
+															tEvent.dropBlock = false;
+															this.worldObj.setBlock(tEvent.x, tEvent.y, tEvent.z, newBlock, is.getItemDamage(), 7);
 														}
 														else
 														{
-															event.dropBlock = false;
+															tEvent.dropBlock = false;
 															float var6 = 0.7F;
 															double var7 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
 															double var9 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
 															double var11 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
-															EntityItem var13 = new EntityItem(this.worldObj, event.x + var7, event.y + var9, event.z + var11, var29.copy());
+															EntityItem var13 = new EntityItem(this.worldObj, tEvent.x + var7, tEvent.y + var9, tEvent.z + var11, is.copy());
 															var13.delayBeforeCanPickup = 10;
 															this.worldObj.spawnEntityInWorld(var13);
 														}
@@ -298,19 +277,18 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 														this.power = 0.0F;
 													}
 												}
-											}
 									}
 									else
-										block.onBlockDestroyedByExplosion(this.worldObj, event.x, event.y, event.z, new Explosion(this.worldObj, this, event.x, event.y, event.z, 1.0F));
+										tBlock.onBlockDestroyedByExplosion(this.worldObj, tEvent.x, tEvent.y, tEvent.z, new Explosion(this.worldObj, this, tEvent.x, tEvent.y, tEvent.z, 1.0F));
 
-									if (event.removeBlock)
+									if (tEvent.removeBlock)
 									{
-										if (event.dropBlock)
-											block.dropBlockAsItemWithChance(this.worldObj, event.x, event.y, event.z, this.worldObj.getBlockMetadata(event.x, event.y, event.z), event.dropChance, 0);
+										if (tEvent.dropBlock)
+											tBlock.dropBlockAsItemWithChance(this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.worldObj.getBlockMetadata(tEvent.x, tEvent.y, tEvent.z), tEvent.dropChance, 0);
 
-										this.worldObj.setBlockToAir(event.x, event.y, event.z);
-										if (this.worldObj.rand.nextInt(10) == 0 && block.getMaterial().getCanBurn())
-											this.worldObj.setBlock(event.x, event.y, event.z, Blocks.fire, 0, 7);
+										this.worldObj.setBlockToAir(tEvent.x, tEvent.y, tEvent.z);
+										if (this.worldObj.rand.nextInt(10) == 0 && tBlock.getMaterial().getCanBurn())
+											this.worldObj.setBlock(tEvent.x, tEvent.y, tEvent.z, Blocks.fire, 0, 7);
 									}
 
 									--this.blockBreaks;
@@ -326,22 +304,30 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			this.range = (float) (this.range - Math.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ));
 			if (this.isInWater())
 				this.setDead();
+
+		}
+		else
+		{
+			if (this.explosive)
+				this.explode();
+
+			this.setDead();
 		}
 	}
 
 	@Override
-	public void writeEntityToNBT(NBTTagCompound nbt)
+	public void writeEntityToNBT(NBTTagCompound nbttagcompound)
 	{
 		// TODO gamerforEA code start
-		this.fake.writeToNBT(nbt);
+		this.fake.writeToNBT(nbttagcompound);
 		// TODO gamerforEA code end
 	}
 
 	@Override
-	public void readEntityFromNBT(NBTTagCompound nbt)
+	public void readEntityFromNBT(NBTTagCompound nbttagcompound)
 	{
 		// TODO gamerforEA code start
-		this.fake.readFromNBT(nbt);
+		this.fake.readFromNBT(nbttagcompound);
 		// TODO gamerforEA code end
 	}
 
@@ -351,15 +337,15 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		return 0.0F;
 	}
 
-	public boolean takeDataFromEvent(LaserEvent event)
+	public boolean takeDataFromEvent(LaserEvent aEvent)
 	{
-		this.owner = event.owner;
-		this.range = event.range;
-		this.power = event.power;
-		this.blockBreaks = event.blockBreaks;
-		this.explosive = event.explosive;
-		this.smelt = event.smelt;
-		if (event.isCanceled())
+		this.owner = aEvent.owner;
+		this.range = aEvent.range;
+		this.power = aEvent.power;
+		this.blockBreaks = aEvent.blockBreaks;
+		this.explosive = aEvent.explosive;
+		this.smelt = aEvent.smelt;
+		if (aEvent.isCanceled())
 		{
 			this.setDead();
 			return false;
@@ -372,14 +358,15 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	{
 		if (IC2.platform.isSimulating())
 		{
-			LaserEvent.LaserExplodesEvent event = new LaserEvent.LaserExplodesEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, 5.0F, 0.85F, 0.55F);
-			MinecraftForge.EVENT_BUS.post(event);
-			if (this.takeDataFromEvent(event))
+			LaserEvent.LaserExplodesEvent tEvent = new LaserEvent.LaserExplodesEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, 5.0F, 0.85F, 0.55F);
+			MinecraftForge.EVENT_BUS.post(tEvent);
+			if (this.takeDataFromEvent(tEvent))
 			{
-				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.posX, this.posY, this.posZ, event.explosionpower, event.explosiondroprate);
+				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.posX, this.posY, this.posZ, tEvent.explosionpower, tEvent.explosiondroprate);
 				explosion.doExplosion();
 			}
 		}
+
 	}
 
 	public boolean canMine(Block block)
@@ -398,5 +385,6 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	{
 		if (entity instanceof EntityLivingBase)
 			this.owner = (EntityLivingBase) entity;
+
 	}
 }

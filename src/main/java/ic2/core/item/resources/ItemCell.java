@@ -90,20 +90,20 @@ public class ItemCell extends ItemIC2
 			return false;
 		else
 		{
-			MovingObjectPosition mop = this.getMovingObjectPositionFromPlayer(world, player, true);
-			if (mop == null)
+			MovingObjectPosition position = this.getMovingObjectPositionFromPlayer(world, player, true);
+			if (position == null)
 				return false;
 			else
 			{
-				if (mop.typeOfHit == MovingObjectType.BLOCK)
+				if (position.typeOfHit == MovingObjectType.BLOCK)
 				{
-					x = mop.blockX;
-					y = mop.blockY;
-					z = mop.blockZ;
+					x = position.blockX;
+					y = position.blockY;
+					z = position.blockZ;
 					if (!world.canMineBlock(player, x, y, z))
 						return false;
 
-					if (!player.canPlayerEdit(x, y, z, mop.sideHit, stack))
+					if (!player.canPlayerEdit(x, y, z, position.sideHit, stack))
 						return false;
 
 					// TODO gamerforEA code start
@@ -115,8 +115,8 @@ public class ItemCell extends ItemIC2
 					{
 						if (world.getBlockMetadata(x, y, z) == 0)
 						{
-							ItemStack fs = this.cells.get(world.getBlock(x, y, z));
-							if (fs != null && StackUtil.storeInventoryItem(fs.copy(), player, false))
+							ItemStack filledCell = this.cells.get(world.getBlock(x, y, z));
+							if (filledCell != null && StackUtil.storeInventoryItem(filledCell.copy(), player, false))
 							{
 								world.setBlockToAir(x, y, z);
 								--stack.stackSize;
@@ -126,9 +126,9 @@ public class ItemCell extends ItemIC2
 					}
 					else
 					{
-						FluidStack fluid = FluidContainerRegistry.getFluidForFilledItem(stack);
-						ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[mop.sideHit];
-						if (fluid != null && LiquidUtil.placeFluid(fluid, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, mop.sideHit, stack) && LiquidUtil.placeFluid(fluid, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
+						FluidStack fs = FluidContainerRegistry.getFluidForFilledItem(stack);
+						ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[position.sideHit];
+						if (fs != null && LiquidUtil.placeFluid(fs, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, position.sideHit, stack) && LiquidUtil.placeFluid(fs, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
 						{
 							if (!player.capabilities.isCreativeMode)
 								--stack.stackSize;
@@ -147,14 +147,9 @@ public class ItemCell extends ItemIC2
 	{
 		this.names.put(Integer.valueOf(meta), name);
 		ItemStack ret = new ItemStack(this, 1, meta);
-		Block[] arr$ = blocks;
-		int len$ = blocks.length;
 
-		for (int i$ = 0; i$ < len$; ++i$)
-		{
-			Block block = arr$[i$];
+		for (Block block : blocks)
 			this.cells.put(block, ret);
-		}
 
 		return ret;
 	}

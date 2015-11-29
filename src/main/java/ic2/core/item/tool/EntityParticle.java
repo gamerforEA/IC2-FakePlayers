@@ -1,7 +1,6 @@
 package ic2.core.item.tool;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.gamerforea.eventhelper.util.EventUtils;
@@ -41,16 +40,16 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		this.lifeTime = 6000;
 	}
 
-	public EntityParticle(World world, EntityLivingBase owner, float speed, double coreSize, double influenceSize)
+	public EntityParticle(World world, EntityLivingBase owner1, float speed, double coreSize1, double influenceSize1)
 	{
 		this(world);
-		this.coreSize = coreSize;
-		this.influenceSize = influenceSize;
-		this.owner = owner;
-		this.setPosition(owner.posX, owner.posY + owner.getEyeHeight(), owner.posZ);
-		Vector3 motion = new Vector3(owner.getLookVec());
-		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize);
-		double stepAngle = Math.atan(0.5D / influenceSize) * 2.0D;
+		this.coreSize = coreSize1;
+		this.influenceSize = influenceSize1;
+		this.owner = owner1;
+		this.setPosition(owner1.posX, owner1.posY + owner1.getEyeHeight(), owner1.posZ);
+		Vector3 motion = new Vector3(owner1.getLookVec());
+		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize1);
+		double stepAngle = Math.atan(0.5D / influenceSize1) * 2.0D;
 		int steps = (int) Math.ceil(6.283185307179586D / stepAngle);
 		Quaternion q = new Quaternion().setFromAxisAngle(motion, stepAngle);
 		this.radialTestVectors = new Vector3[steps];
@@ -123,54 +122,45 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			this.posZ = hit.hitVec.zCoord;
 		}
 
-		List entitiesToCheck = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(this.prevPosX, this.prevPosY, this.prevPosZ, this.posX, this.posY, this.posZ).expand(this.influenceSize, this.influenceSize, this.influenceSize));
-		ArrayList entitiesInfluences = new ArrayList();
+		List<Entity> entitiesToCheck = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(this.prevPosX, this.prevPosY, this.prevPosZ, this.posX, this.posY, this.posZ).expand(this.influenceSize, this.influenceSize, this.influenceSize));
+		List<MovingObjectPosition> entitiesInfluences = new ArrayList();
 		double minDistanceSq = start.distanceSquared(end);
-		Iterator maxInfluenceDistance = entitiesToCheck.iterator();
 
-		MovingObjectPosition len;
-		while (maxInfluenceDistance.hasNext())
-		{
-			Entity entity = (Entity) maxInfluenceDistance.next();
+		for (Entity entity : entitiesToCheck)
 			if (entity != this.owner && entity.canBeCollidedWith())
 			{
-				MovingObjectPosition vForward = entity.boundingBox.expand(this.influenceSize, this.influenceSize, this.influenceSize).calculateIntercept(start.toVec3(), end.toVec3());
-				if (vForward != null)
+				MovingObjectPosition entityInfluence = entity.boundingBox.expand(this.influenceSize, this.influenceSize, this.influenceSize).calculateIntercept(start.toVec3(), end.toVec3());
+				if (entityInfluence != null)
 				{
-					entitiesInfluences.add(vForward);
-					len = entity.boundingBox.expand(this.coreSize, this.coreSize, this.coreSize).calculateIntercept(start.toVec3(), end.toVec3());
-					if (len != null)
+					entitiesInfluences.add(entityInfluence);
+					MovingObjectPosition entityHit = entity.boundingBox.expand(this.coreSize, this.coreSize, this.coreSize).calculateIntercept(start.toVec3(), end.toVec3());
+					if (entityHit != null)
 					{
-						double distanceSq = start.distanceSquared(len.hitVec);
+						double distanceSq = start.distanceSquared(entityHit.hitVec);
 						if (distanceSq < minDistanceSq)
 						{
-							hit = len;
+							hit = entityHit;
 							minDistanceSq = distanceSq;
 						}
 					}
 				}
 			}
-		}
 
-		double var18 = Math.sqrt(minDistanceSq) + this.influenceSize;
-		Iterator var19 = entitiesInfluences.iterator();
+		double maxInfluenceDistance = Math.sqrt(minDistanceSq) + this.influenceSize;
 
-		while (var19.hasNext())
-		{
-			len = (MovingObjectPosition) var19.next();
-			if (start.distance(len.hitVec) <= var18)
-				this.onInfluence(len);
-		}
+		for (MovingObjectPosition entityInfluence : entitiesInfluences)
+			if (start.distance(entityInfluence.hitVec) <= maxInfluenceDistance)
+				this.onInfluence(entityInfluence);
 
 		if (this.radialTestVectors != null)
 		{
-			Vector3 var20 = end.copy().sub(start);
-			double var21 = var20.length();
-			var20.scale(1.0D / var21);
+			Vector3 vForward = end.copy().sub(start);
+			double len = vForward.length();
+			vForward.scale(1.0D / len);
 			Vector3 origin = new Vector3(start);
 			Vector3 tmp = new Vector3();
 
-			for (int d = 0; d < var21; ++d)
+			for (int d = 0; d < len; ++d)
 			{
 				for (Vector3 radialTestVector : this.radialTestVectors)
 				{
@@ -180,7 +170,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 						this.onInfluence(influence);
 				}
 
-				origin.add(var20);
+				origin.add(vForward);
 			}
 		}
 
@@ -195,6 +185,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			if (this.lifeTime <= 0)
 				this.setDead();
 		}
+
 	}
 
 	protected void onImpact(MovingObjectPosition hit)
@@ -202,6 +193,9 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		if (IC2.platform.isSimulating())
 		{
 			// TODO gamerforEA code clear: System.out.println("hit " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
+			if (hit.typeOfHit == MovingObjectType.BLOCK && IC2.platform.isSimulating())
+				;
+
 			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, this.owner, hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 18.0F, 0.95F, ExplosionIC2.Type.Heat);
 			explosion.doExplosion();
 		}

@@ -23,6 +23,7 @@ import ic2.core.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
@@ -90,11 +91,12 @@ public abstract class BlockMultiID extends BlockBase
 				{
 					int subIndex = active * 6 + side;
 					String subName = name + ":" + subIndex;
-					BlockTextureStitched texture = new BlockTextureStitched(subName, subIndex);
+					TextureAtlasSprite texture = new BlockTextureStitched(subName, subIndex);
 					this.textures[index][subIndex] = texture;
 					((TextureMap) iconRegister).setTextureEntry(subName, texture);
 				}
 		}
+
 	}
 
 	@Override
@@ -183,19 +185,19 @@ public abstract class BlockMultiID extends BlockBase
 	@Override
 	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune)
 	{
-		ArrayList ret = super.getDrops(world, x, y, z, metadata, fortune);
+		ArrayList<ItemStack> ret = super.getDrops(world, x, y, z, metadata, fortune);
 		TileEntity te = this.getOwnTe(world, x, y, z);
 		if (te == null)
 		{
-			Iterator inv = tesBeforeBreak.descendingIterator();
+			Iterator<TileEntity> it = tesBeforeBreak.descendingIterator();
 
-			while (inv.hasNext())
+			while (it.hasNext())
 			{
-				TileEntity i = (TileEntity) inv.next();
-				if (i.getWorldObj() == world && i.xCoord == x && i.yCoord == y && i.zCoord == z)
+				TileEntity te2 = it.next();
+				if (te2.getWorldObj() == world && te2.xCoord == x && te2.yCoord == y && te2.zCoord == z)
 				{
-					te = i;
-					inv.remove();
+					te = te2;
+					it.remove();
 					break;
 				}
 			}
@@ -203,11 +205,11 @@ public abstract class BlockMultiID extends BlockBase
 
 		if (te instanceof IInventory)
 		{
-			IInventory var13 = (IInventory) te;
+			IInventory inv = (IInventory) te;
 
-			for (int var12 = 0; var12 < var13.getSizeInventory(); ++var12)
+			for (int i = 0; i < inv.getSizeInventory(); ++i)
 			{
-				ItemStack itemStack = var13.getStackInSlot(var12);
+				ItemStack itemStack = inv.getStackInSlot(i);
 				if (itemStack != null)
 					ret.add(itemStack);
 			}
@@ -222,32 +224,25 @@ public abstract class BlockMultiID extends BlockBase
 		TileEntity te = this.getOwnTe(world, x, y, z);
 		if (te instanceof TileEntityBlock)
 		{
-			TileEntityBlock i$ = (TileEntityBlock) te;
-			i$.onBlockBreak(this, meta);
-			i$.onUnloaded();
+			TileEntityBlock teb = (TileEntityBlock) te;
+			teb.onBlockBreak(this, meta);
+			teb.onUnloaded();
 		}
 
 		if (te != null)
 		{
 			if (te instanceof IHasGui)
-			{
-				Iterator i$1 = world.playerEntities.iterator();
-
-				while (i$1.hasNext())
-				{
-					Object obj = i$1.next();
+				for (Object obj : world.playerEntities)
 					if (obj instanceof EntityPlayerMP)
 					{
 						EntityPlayerMP player = (EntityPlayerMP) obj;
 						if (player.openContainer instanceof ContainerBase)
 						{
-							ContainerBase container = (ContainerBase) player.openContainer;
+							ContainerBase<?> container = (ContainerBase) player.openContainer;
 							if (container.base == te)
 								player.closeScreen();
 						}
 					}
-				}
-			}
 
 			if (tesBeforeBreak.size() >= 8)
 				tesBeforeBreak.pop();
@@ -272,11 +267,11 @@ public abstract class BlockMultiID extends BlockBase
 	@Override
 	public void onBlockAdded(World world, int x, int y, int z)
 	{
-		Iterator it = tesBeforeBreak.descendingIterator();
+		Iterator<TileEntity> it = tesBeforeBreak.descendingIterator();
 
 		while (it.hasNext())
 		{
-			TileEntity te = (TileEntity) it.next();
+			TileEntity te = it.next();
 			if (te.getWorldObj() == world && te.xCoord == x && te.yCoord == y && te.zCoord == z)
 			{
 				it.remove();
@@ -339,20 +334,20 @@ public abstract class BlockMultiID extends BlockBase
 	@Override
 	public final TileEntity createTileEntity(World world, int metadata)
 	{
-		MutableObject ctorArgTypes = new MutableObject(emptyClassArray);
-		MutableObject ctorArgs = new MutableObject(emptyObjArray);
-		Class teClass = this.getTeClass(metadata, ctorArgTypes, ctorArgs);
+		MutableObject<Class<?>[]> ctorArgTypes = new MutableObject(emptyClassArray);
+		MutableObject<Object[]> ctorArgs = new MutableObject(emptyObjArray);
+		Class<? extends TileEntity> teClass = this.getTeClass(metadata, ctorArgTypes, ctorArgs);
 		if (teClass == null)
 			return null;
 		else
 			try
 			{
-				Constructor e = teClass.getConstructor((Class[]) ctorArgTypes.getValue());
-				return (TileEntity) e.newInstance((Object[]) ctorArgs.getValue());
+				Constructor<? extends TileEntity> ctor = teClass.getConstructor(ctorArgTypes.getValue());
+				return ctor.newInstance(ctorArgs.getValue());
 			}
-			catch (Exception var7)
+			catch (Throwable var7)
 			{
-				throw new RuntimeException("Error constructing " + teClass + " with " + Arrays.asList((Object[]) ctorArgTypes.getValue()) + ", " + Arrays.asList((Object[]) ctorArgs.getValue()) + ".", var7);
+				throw new RuntimeException("Error constructing " + teClass + " with " + Arrays.asList((Object[]) ctorArgTypes.getValue()) + ", " + Arrays.asList(ctorArgs.getValue()) + ".", var7);
 			}
 	}
 
@@ -365,12 +360,12 @@ public abstract class BlockMultiID extends BlockBase
 		TileEntity te;
 		if (blockAccess instanceof World)
 		{
-			Chunk expectedClass = Util.getLoadedChunk((World) blockAccess, x >> 4, z >> 4);
-			if (expectedClass == null)
+			Chunk chunk = Util.getLoadedChunk((World) blockAccess, x >> 4, z >> 4);
+			if (chunk == null)
 				return null;
 
-			block = expectedClass.getBlock(x & 15, y, z & 15);
-			meta = expectedClass.getBlockMetadata(x & 15, y, z & 15);
+			block = chunk.getBlock(x & 15, y, z & 15);
+			meta = chunk.getBlockMetadata(x & 15, y, z & 15);
 			te = blockAccess.getTileEntity(x, y, z);
 		}
 		else
@@ -380,22 +375,22 @@ public abstract class BlockMultiID extends BlockBase
 			te = blockAccess.getTileEntity(x, y, z);
 		}
 
-		Class expectedClass1 = this.getTeClass(meta, (MutableObject) null, (MutableObject) null);
-		Class actualClass = te != null ? te.getClass() : null;
-		if (actualClass != expectedClass1)
+		Class<? extends TileEntity> expectedClass = this.getTeClass(meta, (MutableObject<Class<?>[]>) null, (MutableObject<Object[]>) null);
+		Class<? extends TileEntity> actualClass = te != null ? te.getClass() : null;
+		if (actualClass != expectedClass)
 		{
 			if (block != this)
 			{
 				if (Util.inDev())
 				{
-					StackTraceElement[] world1 = new Throwable().getStackTrace();
-					IC2.log.warn(LogCategory.Block, "Own tile entity query from %s to foreign block %s instead of %s at %s.", new Object[] { world1.length > 1 ? world1[1] : "?", block != null ? block.getClass() : null, this.getClass(), Util.formatPosition(blockAccess, x, y, z) });
+					StackTraceElement[] st = new Throwable().getStackTrace();
+					IC2.log.warn(LogCategory.Block, "Own tile entity query from %s to foreign block %s instead of %s at %s.", new Object[] { st.length > 1 ? st[1] : "?", block != null ? block.getClass() : null, this.getClass(), Util.formatPosition(blockAccess, x, y, z) });
 				}
 
 				return null;
 			}
 
-			IC2.log.warn(LogCategory.Block, "Mismatched tile entity at %s, got %s, expected %s.", new Object[] { Util.formatPosition(blockAccess, x, y, z), actualClass, expectedClass1 });
+			IC2.log.warn(LogCategory.Block, "Mismatched tile entity at %s, got %s, expected %s.", new Object[] { Util.formatPosition(blockAccess, x, y, z), actualClass, expectedClass });
 			if (!(blockAccess instanceof World))
 				return null;
 
