@@ -100,8 +100,15 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 					if (this.collectFluidBlock(stack, player, world, x, y, z))
 						return true;
 
-					FluidStack fs = LiquidUtil.drainContainerStack(stack, player, 1000, true);
 					ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[position.sideHit];
+
+					// TODO gamerforEA code start
+					if (EventUtils.cantBreak(player, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
+						return false;
+					// TODO gamerforEA code end
+
+					FluidStack fs = LiquidUtil.drainContainerStack(stack, player, 1000, true);
+
 					if (LiquidUtil.placeFluid(fs, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, position.sideHit, stack) && LiquidUtil.placeFluid(fs, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
 					{
 						if (!player.capabilities.isCreativeMode)

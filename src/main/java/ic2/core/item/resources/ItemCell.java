@@ -126,8 +126,15 @@ public class ItemCell extends ItemIC2
 					}
 					else
 					{
-						FluidStack fs = FluidContainerRegistry.getFluidForFilledItem(stack);
 						ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[position.sideHit];
+
+						// TODO gamerforEA code start
+						if (EventUtils.cantBreak(player, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
+							return false;
+						// TODO gamerforEA code end
+
+						FluidStack fs = FluidContainerRegistry.getFluidForFilledItem(stack);
+
 						if (fs != null && LiquidUtil.placeFluid(fs, world, x, y, z) || player.canPlayerEdit(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, position.sideHit, stack) && LiquidUtil.placeFluid(fs, world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
 						{
 							if (!player.capabilities.isCreativeMode)

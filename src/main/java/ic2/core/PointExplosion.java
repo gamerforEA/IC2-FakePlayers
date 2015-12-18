@@ -1,13 +1,17 @@
 package ic2.core;
 
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerWorld;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.api.event.ExplosionEvent;
 import ic2.core.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.ChunkPosition;
@@ -22,6 +26,10 @@ public class PointExplosion extends Explosion
 	private final float dropRate;
 	private final int entityDamage;
 
+	// TODO gamerforEA code start
+	public final FakePlayerContainer fake;
+	// TODO gamerforEA code end
+
 	public PointExplosion(World world1, Entity entity, EntityLivingBase exploder, double x, double y, double z, float power, float dropRate1, int entityDamage1)
 	{
 		super(world1, exploder, x, y, z, power);
@@ -29,6 +37,14 @@ public class PointExplosion extends Explosion
 		this.entity = entity;
 		this.dropRate = dropRate1;
 		this.entityDamage = entityDamage1;
+
+		// TODO gamerforEA code start
+		this.fake = new FakePlayerContainerWorld(ModUtils.profile, this.world);
+		if (entity instanceof EntityPlayer)
+			this.fake.profile = ((EntityPlayer) entity).getGameProfile();
+		else if (exploder instanceof EntityPlayer)
+			this.fake.profile = ((EntityPlayer) exploder).getGameProfile();
+		// TODO gamerforEA code end
 	}
 
 	@Override
@@ -50,7 +66,7 @@ public class PointExplosion extends Explosion
 						if (block.getExplosionResistance(this.exploder, this.world, x, y, z, this.explosionX, this.explosionY, this.explosionZ) < this.explosionSize * 10.0F)
 						{
 							// TODO gamerforEA code start
-							if (EventConfig.explosionEvent && EventUtils.isInPrivate(this.world, x, y, z))
+							if (EventConfig.explosionEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
 								continue;
 							// TODO gamerforEA code end
 
@@ -61,7 +77,7 @@ public class PointExplosion extends Explosion
 			for (Entity entity : (Iterable<Entity>) this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D)))
 			{
 				// TODO gamerforEA code start
-				if (EventUtils.isInPrivate(entity))
+				if (EventUtils.cantDamage(this.fake.getPlayer(), entity))
 					continue;
 				// TODO gamerforEA code end
 

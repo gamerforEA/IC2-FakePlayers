@@ -15,6 +15,7 @@ import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 import com.gamerforea.ic2.ModUtils;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.network.INetworkDataProvider;
@@ -398,11 +399,11 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		if (subscription == null)
 		{
 			boolean hasUpdateClient = false;
+			boolean hasUpdateServer = false;
 
-			boolean hasUpdateServer;
-			for (hasUpdateServer = false; cls != TileEntityBlock.class && (!hasUpdateClient || !hasUpdateServer); cls = cls.getSuperclass())
+			for (boolean isClient = FMLCommonHandler.instance().getSide().isClient(); cls != TileEntityBlock.class && (!hasUpdateClient && isClient || !hasUpdateServer); cls = cls.getSuperclass())
 			{
-				if (!hasUpdateClient)
+				if (!hasUpdateClient && isClient)
 				{
 					boolean found = true;
 
@@ -410,7 +411,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 					{
 						cls.getDeclaredMethod("updateEntityClient", new Class[0]);
 					}
-					catch (NoSuchMethodException var8)
+					catch (NoSuchMethodException var9)
 					{
 						found = false;
 					}
@@ -427,7 +428,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 					{
 						cls.getDeclaredMethod("updateEntityServer", new Class[0]);
 					}
-					catch (NoSuchMethodException var7)
+					catch (NoSuchMethodException var8)
 					{
 						found = false;
 					}

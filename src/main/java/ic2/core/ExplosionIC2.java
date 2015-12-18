@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerWorld;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.ModUtils;
 
 import ic2.api.event.ExplosionEvent;
 import ic2.api.tile.ExplosionWhitelist;
@@ -61,32 +64,36 @@ public class ExplosionIC2 extends Explosion
 	private static final int secondaryRayCount = 5;
 	private static final int bitSetElementSize = 2;
 
-	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power1, float drop)
+	// TODO gamerforEA code start
+	public final FakePlayerContainer fake;
+	// TODO gamerforEA code end
+
+	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power, float drop)
 	{
-		this(world, entity, x, y, z, power1, drop, Type.Normal);
+		this(world, entity, x, y, z, power, drop, Type.Normal);
 	}
 
-	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power1, float drop, Type type1)
+	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power, float drop, Type type)
 	{
-		this(world, entity, x, y, z, power1, drop, type1, (EntityLivingBase) null, 0);
+		this(world, entity, x, y, z, power, drop, type, (EntityLivingBase) null, 0);
 	}
 
-	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power1, float drop, Type type1, EntityLivingBase igniter1, int radiationRange1)
+	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power, float drop, Type type, EntityLivingBase igniter, int radiationRange)
 	{
-		super(world, entity, x, y, z, power1);
+		super(world, entity, x, y, z, power);
 		this.ExplosionRNG = new Random();
 		this.entitiesInRange = new ArrayList();
 		this.worldObj = world;
 		this.mapHeight = IC2.getWorldHeight(world);
 		this.exploder = entity;
-		this.power = power1;
+		this.power = power;
 		this.explosionDropRate = drop;
 		this.explosionX = x;
 		this.explosionY = y;
 		this.explosionZ = z;
-		this.type = type1;
-		this.igniter = igniter1;
-		this.radiationRange = radiationRange1;
+		this.type = type;
+		this.igniter = igniter;
+		this.radiationRange = radiationRange;
 		this.maxDistance = this.power / 0.4D;
 		int maxDistanceInt = (int) Math.ceil(this.maxDistance);
 		this.areaSize = maxDistanceInt * 2;
@@ -98,6 +105,14 @@ public class ExplosionIC2 extends Explosion
 			this.damageSource = DamageSource.setExplosionSource(this);
 
 		this.destroyedBlockPositions = new long[this.mapHeight][];
+
+		// TODO gamerforEA code start
+		this.fake = new FakePlayerContainerWorld(ModUtils.profile, this.worldObj);
+		if (entity instanceof EntityPlayer)
+			this.fake.profile = ((EntityPlayer) entity).getGameProfile();
+		else if (igniter instanceof EntityPlayer)
+			this.fake.profile = ((EntityPlayer) igniter).getGameProfile();
+		// TODO gamerforEA code end
 	}
 
 	public void doExplosion()
@@ -146,6 +161,12 @@ public class ExplosionIC2 extends Explosion
 				for (EntityDamage entry : this.entitiesInRange)
 				{
 					Entity entity = entry.entity;
+
+					// TODO gamerforEA code start
+					if (EventConfig.explosionEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity))
+						continue;
+					// TODO gamerforEA code end
+
 					entity.attackEntityFrom(this.damageSource, (float) entry.damage);
 					if (entity instanceof EntityPlayer)
 					{
@@ -197,7 +218,7 @@ public class ExplosionIC2 extends Explosion
 							z = z + this.areaZ;
 
 							// TODO gamerforEA code start
-							if (EventConfig.explosionEvent && EventUtils.isInPrivate(this.worldObj, x, y, z))
+							if (EventConfig.explosionEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
 								continue;
 							// TODO gamerforEA code end
 
@@ -406,6 +427,11 @@ public class ExplosionIC2 extends Explosion
 			Entity entity = entry.entity;
 			if (Util.square(entity.posX - x) + Util.square(entity.posY - y) + Util.square(entity.posZ - z) <= 25.0D)
 			{
+				// TODO gamerforEA code start
+				if (EventConfig.explosionEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity))
+					continue;
+				// TODO gamerforEA code end
+
 				double damage = 4.0D * power;
 				entry.damage += damage;
 				entry.health -= damage;

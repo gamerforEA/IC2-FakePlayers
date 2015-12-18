@@ -363,6 +363,11 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			if (this.takeDataFromEvent(tEvent))
 			{
 				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.posX, this.posY, this.posZ, tEvent.explosionpower, tEvent.explosiondroprate);
+
+				// TODO gamerforEA code start
+				explosion.fake.profile = this.fake.profile;
+				// TODO gamerforEA code end
+
 				explosion.doExplosion();
 			}
 		}

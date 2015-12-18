@@ -3,8 +3,11 @@ package ic2.core.item.tool;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.ModUtils;
 
 import cpw.mods.fml.common.registry.IThrowableEntity;
 import ic2.core.ExplosionIC2;
@@ -14,6 +17,7 @@ import ic2.core.util.Vector3;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -32,6 +36,10 @@ public class EntityParticle extends Entity implements IThrowableEntity
 	private int lifeTime;
 	private Entity owner;
 	private Vector3[] radialTestVectors;
+
+	// TODO gamerforEA code start
+	public final FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.profile, this);
+	// TODO gamerforEA code end
 
 	public EntityParticle(World world)
 	{
@@ -65,6 +73,11 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		this.motionX = motion.x;
 		this.motionY = motion.y;
 		this.motionZ = motion.z;
+
+		// TODO gamerforEA code start
+		if (owner1 instanceof EntityPlayer)
+			this.fake.profile = ((EntityPlayer) owner1).getGameProfile();
+		// TODO gamerforEA code end
 	}
 
 	@Override
@@ -75,11 +88,17 @@ public class EntityParticle extends Entity implements IThrowableEntity
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound)
 	{
+		// TODO gamerforEA code start
+		this.fake.readFromNBT(nbttagcompound);
+		// TODO gamerforEA code end
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound)
 	{
+		// TODO gamerforEA code start
+		this.fake.writeToNBT(nbttagcompound);
+		// TODO gamerforEA code end
 	}
 
 	@Override
@@ -197,6 +216,11 @@ public class EntityParticle extends Entity implements IThrowableEntity
 				;
 
 			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, this.owner, hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 18.0F, 0.95F, ExplosionIC2.Type.Heat);
+
+			// TODO gamerforEA code start
+			explosion.fake.profile = this.fake.profile;
+			// TODO gamerforEA code end
+
 			explosion.doExplosion();
 		}
 	}
@@ -215,7 +239,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 					if (smelted != null && smelted.getItem() instanceof ItemBlock)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.plasmaEvent && EventUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
+						if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
 							return;
 						// TODO gamerforEA code end
 
@@ -231,7 +255,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 							int z = hit.blockZ - side.offsetZ;
 
 							// TODO gamerforEA code start
-							if (EventConfig.plasmaEvent && EventUtils.isInPrivate(this.worldObj, x, y, z))
+							if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
 								return;
 							// TODO gamerforEA code end
 
@@ -242,7 +266,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 				else
 				{
 					// TODO gamerforEA code start
-					if (EventConfig.plasmaEvent && EventUtils.isInPrivate(this.worldObj, hit.blockX, hit.blockY, hit.blockZ))
+					if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
 						return;
 					// TODO gamerforEA code end
 
