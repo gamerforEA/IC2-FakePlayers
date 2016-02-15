@@ -15,22 +15,29 @@ buildscript {
 	}
 }
 
+repositories {
+	flatDir {
+		dirs 'lib'
+	}
+}
+
 apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2-2.2.810-experimental"
+version = "2-2.2.813-experimental"
 group= "ic2"
 archivesBaseName = "industrialcraft"
 
 minecraft {
-	version = "1.7.10-10.13.4.1541-1.7.10"
+	version = "1.7.10-10.13.4.1614-1.7.10"
 	runDir = "eclipse"
 }
 
 dependencies {
-	compile files('lib/EJML-core-0.26.jar')
-	compile fileTree(dir: 'lib', include: '*-dev.jar')
+	compile name: 'EventHelper-1.4-dev'
+	compile name: 'EJML-core-0.26'
+	compile name: archivesBaseName + '-' + version + '-dev'
 }
 
 jar {
