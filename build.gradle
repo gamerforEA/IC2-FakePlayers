@@ -35,7 +35,7 @@ minecraft {
 }
 
 dependencies {
-	compile name: 'EventHelper-1.4-dev'
+	compile name: 'EventHelper-1.6-dev'
 	compile name: 'EJML-core-0.26'
 	compile name: archivesBaseName + '-' + version + '-dev'
 }

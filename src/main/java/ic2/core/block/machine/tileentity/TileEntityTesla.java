@@ -40,7 +40,7 @@ public class TileEntityTesla extends TileEntityBlock
 
 		for (EntityLivingBase entity : (Iterable<EntityLivingBase>) this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 4, this.yCoord - 4, this.zCoord - 4, this.xCoord + 4 + 1, this.yCoord + 4 + 1, this.zCoord + 4 + 1)))
 			// TODO gamerforEA add condition [2, 3]
-			if (!ItemArmorHazmat.hasCompleteHazmat(entity) || EventConfig.teslaEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity) || entity.attackEntityFrom(IC2DamageSource.electricity, damage))
+			if (!ItemArmorHazmat.hasCompleteHazmat(entity) && (!EventConfig.teslaEvent || !EventUtils.cantDamage(this.fake.getPlayer(), entity)) && entity.attackEntityFrom(IC2DamageSource.electricity, damage))
 			{
 				if (this.worldObj instanceof WorldServer)
 				{

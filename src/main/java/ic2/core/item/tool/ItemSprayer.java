@@ -148,7 +148,8 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 						target = ItemSprayer.Target.Any;
 					}
 
-					int amount = this.sprayFoam(world, x, y, z, calculateDirectionsFromPlayer(player), target, maxFoamBlocks, player); // TODO gamerforEA add EntityPlayer parameter
+					// TODO gamerforEA add EntityPlayer parameter
+					int amount = this.sprayFoam(world, x, y, z, calculateDirectionsFromPlayer(player), target, maxFoamBlocks, player);
 					amount = amount * this.getFluidPerFoam();
 					if (amount > 0)
 					{
