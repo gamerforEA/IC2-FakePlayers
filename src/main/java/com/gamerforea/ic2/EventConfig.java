@@ -2,12 +2,11 @@ package com.gamerforea.ic2;
 
 import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
 
-import java.io.File;
 import java.util.Set;
 
+import com.gamerforea.eventhelper.util.FastUtils;
 import com.google.common.collect.Sets;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import net.minecraft.block.Block;
@@ -18,6 +17,7 @@ import net.minecraftforge.common.config.Configuration;
 public final class EventConfig
 {
 	public static final Set<String> tradeOMatBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
+	public static final Set<String> scannerBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
 
 	public static boolean terraEvent = true;
 	public static boolean pumpEvent = true;
@@ -34,13 +34,14 @@ public final class EventConfig
 	public static boolean explosionEnabled = false;
 	public static boolean laserscatterEnabled = true;
 
+	public static String safeAccessPermission = "ic2.accesssafe";
+	public static boolean skipTicks = false;
+
 	static
 	{
 		try
 		{
-			File mainDirectory = FMLCommonHandler.instance().getMinecraftServerInstance().getFile(".");
-			Configuration cfg = new Configuration(new File(mainDirectory, "config/Events/IC2.cfg"));
-			cfg.load();
+			Configuration cfg = FastUtils.getConfig("IC2");
 
 			terraEvent = cfg.getBoolean("terraEvent", CATEGORY_GENERAL, terraEvent, "Терраформер (замена/установка блоков)");
 			pumpEvent = cfg.getBoolean("pumpEvent", CATEGORY_GENERAL, pumpEvent, "Помпа (выкачивание жидкости)");
@@ -57,7 +58,11 @@ public final class EventConfig
 			explosionEnabled = cfg.getBoolean("explosionEnabled", "other", explosionEnabled, "Взрывы");
 			laserscatterEnabled = cfg.getBoolean("laserscatterEnabled", "other", laserscatterEnabled, "Шахтёрский лазер (режим \"Разброс\")");
 
+			safeAccessPermission = cfg.getString("safeAccessPermission", "other", safeAccessPermission, "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)");
+			skipTicks = cfg.getBoolean("skipTicks", "other", skipTicks, "Пропускать каждый второй тик обработки энергосетей");
+
 			readStringSet(cfg, "tradeOMatBlackList", "blacklists", "Чёрный список предметов для Обменного аппарата", tradeOMatBlackList);
+			readStringSet(cfg, "scannerBlackList", "blacklists", "Чёрный список предметов для Сканера", scannerBlackList);
 
 			cfg.save();
 		}
