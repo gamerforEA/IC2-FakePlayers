@@ -2,6 +2,9 @@ package com.gamerforea.ic2;
 
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import com.gamerforea.eventhelper.util.ConvertUtils;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.eventhelper.util.FastUtils;
@@ -29,6 +32,19 @@ public final class ModUtils
 	public static final boolean cantBreakOrNotInPrivate(EntityPlayer player, int x, int y, int z)
 	{
 		return !EventUtils.isInPrivate(player.worldObj, x, y, z) || EventUtils.cantBreak(player, x, y, z);
+	}
+
+	public static final boolean hasPermission(UUID playerId, String permission)
+	{
+		try
+		{
+			Player player = Bukkit.getPlayer(playerId);
+			return player != null && player.hasPermission(permission);
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
 
 	public static final boolean hasPermission(EntityPlayer player, String permission)

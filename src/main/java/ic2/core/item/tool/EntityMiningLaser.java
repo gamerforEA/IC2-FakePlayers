@@ -208,13 +208,13 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 							} */
 							if (EventConfig.laserEvent && EventUtils.cantDamage(this.fake.getPlayer(), tEvent.hitentity))
 							{
-								this.setDead();
-								return;
+							this.setDead();
+							return;
 							}
 							else
 							// TODO gamerforEA code end
 							if (tEvent.hitentity.attackEntityFrom(new EntityDamageSourceIndirect("arrow", this, this.owner).setProjectile(), damage) && this.owner instanceof EntityPlayer && (tEvent.hitentity instanceof EntityDragon && ((EntityDragon) tEvent.hitentity).getHealth() <= 0.0F || tEvent.hitentity instanceof EntityDragonPart && ((EntityDragonPart) tEvent.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) tEvent.hitentity).entityDragonObj).getHealth() <= 0.0F))
-								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
+							IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
 
 						this.setDead();
 					}

@@ -579,11 +579,18 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 	static enum MineResult
 	{
-		Working, Done, Failed_Temp, Failed_Perm;
+		Working,
+		Done,
+		Failed_Temp,
+		Failed_Perm;
 	}
 
 	static enum Mode
 	{
-		None, Withdraw, MineAir, MineDrill, MineDDrill;
+		None,
+		Withdraw,
+		MineAir,
+		MineDrill,
+		MineDDrill;
 	}
 }

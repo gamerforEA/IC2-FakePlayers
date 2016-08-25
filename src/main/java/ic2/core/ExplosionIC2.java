@@ -549,7 +549,9 @@ public class ExplosionIC2 extends Explosion
 
 	public static enum Type
 	{
-		Normal, Heat, Nuclear;
+		Normal,
+		Heat,
+		Nuclear;
 	}
 
 	private static class XZposition

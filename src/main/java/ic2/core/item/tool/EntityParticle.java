@@ -231,47 +231,47 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			// TODO gamerforEA code clear: System.out.println("influenced " + hit.typeOfHit + " " + hit.hitVec + " sim=" + IC2.platform.isSimulating());
 			if (hit.typeOfHit == MovingObjectType.BLOCK && IC2.platform.isSimulating())
 			{
-				Block block = this.worldObj.getBlock(hit.blockX, hit.blockY, hit.blockZ);
-				if (block != Blocks.water && block != Blocks.flowing_water)
-				{
-					ItemStack existing = new ItemStack(block, 1, this.worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ));
-					ItemStack smelted = FurnaceRecipes.smelting().getSmeltingResult(existing);
-					if (smelted != null && smelted.getItem() instanceof ItemBlock)
-					{
-						// TODO gamerforEA code start
-						if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
-							return;
-						// TODO gamerforEA code end
+			Block block = this.worldObj.getBlock(hit.blockX, hit.blockY, hit.blockZ);
+			if (block != Blocks.water && block != Blocks.flowing_water)
+			{
+			ItemStack existing = new ItemStack(block, 1, this.worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ));
+			ItemStack smelted = FurnaceRecipes.smelting().getSmeltingResult(existing);
+			if (smelted != null && smelted.getItem() instanceof ItemBlock)
+			{
+			// TODO gamerforEA code start
+			if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
+			return;
+			// TODO gamerforEA code end
 
-						this.worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, ((ItemBlock) smelted.getItem()).field_150939_a, smelted.getItemDamage(), 3);
-					}
-					else
-					{
-						ForgeDirection side = ForgeDirection.VALID_DIRECTIONS[hit.sideHit];
-						if (block.isFlammable(this.worldObj, hit.blockX, hit.blockY, hit.blockZ, side))
-						{
-							int x = hit.blockX - side.offsetX;
-							int y = hit.blockY - side.offsetY;
-							int z = hit.blockZ - side.offsetZ;
+			this.worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, ((ItemBlock) smelted.getItem()).field_150939_a, smelted.getItemDamage(), 3);
+			}
+			else
+			{
+			ForgeDirection side = ForgeDirection.VALID_DIRECTIONS[hit.sideHit];
+			if (block.isFlammable(this.worldObj, hit.blockX, hit.blockY, hit.blockZ, side))
+			{
+			int x = hit.blockX - side.offsetX;
+			int y = hit.blockY - side.offsetY;
+			int z = hit.blockZ - side.offsetZ;
 
-							// TODO gamerforEA code start
-							if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
-								return;
-							// TODO gamerforEA code end
+			// TODO gamerforEA code start
+			if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
+			return;
+			// TODO gamerforEA code end
 
-							this.worldObj.setBlock(x, y, z, Blocks.fire);
-						}
-					}
-				}
-				else
-				{
-					// TODO gamerforEA code start
-					if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
-						return;
-					// TODO gamerforEA code end
+			this.worldObj.setBlock(x, y, z, Blocks.fire);
+			}
+			}
+			}
+			else
+			{
+			// TODO gamerforEA code start
+			if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
+			return;
+			// TODO gamerforEA code end
 
-					this.worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
-				}
+			this.worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
+			}
 			}
 	}
 }

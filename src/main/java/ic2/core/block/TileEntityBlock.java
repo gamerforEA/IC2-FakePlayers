@@ -458,6 +458,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 
 	private static enum TickSubscription
 	{
-		None, Client, Server, Both;
+		None,
+		Client,
+		Server,
+		Both;
 	}
 }

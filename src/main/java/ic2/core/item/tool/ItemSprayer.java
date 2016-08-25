@@ -370,6 +370,8 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 
 	static enum Target
 	{
-		Any, Scaffold, Cable;
+		Any,
+		Scaffold,
+		Cable;
 	}
 }

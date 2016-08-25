@@ -300,6 +300,13 @@ public class TileEntityScanner extends TileEntityElectricMachine implements IHas
 
 	public static enum State
 	{
-		IDLE, SCANNING, COMPLETED, FAILED, NO_STORAGE, NO_ENERGY, TRANSFER_ERROR, ALREADY_RECORDED;
+		IDLE,
+		SCANNING,
+		COMPLETED,
+		FAILED,
+		NO_STORAGE,
+		NO_ENERGY,
+		TRANSFER_ERROR,
+		ALREADY_RECORDED;
 	}
 }
