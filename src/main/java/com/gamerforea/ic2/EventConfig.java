@@ -33,6 +33,8 @@ public final class EventConfig
 	public static boolean radiationEnabled = false;
 	public static boolean explosionEnabled = false;
 	public static boolean laserscatterEnabled = true;
+	public static boolean boozeCombineEffectEnabled = false;
+	public static boolean scrapboxDropEnabled = true;
 
 	public static String safeAccessPermission = "ic2.accesssafe";
 	public static boolean skipTicks = false;
@@ -57,6 +59,8 @@ public final class EventConfig
 			radiationEnabled = cfg.getBoolean("radiationEnabled", "other", radiationEnabled, "Радиация");
 			explosionEnabled = cfg.getBoolean("explosionEnabled", "other", explosionEnabled, "Взрывы");
 			laserscatterEnabled = cfg.getBoolean("laserscatterEnabled", "other", laserscatterEnabled, "Шахтёрский лазер (режим \"Разброс\")");
+			boozeCombineEffectEnabled = cfg.getBoolean("boozeCombineEffectEnabled", "other", boozeCombineEffectEnabled, "Комбинирование эффектов от выпивки");
+			scrapboxDropEnabled = cfg.getBoolean("scrapbosDropEnabled", "other", scrapboxDropEnabled, "Дроп предметов из Утильсырья");
 
 			safeAccessPermission = cfg.getString("safeAccessPermission", "other", safeAccessPermission, "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)");
 			skipTicks = cfg.getBoolean("skipTicks", "other", skipTicks, "Пропускать каждый второй тик обработки энергосетей");

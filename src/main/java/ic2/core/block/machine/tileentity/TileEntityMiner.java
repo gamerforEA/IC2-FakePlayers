@@ -15,7 +15,6 @@ import ic2.core.ContainerBase;
 import ic2.core.IC2;
 import ic2.core.IHasGui;
 import ic2.core.Ic2Items;
-import ic2.core.Ic2Player;
 import ic2.core.InvSlotConsumableBlock;
 import ic2.core.audio.AudioSource;
 import ic2.core.audio.PositionSpec;
@@ -39,7 +38,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeHooks;
@@ -207,6 +205,8 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 	{
 		this.worldObj.setBlockToAir(this.xCoord, y, this.zCoord);
 		this.storeDrop(Ic2Items.miningPipe.copy());
+
+		/* TODO gamerforEA code clear:
 		ItemStack pipe = this.pipeSlot.consume(1, true, false);
 		if (pipe != null && pipe.getItem() != Ic2Items.miningPipe.getItem())
 		{
@@ -214,8 +214,8 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 			Item fillerItem = filler.getItem();
 			if (fillerItem instanceof ItemBlock)
 				((ItemBlock) fillerItem).onItemUse(filler, new Ic2Player(this.worldObj), this.worldObj, this.xCoord, y + 1, this.zCoord, 0, 0.0F, 0.0F, 0.0F);
-		}
-
+		} */
+		;
 	}
 
 	private boolean digDown(int y, boolean removeTipAbove)
@@ -223,6 +223,11 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		ItemStack pipe = this.pipeSlot.consume(1, true, false);
 		if (pipe != null && pipe.getItem() == Ic2Items.miningPipe.getItem())
 		{
+			// TODO gamerforEA code start
+			if (removeTipAbove && EventConfig.minerEvent && EventUtils.cantBreak(this.fake.getPlayer(), this.xCoord, y + 1, this.zCoord))
+				return false;
+			// TODO gamerforEA code end
+
 			if (y < 0)
 			{
 				if (removeTipAbove)
@@ -237,6 +242,11 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				{
 					if (result == TileEntityMiner.MineResult.Done)
 					{
+						// TODO gamerforEA code start
+						if (EventConfig.minerEvent && EventUtils.cantBreak(this.fake.getPlayer(), this.xCoord, y, this.zCoord))
+							return false;
+						// TODO gamerforEA code end
+
 						if (removeTipAbove)
 							this.worldObj.setBlock(this.xCoord, y + 1, this.zCoord, StackUtil.getBlock(Ic2Items.miningPipe));
 
