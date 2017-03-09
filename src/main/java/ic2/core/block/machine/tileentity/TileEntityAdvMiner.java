@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 
 import cpw.mods.fml.relauncher.Side;
@@ -52,7 +51,10 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public boolean blacklist = true;
 	public boolean silktouch = false;
 	public boolean redstonePowered = false;
-	public int energyConsume = 512;
+
+	// TODO gamerforEA add multiplier
+	public int energyConsume = (int) (512 * EventConfig.advMinerEnergyMultiplier);
+
 	public int xcounter = 99;
 	public int zcounter = 99;
 	private int minelayer = -1;
@@ -87,7 +89,6 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	{
 		if (!this.scannerSlot.isEmpty())
 			this.energy -= ElectricItem.manager.charge(this.scannerSlot.get(), this.energy, 2, false, false);
-
 	}
 
 	@Override
@@ -188,7 +189,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	public void doMine(Block block)
 	{
 		// TODO gamerforEA code start
-		if (EventConfig.advminerEvent && EventUtils.cantBreak(this.fake.getPlayer(), this.minetargetX, this.minelayer, this.minetargetZ))
+		if (EventConfig.advminerEvent && this.fake.cantBreak(this.minetargetX, this.minelayer, this.minetargetZ))
 			return;
 		// TODO gamerforEA code end
 

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 
 import cpw.mods.fml.relauncher.Side;
@@ -176,7 +175,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	public FluidStack pump(int x, int y, int z, boolean sim, TileEntity miner)
 	{
 		// TODO gamerforEA code start
-		if (EventConfig.pumpEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
+		if (EventConfig.pumpEvent && this.fake.cantBreak(x, y, z))
 			return null;
 		// TODO gamerforEA code end
 

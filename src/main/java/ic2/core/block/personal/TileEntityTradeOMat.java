@@ -46,6 +46,10 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 	public final InvSlotConsumableLinked inputSlot;
 	public final InvSlotOutput outputSlot;
 
+	// TODO gamerforEA code start
+	public boolean isOpened;
+	// TODO gamerforEA code end
+
 	public TileEntityTradeOMat()
 	{
 		/* TODO gamerforEA code replace, old code:
@@ -55,7 +59,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return EventConfig.inBlackList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
+				return EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
 			}
 		};
 
@@ -64,7 +68,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return EventConfig.inBlackList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
+				return EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
 			}
 		};
 
@@ -73,7 +77,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return EventConfig.inBlackList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
+				return EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
 			}
 		};
 		// TODO gamerforEA code end

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Set;
 
-import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 
 import cpw.mods.fml.relauncher.Side;
@@ -34,7 +33,6 @@ import ic2.core.util.LiquidUtil;
 import ic2.core.util.StackUtil;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -224,7 +222,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		if (pipe != null && pipe.getItem() == Ic2Items.miningPipe.getItem())
 		{
 			// TODO gamerforEA code start
-			if (removeTipAbove && EventConfig.minerEvent && EventUtils.cantBreak(this.fake.getPlayer(), this.xCoord, y + 1, this.zCoord))
+			if (removeTipAbove && EventConfig.minerEvent && this.fake.cantBreak(this.xCoord, y + 1, this.zCoord))
 				return false;
 			// TODO gamerforEA code end
 
@@ -243,7 +241,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 					if (result == TileEntityMiner.MineResult.Done)
 					{
 						// TODO gamerforEA code start
-						if (EventConfig.minerEvent && EventUtils.cantBreak(this.fake.getPlayer(), this.xCoord, y, this.zCoord))
+						if (EventConfig.minerEvent && this.fake.cantBreak(this.xCoord, y, this.zCoord))
 							return false;
 						// TODO gamerforEA code end
 
@@ -452,7 +450,8 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		{
 			if (this.drillSlot.get().getItem() == Ic2Items.miningDrill.getItem())
 			{
-				if (!ElectricItem.manager.use(this.drillSlot.get(), 50.0D, (EntityLivingBase) null))
+				// TODO gamerforEA add multiplier
+				if (!ElectricItem.manager.use(this.drillSlot.get(), 50.0D * EventConfig.minerEnergyMultiplier, null))
 					return false;
 			}
 			else
@@ -460,14 +459,15 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 				if (this.drillSlot.get().getItem() != Ic2Items.diamondDrill.getItem())
 					throw new IllegalStateException("invalid drill: " + this.drillSlot.get());
 
-				if (!ElectricItem.manager.use(this.drillSlot.get(), 80.0D, (EntityLivingBase) null))
+				// TODO gamerforEA add multiplier
+				if (!ElectricItem.manager.use(this.drillSlot.get(), 80.0D * EventConfig.minerEnergyMultiplier, null))
 					return false;
 			}
 
 			this.energy -= energyCost;
 
 			// TODO gamerforEA code start
-			if (EventConfig.minerEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
+			if (EventConfig.minerEvent && this.fake.cantBreak(x, y, z))
 				return false;
 			// TODO gamerforEA code end
 

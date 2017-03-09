@@ -70,7 +70,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 				}
 
 				// TODO gamerforEA code replace, old code: if (tfbp.terraform(this.worldObj, x, z, this.yCoord))
-				if (tfbp instanceof ITerraformingBPFakePlayer ? ((ITerraformingBPFakePlayer) tfbp).terraform(this.worldObj, x, z, this.yCoord, this.fake.getPlayer()) : tfbp.terraform(this.worldObj, x, z, this.yCoord))
+				if (tfbp instanceof ITerraformingBPFakePlayer ? ((ITerraformingBPFakePlayer) tfbp).terraform(this.worldObj, x, z, this.yCoord, this.fake.get()) : tfbp.terraform(this.worldObj, x, z, this.yCoord))
 				// TODO gamerforEA code end
 				{
 					this.energy -= tfbp.getConsume();

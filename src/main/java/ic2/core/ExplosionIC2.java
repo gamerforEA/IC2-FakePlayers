@@ -109,9 +109,9 @@ public class ExplosionIC2 extends Explosion
 		// TODO gamerforEA code start
 		this.fake = new FakePlayerContainerWorld(ModUtils.profile, this.worldObj);
 		if (entity instanceof EntityPlayer)
-			this.fake.profile = ((EntityPlayer) entity).getGameProfile();
+			this.fake.setRealPlayer((EntityPlayer) entity);
 		else if (igniter instanceof EntityPlayer)
-			this.fake.profile = ((EntityPlayer) igniter).getGameProfile();
+			this.fake.setRealPlayer((EntityPlayer) igniter);
 		// TODO gamerforEA code end
 	}
 
@@ -163,7 +163,7 @@ public class ExplosionIC2 extends Explosion
 					Entity entity = entry.entity;
 
 					// TODO gamerforEA code start
-					if (EventConfig.explosionEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity))
+					if (EventConfig.explosionEvent && this.fake.cantDamage(entity))
 						continue;
 					// TODO gamerforEA code end
 
@@ -218,7 +218,9 @@ public class ExplosionIC2 extends Explosion
 							z = z + this.areaZ;
 
 							// TODO gamerforEA code start
-							if (EventConfig.explosionEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
+							if (EventConfig.explosionRegionOnly && !EventUtils.isInPrivate(this.worldObj, x, y, z))
+								continue;
+							if (EventConfig.explosionEvent && this.fake.cantBreak(x, y, z))
 								continue;
 							// TODO gamerforEA code end
 
@@ -428,7 +430,7 @@ public class ExplosionIC2 extends Explosion
 			if (Util.square(entity.posX - x) + Util.square(entity.posY - y) + Util.square(entity.posZ - z) <= 25.0D)
 			{
 				// TODO gamerforEA code start
-				if (EventConfig.explosionEvent && EventUtils.cantDamage(this.fake.getPlayer(), entity))
+				if (EventConfig.explosionEvent && this.fake.cantDamage(entity))
 					continue;
 				// TODO gamerforEA code end
 

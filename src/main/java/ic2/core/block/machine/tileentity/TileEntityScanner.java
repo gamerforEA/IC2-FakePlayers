@@ -67,7 +67,7 @@ public class TileEntityScanner extends TileEntityElectricMachine implements IHas
 					this.pattern = UuGraph.find(this.currentStack);
 
 					// TODO gameroforEA add condition [2, 3]
-					if (this.pattern == null || this.currentStack != null && EventConfig.inBlackList(EventConfig.scannerBlackList, this.currentStack.getItem(), this.currentStack.getItemDamage()))
+					if (this.pattern == null || this.currentStack != null && EventConfig.inList(EventConfig.scannerBlackList, this.currentStack.getItem(), this.currentStack.getItemDamage()))
 						this.state = TileEntityScanner.State.FAILED;
 					else if (this.isPatternRecorded(this.pattern))
 					{

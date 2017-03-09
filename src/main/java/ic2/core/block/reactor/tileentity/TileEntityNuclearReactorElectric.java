@@ -404,14 +404,25 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 					{
 						Block block = this.worldObj.getBlock(coord[0], coord[1], coord[2]);
 						if (block.isAir(this.worldObj, coord[0], coord[1], coord[2]))
-							this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.fire, 0, 7);
+						{
+							// TODO gamerforEA code start
+							if (!this.fake.cantBreak(coord[0], coord[1], coord[2]))
+								// TODO gamerforEA code end
+								this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.fire, 0, 7);
+						}
 						else if (block.getBlockHardness(this.worldObj, coord[0], coord[1], coord[2]) >= 0.0F && this.worldObj.getTileEntity(coord[0], coord[1], coord[2]) == null)
 						{
-							Material mat = block.getMaterial();
-							if (mat != Material.rock && mat != Material.iron && mat != Material.lava && mat != Material.ground && mat != Material.clay)
-								this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.fire, 0, 7);
-							else
-								this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.flowing_lava, 15, 7);
+							// TODO gamerforEA code start
+							if (!this.fake.cantBreak(coord[0], coord[1], coord[2]))
+							// TODO gamerforEA code end
+							{
+								Material mat = block.getMaterial();
+								if (mat != Material.rock && mat != Material.iron && mat != Material.lava && mat != Material.ground && mat != Material.clay)
+									this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.fire, 0, 7);
+								else
+									this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.flowing_lava, 15, 7);
+							}
+							;
 						}
 					}
 				}
@@ -446,7 +457,10 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 						Block block = this.worldObj.getBlock(coord[0], coord[1], coord[2]);
 						Material mat = block.getMaterial();
 						if (mat == Material.wood || mat == Material.leaves || mat == Material.cloth)
-							this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.fire, 0, 7);
+							// TODO gamerforEA code start
+							if (!this.fake.cantBreak(coord[0], coord[1], coord[2]))
+								// TODO gamerforEA code end
+								this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.fire, 0, 7);
 					}
 				}
 
@@ -691,7 +705,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.xCoord, this.yCoord, this.zCoord, boomPower, 0.01F, ExplosionIC2.Type.Nuclear);
 
 		// TODO gamerforEA code start
-		explosion.fake.profile = this.fake.profile;
+		explosion.fake.setParent(this.fake);
 		// TODO gamerforEA code end
 
 		explosion.doExplosion();

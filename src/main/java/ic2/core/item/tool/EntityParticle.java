@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
-import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
 
@@ -76,7 +75,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 
 		// TODO gamerforEA code start
 		if (owner1 instanceof EntityPlayer)
-			this.fake.profile = ((EntityPlayer) owner1).getGameProfile();
+			this.fake.setRealPlayer((EntityPlayer) owner1);
 		// TODO gamerforEA code end
 	}
 
@@ -218,7 +217,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, this.owner, hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 18.0F, 0.95F, ExplosionIC2.Type.Heat);
 
 			// TODO gamerforEA code start
-			explosion.fake.profile = this.fake.profile;
+			explosion.fake.setParent(this.fake);
 			// TODO gamerforEA code end
 
 			explosion.doExplosion();
@@ -239,7 +238,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			if (smelted != null && smelted.getItem() instanceof ItemBlock)
 			{
 			// TODO gamerforEA code start
-			if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
+			if (EventConfig.plasmaEvent && this.fake.cantBreak(hit.blockX, hit.blockY, hit.blockZ))
 			return;
 			// TODO gamerforEA code end
 
@@ -255,7 +254,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			int z = hit.blockZ - side.offsetZ;
 
 			// TODO gamerforEA code start
-			if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
+			if (EventConfig.plasmaEvent && this.fake.cantBreak(x, y, z))
 			return;
 			// TODO gamerforEA code end
 
@@ -266,7 +265,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 			else
 			{
 			// TODO gamerforEA code start
-			if (EventConfig.plasmaEvent && EventUtils.cantBreak(this.fake.getPlayer(), hit.blockX, hit.blockY, hit.blockZ))
+			if (EventConfig.plasmaEvent && this.fake.cantBreak(hit.blockX, hit.blockY, hit.blockZ))
 			return;
 			// TODO gamerforEA code end
 

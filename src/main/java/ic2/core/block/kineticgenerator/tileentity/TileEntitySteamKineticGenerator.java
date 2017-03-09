@@ -199,7 +199,7 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory impleme
 			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.xCoord, this.yCoord, this.zCoord, 1.0F, 1.0F, ExplosionIC2.Type.Heat);
 
 			// TODO gamerforEA code start
-			explosion.fake.profile = this.fake.profile;
+			explosion.fake.setParent(this.fake);
 			// TODO gamerforEA code end
 
 			explosion.doExplosion();

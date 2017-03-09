@@ -296,7 +296,7 @@ public abstract class BlockMultiID extends BlockBase
 				{
 					// TODO gamerforEA code start
 					if (te instanceof TileEntityBlock && entityliving instanceof EntityPlayer)
-						((TileEntityBlock) te).fake.profile = ((EntityPlayer) entityliving).getGameProfile();
+						((TileEntityBlock) te).fake.setProfile(((EntityPlayer) entityliving).getGameProfile());
 					// TODO gamerforEA code end
 
 					int l = MathHelper.floor_double(entityliving.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;

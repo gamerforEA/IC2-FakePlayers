@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
-import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
 
@@ -115,7 +114,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 
 		// TODO gamerforEA code start
 		if (entityliving instanceof EntityPlayer)
-			this.fake.profile = ((EntityPlayer) entityliving).getGameProfile();
+			this.fake.setRealPlayer((EntityPlayer) entityliving);
 		// TODO gamerforEA code end
 	}
 
@@ -206,7 +205,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 							{
 								entity.setFire(damage * (this.smelt ? 2 : 1));
 							} */
-							if (EventConfig.laserEvent && EventUtils.cantDamage(this.fake.getPlayer(), tEvent.hitentity))
+							if (EventConfig.laserEvent && this.fake.cantDamage(tEvent.hitentity))
 							{
 							this.setDead();
 							return;
@@ -224,7 +223,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 					LaserEvent.LaserHitsBlockEvent tEvent = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ, movingobjectposition.sideHit, 0.9F, true, true);
 					MinecraftForge.EVENT_BUS.post(tEvent);
 					// TODO gamerforEA code start
-					if (EventConfig.laserEvent && EventUtils.cantBreak(this.fake.getPlayer(), tEvent.x, tEvent.y, tEvent.z))
+					if (EventConfig.laserEvent && this.fake.cantBreak(tEvent.x, tEvent.y, tEvent.z))
 					{
 						this.setDead();
 						return;
@@ -365,7 +364,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.posX, this.posY, this.posZ, tEvent.explosionpower, tEvent.explosiondroprate);
 
 				// TODO gamerforEA code start
-				explosion.fake.profile = this.fake.profile;
+				explosion.fake.setParent(this.fake);
 				// TODO gamerforEA code end
 
 				explosion.doExplosion();

@@ -41,9 +41,9 @@ public class PointExplosion extends Explosion
 		// TODO gamerforEA code start
 		this.fake = new FakePlayerContainerWorld(ModUtils.profile, this.world);
 		if (entity instanceof EntityPlayer)
-			this.fake.profile = ((EntityPlayer) entity).getGameProfile();
+			this.fake.setRealPlayer((EntityPlayer) entity);
 		else if (exploder instanceof EntityPlayer)
-			this.fake.profile = ((EntityPlayer) exploder).getGameProfile();
+			this.fake.setRealPlayer((EntityPlayer) exploder);
 		// TODO gamerforEA code end
 	}
 
@@ -66,7 +66,9 @@ public class PointExplosion extends Explosion
 						if (block.getExplosionResistance(this.exploder, this.world, x, y, z, this.explosionX, this.explosionY, this.explosionZ) < this.explosionSize * 10.0F)
 						{
 							// TODO gamerforEA code start
-							if (EventConfig.explosionEvent && EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
+							if (EventConfig.explosionRegionOnly && !EventUtils.isInPrivate(this.world, x, y, z))
+								continue;
+							if (EventConfig.explosionEvent && this.fake.cantBreak(x, y, z))
 								continue;
 							// TODO gamerforEA code end
 
@@ -77,7 +79,7 @@ public class PointExplosion extends Explosion
 			for (Entity entity : (Iterable<Entity>) this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D)))
 			{
 				// TODO gamerforEA code start
-				if (EventUtils.cantDamage(this.fake.getPlayer(), entity))
+				if (this.fake.cantDamage(entity))
 					continue;
 				// TODO gamerforEA code end
 
