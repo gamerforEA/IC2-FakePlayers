@@ -156,7 +156,11 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 						if (pack != null)
 						{
 							fluid = ((ItemArmorCFPack) pack.getItem()).drainfromCFpack(player, pack, amount);
-							amount -= fluid.amount;
+
+							// TODO gamerforEA code start
+							if (fluid != null)
+								// TODO gamerforEA code end
+								amount -= fluid.amount;
 						}
 
 						if (amount > 0)
