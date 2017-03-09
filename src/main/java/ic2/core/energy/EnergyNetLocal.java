@@ -487,6 +487,16 @@ public final class EnergyNetLocal
 							}
 				}
 
+			// TODO gamerforEA code start
+			Iterator<Node> iterator = neighbors.iterator();
+			while (iterator.hasNext())
+			{
+				Node neighbor = iterator.next();
+				if (neighbor == null || neighbor.getGrid() == null)
+					iterator.remove();
+			}
+			// TODO gamerforEA code end
+
 			if (neighbors.isEmpty())
 			{
 				if (EnergyNetGlobal.debugGrid)
@@ -526,6 +536,16 @@ public final class EnergyNetLocal
 						{
 							Node neighbor = it.next();
 							if (neighbor.getGrid() != grid)
+							{
+								// TODO gamerforEA code start
+								if (neighbor.getGrid() == null)
+								{
+									if (EnergyNetGlobal.debugGrid)
+										IC2.log.debug(LogCategory.EnergyNet, "Error. Grid is null: %s.", neighbor);
+									continue;
+								}
+								// TODO gamerforEA code end
+
 								if (neighbor.nodeType != NodeType.Conductor && !neighbor.links.isEmpty())
 								{
 									boolean found = false;
@@ -560,6 +580,7 @@ public final class EnergyNetLocal
 								}
 								else
 									grid.merge(neighbor.getGrid(), neighborReplacements);
+							}
 						}
 
 						it = neighbors.listIterator();
@@ -613,10 +634,20 @@ public final class EnergyNetLocal
 
 						assert !neighborGroups.isEmpty();
 
-						for (int i = 0; i < ((List) neighborGroups).size(); ++i)
+						for (int i = 0; i < neighborGroups.size(); ++i)
 						{
 							List<Node> nodeList = neighborGroups.get(i);
 							Node neighbor = nodeList.get(0);
+
+							// TODO gamerforEA code start
+							if (neighbor.getGrid() == null)
+							{
+								if (EnergyNetGlobal.debugGrid)
+									IC2.log.debug(LogCategory.EnergyNet, "Error. Grid is null: %s.", neighbor);
+								continue;
+							}
+							// TODO gamerforEA code end
+
 							if (neighbor.nodeType != NodeType.Conductor && !neighbor.links.isEmpty())
 							{
 								assert nodeList.size() == 1;
