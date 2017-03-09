@@ -106,7 +106,34 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 			}
 			else
 			{
-				int consume = new int[] { 1250, 100, 5000, 0, 2500, 10000, 5000 }[laserSetting];
+				// TODO gamerforEA code replace, old code: int consume = new int[] { 1250, 100, 5000, 0, 2500, 10000, 5000 }[laserSetting];
+				int consume;
+				switch (laserSetting)
+				{
+					case 0:
+						consume = EventConfig.laserMining;
+						break;
+					case 1:
+						consume = EventConfig.laserLowFocus;
+						break;
+					case 2:
+						consume = EventConfig.laserLongRange;
+						break;
+					case 4:
+						consume = EventConfig.laserSuperHeat;
+						break;
+					case 5:
+						consume = EventConfig.laserScatter;
+						break;
+					case 6:
+						consume = EventConfig.laserExplosive;
+						break;
+					default:
+						consume = 0;
+						break;
+				}
+				// TODO gamerforEA code end
+
 				if (!ElectricItem.manager.use(stack, consume, player))
 					return stack;
 
@@ -163,7 +190,8 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 			if (!IC2.keyboard.isModeSwitchKeyDown(entityPlayer) && nbtData.getInteger("laserSetting") == 3)
 				if (Math.abs(entityPlayer.posY + entityPlayer.getEyeHeight() - 0.1D - (y + 0.5D)) < 1.5D)
 				{
-					if (ElectricItem.manager.use(itemstack, 3000.0D, entityPlayer) && this.shootLaser(world, entityPlayer, itemstack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false, entityPlayer.rotationYaw, 0.0D, y + 0.5D))
+					// TODO gamerforEA code replace, old value: 3000.0D
+					if (ElectricItem.manager.use(itemstack, EventConfig.laserHorizontal, entityPlayer) && this.shootLaser(world, entityPlayer, itemstack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false, entityPlayer.rotationYaw, 0.0D, y + 0.5D))
 						IC2.network.get().initiateItemEvent(entityPlayer, itemstack, 3, true);
 				}
 				else
