@@ -66,6 +66,7 @@ public class ExplosionIC2 extends Explosion
 
 	// TODO gamerforEA code start
 	public final FakePlayerContainer fake;
+	public boolean denyBlockBreak;
 	// TODO gamerforEA code end
 
 	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power, float drop)
@@ -218,6 +219,8 @@ public class ExplosionIC2 extends Explosion
 							z = z + this.areaZ;
 
 							// TODO gamerforEA code start
+							if (this.denyBlockBreak)
+								continue;
 							if (EventConfig.explosionRegionOnly && !EventUtils.isInPrivate(this.worldObj, x, y, z))
 								continue;
 							if (EventConfig.explosionEvent && this.fake.cantBreak(x, y, z))

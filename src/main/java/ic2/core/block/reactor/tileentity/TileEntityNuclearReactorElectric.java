@@ -519,12 +519,17 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		{
 			short cols = 3;
 
+			/* TODO gamerforEA code replace, old code:
 			for (Direction direction : Direction.directions)
 			{
 				TileEntity target = direction.applyToTileEntity(this);
 				if (target instanceof TileEntityReactorChamberElectric)
 					++cols;
-			}
+			} */
+			for (TileEntity target : this.getSubTiles())
+				if (target instanceof TileEntityReactorChamberElectric)
+					++cols;
+			// TODO gamerforEA code end
 
 			return cols;
 		}

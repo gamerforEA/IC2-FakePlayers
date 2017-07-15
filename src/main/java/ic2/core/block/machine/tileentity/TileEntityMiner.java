@@ -182,6 +182,11 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 		if (y != this.yCoord && this.energy >= 3.0D)
 		{
+			// TODO gamerforEA code start
+			if (EventConfig.minerEvent && this.fake.cantBreak(this.xCoord, y, this.zCoord))
+				return false;
+			// TODO gamerforEA code end
+
 			if (this.progress < 20)
 			{
 				this.energy -= 3.0D;

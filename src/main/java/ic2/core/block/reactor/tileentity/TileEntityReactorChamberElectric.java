@@ -1,5 +1,7 @@
 package ic2.core.block.reactor.tileentity;
 
+import java.lang.ref.WeakReference;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
@@ -29,6 +31,10 @@ public class TileEntityReactorChamberElectric extends TileEntity implements IHas
 	public boolean redpowert = false;
 	private short ticker = 0;
 	private boolean loaded = false;
+
+	// TODO gamerforEA code start
+	private WeakReference<TileEntityNuclearReactorElectric> cachedReactor;
+	// TODO gamerforEA code end
 
 	@Override
 	public void validate()
@@ -87,6 +93,9 @@ public class TileEntityReactorChamberElectric extends TileEntity implements IHas
 		if (this.loaded)
 			this.onUnloaded();
 
+		// TODO gamerforEA code start
+		this.cachedReactor = null;
+		// TODO gamerforEA code end
 	}
 
 	@Override
@@ -102,6 +111,11 @@ public class TileEntityReactorChamberElectric extends TileEntity implements IHas
 	public void updateEntity()
 	{
 		super.updateEntity();
+
+		// TODO gamerforEA code start
+		this.cachedReactor = null;
+		// TODO gamerforEA code end
+
 		if (this.ticker == 19)
 		{
 			if (this.worldObj.isBlockIndirectlyGettingPowered(this.xCoord, this.yCoord, this.zCoord))
@@ -259,11 +273,31 @@ public class TileEntityReactorChamberElectric extends TileEntity implements IHas
 	@Override
 	public TileEntityNuclearReactorElectric getReactor()
 	{
+		// TODO gamerforEA code start
+		WeakReference<TileEntityNuclearReactorElectric> ref = this.cachedReactor;
+		if (ref != null)
+		{
+			TileEntityNuclearReactorElectric tile = ref.get();
+			if (tile == null)
+				this.cachedReactor = null;
+			else
+				return tile;
+		}
+		// TODO gamerforEA code end
+
 		for (Direction value : Direction.directions)
 		{
 			TileEntity te = value.applyToTileEntity(this);
 			if (te instanceof TileEntityNuclearReactorElectric)
-				return (TileEntityNuclearReactorElectric) te;
+			{
+				TileEntityNuclearReactorElectric reactor = (TileEntityNuclearReactorElectric) te;
+
+				// TODO gamerforEA code start
+				this.cachedReactor = new WeakReference<TileEntityNuclearReactorElectric>(reactor);
+				// TODO gamerforEA code end
+
+				return reactor;
+			}
 		}
 
 		// TODO gamerforEA code replace, old code: Block blk = this.getBlockType();

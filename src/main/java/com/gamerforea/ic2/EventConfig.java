@@ -38,6 +38,7 @@ public final class EventConfig
 
 	public static String safeAccessPermission = "ic2.accesssafe";
 	public static boolean skipTicks = false;
+	public static int skipTicksAmount = 1;
 	public static boolean tradeOMatOnePlayer = true;
 
 	public static int laserMining = 1250;
@@ -47,6 +48,7 @@ public final class EventConfig
 	public static int laserSuperHeat = 2500;
 	public static int laserScatter = 10000;
 	public static int laserExplosive = 5000;
+	public static boolean laserBreakBlock = true;
 
 	public static float minerEnergyMultiplier = 1;
 	public static float advMinerEnergyMultiplier = 1;
@@ -76,7 +78,8 @@ public final class EventConfig
 			scrapboxDropEnabled = cfg.getBoolean("scrapbosDropEnabled", "other", scrapboxDropEnabled, "Дроп предметов из Утильсырья");
 
 			safeAccessPermission = cfg.getString("safeAccessPermission", "other", safeAccessPermission, "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)");
-			skipTicks = cfg.getBoolean("skipTicks", "other", skipTicks, "Пропускать каждый второй тик обработки энергосетей");
+			skipTicks = cfg.getBoolean("skipTicks", "other", skipTicks, "Пропускать тики при обработки энергосетей");
+			skipTicksAmount = cfg.getInt("skipTicksAmount", "other", skipTicksAmount, 1, Integer.MAX_VALUE, "Количество пропускаемых тиков");
 			tradeOMatOnePlayer = cfg.getBoolean("tradeOMatOnePlayer", "other", tradeOMatOnePlayer, "Возможность пользоваться Торговым аппаратом одновременно лишь одним человеком");
 
 			laserMining = cfg.getInt("laserMining", "laser", laserMining, 1, Integer.MAX_VALUE, "Энергия для режима Короткого фокуса");
@@ -86,6 +89,7 @@ public final class EventConfig
 			laserSuperHeat = cfg.getInt("laserSuperHeat", "laser", laserSuperHeat, 1, Integer.MAX_VALUE, "Энергия для режима Перегревающий");
 			laserScatter = cfg.getInt("laserScatter", "laser", laserScatter, 1, Integer.MAX_VALUE, "Энергия для режима Разброс");
 			laserExplosive = cfg.getInt("laserExplosive", "laser", laserExplosive, 1, Integer.MAX_VALUE, "Энергия для режима Взрывоопасный");
+			laserBreakBlock = cfg.getBoolean("laserBreakBlock", "laser", laserBreakBlock, "Разрушение блоков Шахтёрским лазером");
 
 			minerEnergyMultiplier = cfg.getFloat("minerEnergyMultiplier", "miner", minerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Буровой установки");
 			advMinerEnergyMultiplier = cfg.getFloat("advMinerEnergyMultiplier", "miner", advMinerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Продвинутой буровой установки");

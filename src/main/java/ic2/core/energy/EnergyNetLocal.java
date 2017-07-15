@@ -375,7 +375,7 @@ public final class EnergyNetLocal
 	}
 
 	// TODO gamerforEA code start
-	private boolean skipTick = false;
+	private int ticksSkipped;
 	// TODO gamerforEA code end
 
 	protected void onTickEnd()
@@ -384,13 +384,10 @@ public final class EnergyNetLocal
 		{
 			// TODO gamerforEA code start
 			if (EventConfig.skipTicks)
-				if (this.skipTick)
-				{
-					this.skipTick = false;
-					return;
-				}
+				if (++this.ticksSkipped > EventConfig.skipTicksAmount)
+					this.ticksSkipped = 0;
 				else
-					this.skipTick = true;
+					return;
 			// TODO gamerforEA code end
 
 			this.locked = true;
