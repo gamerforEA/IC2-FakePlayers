@@ -355,10 +355,14 @@ public final class StackUtil
 			{
 				sidedInv = (ISidedInventory) inv;
 				ret = sidedInv.getAccessibleSlotsFromSide(side.toSideValue());
-				if (ret.length == 0)
-					return emptySlotArray;
+				if (ret != null)
+				{
+					if (ret.length == 0)
+						return emptySlotArray;
 
-				ret = Arrays.copyOf(ret, ret.length);
+					ret = Arrays.copyOf(ret, ret.length);
+				} else
+					return emptySlotArray;
 			}
 			else
 			{
