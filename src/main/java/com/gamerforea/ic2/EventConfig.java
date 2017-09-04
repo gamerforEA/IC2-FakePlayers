@@ -1,17 +1,16 @@
 package com.gamerforea.ic2;
 
-import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
-
-import java.util.Set;
-
 import com.gamerforea.eventhelper.util.FastUtils;
 import com.google.common.collect.Sets;
-
 import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.common.config.Configuration;
+
+import java.util.Set;
+
+import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
 
 public final class EventConfig
 {
