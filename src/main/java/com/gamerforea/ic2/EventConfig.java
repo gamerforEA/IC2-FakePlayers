@@ -53,6 +53,9 @@ public final class EventConfig
 	public static float minerEnergyMultiplier = 1;
 	public static float advMinerEnergyMultiplier = 1;
 
+	public static int windRotorDamage = 1;
+	public static int additionalWindRotorRadius = 0;
+
 	static
 	{
 		try
@@ -93,6 +96,9 @@ public final class EventConfig
 
 			minerEnergyMultiplier = cfg.getFloat("minerEnergyMultiplier", "miner", minerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Буровой установки");
 			advMinerEnergyMultiplier = cfg.getFloat("advMinerEnergyMultiplier", "miner", advMinerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Продвинутой буровой установки");
+
+			windRotorDamage = cfg.getInt("windRotorDamage", "windRotors", windRotorDamage, 0, Integer.MAX_VALUE, "Урон ветровым роторам в тик");
+			additionalWindRotorRadius = cfg.getInt("additionalWindRotorRadius", "windRotors", additionalWindRotorRadius, 0, Integer.MAX_VALUE, "Минимальное расстоение в блоках между роторами");
 
 			readStringSet(cfg, "tradeOMatBlackList", "blacklists", "Чёрный список предметов для Обменного аппарата", tradeOMatBlackList);
 			readStringSet(cfg, "scannerBlackList", "blacklists", "Чёрный список предметов для Сканера", scannerBlackList);
