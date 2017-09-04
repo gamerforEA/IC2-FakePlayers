@@ -1,17 +1,16 @@
 package com.gamerforea.ic2;
 
-import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
-
-import java.util.Set;
-
 import com.gamerforea.eventhelper.util.FastUtils;
 import com.google.common.collect.Sets;
-
 import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.common.config.Configuration;
+
+import java.util.Set;
+
+import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
 
 public final class EventConfig
 {
@@ -53,6 +52,9 @@ public final class EventConfig
 	public static float minerEnergyMultiplier = 1;
 	public static float advMinerEnergyMultiplier = 1;
 
+	public static int windRotorDamage = 1;
+	public static int additionalWindRotorRadius = 0;
+
 	static
 	{
 		try
@@ -93,6 +95,9 @@ public final class EventConfig
 
 			minerEnergyMultiplier = cfg.getFloat("minerEnergyMultiplier", "miner", minerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Буровой установки");
 			advMinerEnergyMultiplier = cfg.getFloat("advMinerEnergyMultiplier", "miner", advMinerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Продвинутой буровой установки");
+
+			windRotorDamage = cfg.getInt("windRotorDamage", "windRotors", windRotorDamage, 0, Integer.MAX_VALUE, "Урон ветровым роторам в тик");
+			additionalWindRotorRadius = cfg.getInt("additionalWindRotorRadius", "windRotors", additionalWindRotorRadius, 0, Integer.MAX_VALUE, "Минимальное расстояние в блоках между лопастями роторов");
 
 			readStringSet(cfg, "tradeOMatBlackList", "blacklists", "Чёрный список предметов для Обменного аппарата", tradeOMatBlackList);
 			readStringSet(cfg, "scannerBlackList", "blacklists", "Чёрный список предметов для Сканера", scannerBlackList);
