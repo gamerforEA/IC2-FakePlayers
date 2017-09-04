@@ -57,6 +57,11 @@ public final class EventConfig
 
 	static
 	{
+		init();
+	}
+
+	public static void init()
+	{
 		try
 		{
 			Configuration cfg = FastUtils.getConfig("IC2");
