@@ -1,12 +1,5 @@
 package ic2.core.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-
 import ic2.api.Direction;
 import ic2.core.IC2;
 import ic2.core.block.personal.IPersonalBlock;
@@ -25,6 +18,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
+
+import java.util.*;
 
 public final class StackUtil
 {
@@ -45,6 +40,7 @@ public final class StackUtil
 			IInventory inventory = (IInventory) target;
 			if (target instanceof TileEntityChest)
 				for (Direction direction2 : Direction.directions)
+				{
 					if (direction2 != Direction.YN && direction2 != Direction.YP)
 					{
 						TileEntity target2 = direction2.applyToTileEntity(target);
@@ -54,6 +50,7 @@ public final class StackUtil
 							break;
 						}
 					}
+				}
 
 			if (target instanceof IPersonalBlock)
 			{
@@ -141,7 +138,8 @@ public final class StackUtil
 		ISidedInventory dstSided = dst instanceof ISidedInventory ? (ISidedInventory) dst : null;
 		int dstVanillaSide = dir.getInverse().toSideValue();
 
-		label69: for (int srcSlot : srcSlots)
+		label69:
+		for (int srcSlot : srcSlots)
 		{
 			ItemStack srcStack = src.getStackInSlot(srcSlot);
 			if (srcStack != null)
@@ -151,6 +149,7 @@ public final class StackUtil
 				assert srcTransfer > 0;
 
 				for (int pass = 0; pass < 2; ++pass)
+				{
 					for (int i = 0; i < dstSlots.length; ++i)
 					{
 						int dstSlot = dstSlots[i];
@@ -200,6 +199,7 @@ public final class StackUtil
 							}
 						}
 					}
+				}
 			}
 		}
 
@@ -231,7 +231,9 @@ public final class StackUtil
 		}
 
 		for (ItemStack itemStack : itemStacks)
+		{
 			dropAsEntity(source.getWorldObj(), source.xCoord, source.yCoord, source.zCoord, itemStack);
+		}
 
 		itemStacks.clear();
 	}
@@ -355,14 +357,17 @@ public final class StackUtil
 			{
 				sidedInv = (ISidedInventory) inv;
 				ret = sidedInv.getAccessibleSlotsFromSide(side.toSideValue());
-				if (ret != null)
-				{
-					if (ret.length == 0)
-						return emptySlotArray;
 
-					ret = Arrays.copyOf(ret, ret.length);
-				} else
+				// TODO gamerforEA code start
+				// Fixed by synthetic65535
+				if (ret == null)
 					return emptySlotArray;
+				// TODO gamerforEA code end
+
+				if (ret.length == 0)
+					return emptySlotArray;
+
+				ret = Arrays.copyOf(ret, ret.length);
 			}
 			else
 			{
@@ -374,7 +379,9 @@ public final class StackUtil
 				ret = new int[size];
 
 				for (int i = 0; i < ret.length; ret[i] = i++)
+				{
 					;
+				}
 			}
 
 			if (checkInsert || checkExtract)
@@ -484,8 +491,10 @@ public final class StackUtil
 	public static boolean check2(Iterable<List<ItemStack>> list)
 	{
 		for (List<ItemStack> list2 : list)
+		{
 			if (!check(list2))
 				return false;
+		}
 
 		return true;
 	}
@@ -498,8 +507,10 @@ public final class StackUtil
 	public static boolean check(Iterable<ItemStack> list)
 	{
 		for (ItemStack stack : list)
+		{
 			if (!check(stack))
 				return false;
+		}
 
 		return true;
 	}
@@ -554,11 +565,13 @@ public final class StackUtil
 	public static void consumeInventoryItem(EntityPlayer player, ItemStack itemStack)
 	{
 		for (int i = 0; i < player.inventory.mainInventory.length; ++i)
+		{
 			if (player.inventory.mainInventory[i] != null && player.inventory.mainInventory[i].isItemEqual(itemStack))
 			{
 				player.inventory.decrStackSize(i, 1);
 				return;
 			}
+		}
 
 	}
 
