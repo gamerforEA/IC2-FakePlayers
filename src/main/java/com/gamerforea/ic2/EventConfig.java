@@ -98,7 +98,7 @@ public final class EventConfig
 			advMinerEnergyMultiplier = cfg.getFloat("advMinerEnergyMultiplier", "miner", advMinerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Продвинутой буровой установки");
 
 			windRotorDamage = cfg.getInt("windRotorDamage", "windRotors", windRotorDamage, 0, Integer.MAX_VALUE, "Урон ветровым роторам в тик");
-			additionalWindRotorRadius = cfg.getInt("additionalWindRotorRadius", "windRotors", additionalWindRotorRadius, 0, Integer.MAX_VALUE, "Минимальное расстоение в блоках между роторами");
+			additionalWindRotorRadius = cfg.getInt("additionalWindRotorRadius", "windRotors", additionalWindRotorRadius, 0, Integer.MAX_VALUE, "Минимальное расстояние в блоках между лопастями роторов");
 
 			readStringSet(cfg, "tradeOMatBlackList", "blacklists", "Чёрный список предметов для Обменного аппарата", tradeOMatBlackList);
 			readStringSet(cfg, "scannerBlackList", "blacklists", "Чёрный список предметов для Сканера", scannerBlackList);
