@@ -6,6 +6,7 @@ import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 
 import java.util.Set;
@@ -16,7 +17,9 @@ public final class EventConfig
 {
 	public static final Set<String> tradeOMatBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
 	public static final Set<String> scannerBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
+	public static final Set<String> minerBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
 
+	public static boolean terraRegionOnly = true;
 	public static boolean terraEvent = true;
 	public static boolean pumpEvent = true;
 	public static boolean minerEvent = true;
@@ -34,6 +37,7 @@ public final class EventConfig
 	public static boolean laserscatterEnabled = true;
 	public static boolean boozeCombineEffectEnabled = false;
 	public static boolean scrapboxDropEnabled = true;
+	public static boolean minerPlacingEnabled = false;
 
 	public static String safeAccessPermission = "ic2.accesssafe";
 	public static boolean skipTicks = false;
@@ -66,15 +70,17 @@ public final class EventConfig
 		{
 			Configuration cfg = FastUtils.getConfig("IC2");
 
-			terraEvent = cfg.getBoolean("terraEvent", CATEGORY_GENERAL, terraEvent, "Терраформер (замена/установка блоков)");
-			pumpEvent = cfg.getBoolean("pumpEvent", CATEGORY_GENERAL, pumpEvent, "Помпа (выкачивание жидкости)");
-			minerEvent = cfg.getBoolean("minerEvent", CATEGORY_GENERAL, minerEvent, "Буровая установка (разрушение блоков)");
-			advminerEvent = cfg.getBoolean("advMinerEvent", CATEGORY_GENERAL, advminerEvent, "Продвинутая буровая установка (разрушение блоков)");
-			teslaEvent = cfg.getBoolean("teslaEvent", CATEGORY_GENERAL, teslaEvent, "Катушка Теслы (урон по мобам)");
-			sprayerEvent = cfg.getBoolean("sprayerEvent", CATEGORY_GENERAL, sprayerEvent, "Пульверизатор (установка блоков)");
-			laserEvent = cfg.getBoolean("laserEvent", CATEGORY_GENERAL, laserEvent, "Шахтёрский лазер (разрушение блоков и урон по мобам)");
-			plasmaEvent = cfg.getBoolean("plasmaEvent", CATEGORY_GENERAL, plasmaEvent, "Плазменная пушка (взрыв)");
-			explosionEvent = cfg.getBoolean("explosionEvent", CATEGORY_GENERAL, explosionEvent, "Взрывы (разрушение блоков)");
+			String c = CATEGORY_GENERAL;
+			terraRegionOnly = cfg.getBoolean("terraRegionOnly", c, terraRegionOnly, "Терраформер (работа только в привате)");
+			terraEvent = cfg.getBoolean("terraEvent", c, terraEvent, "Терраформер (замена/установка блоков)");
+			pumpEvent = cfg.getBoolean("pumpEvent", c, pumpEvent, "Помпа (выкачивание жидкости)");
+			minerEvent = cfg.getBoolean("minerEvent", c, minerEvent, "Буровая установка (разрушение блоков)");
+			advminerEvent = cfg.getBoolean("advMinerEvent", c, advminerEvent, "Продвинутая буровая установка (разрушение блоков)");
+			teslaEvent = cfg.getBoolean("teslaEvent", c, teslaEvent, "Катушка Теслы (урон по мобам)");
+			sprayerEvent = cfg.getBoolean("sprayerEvent", c, sprayerEvent, "Пульверизатор (установка блоков)");
+			laserEvent = cfg.getBoolean("laserEvent", c, laserEvent, "Шахтёрский лазер (разрушение блоков и урон по мобам)");
+			plasmaEvent = cfg.getBoolean("plasmaEvent", c, plasmaEvent, "Плазменная пушка (взрыв)");
+			explosionEvent = cfg.getBoolean("explosionEvent", c, explosionEvent, "Взрывы (разрушение блоков)");
 
 			plasmaEnabled = cfg.getBoolean("plasmaEnabled", "other", plasmaEnabled, "Плазменная пушка");
 			radiationEnabled = cfg.getBoolean("radiationEnabled", "other", radiationEnabled, "Радиация");
@@ -83,6 +89,7 @@ public final class EventConfig
 			laserscatterEnabled = cfg.getBoolean("laserscatterEnabled", "other", laserscatterEnabled, "Шахтёрский лазер (режим \"Разброс\")");
 			boozeCombineEffectEnabled = cfg.getBoolean("boozeCombineEffectEnabled", "other", boozeCombineEffectEnabled, "Комбинирование эффектов от выпивки");
 			scrapboxDropEnabled = cfg.getBoolean("scrapbosDropEnabled", "other", scrapboxDropEnabled, "Дроп предметов из Утильсырья");
+			minerPlacingEnabled = cfg.getBoolean("minerPlacingEnabled", "other", minerPlacingEnabled, "Установка блоков Буровой установкой");
 
 			safeAccessPermission = cfg.getString("safeAccessPermission", "other", safeAccessPermission, "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)");
 			skipTicks = cfg.getBoolean("skipTicks", "other", skipTicks, "Пропускать тики при обработки энергосетей");
@@ -106,6 +113,7 @@ public final class EventConfig
 
 			readStringSet(cfg, "tradeOMatBlackList", "blacklists", "Чёрный список предметов для Обменного аппарата", tradeOMatBlackList);
 			readStringSet(cfg, "scannerBlackList", "blacklists", "Чёрный список предметов для Сканера", scannerBlackList);
+			readStringSet(cfg, "minerBlackList", "blacklists", "Чёрный список устанавливаемых блоков для Буровой установки", minerBlackList);
 
 			cfg.save();
 		}
@@ -116,7 +124,12 @@ public final class EventConfig
 		}
 	}
 
-	public static final boolean inList(Set<String> list, Item item, int meta)
+	public static boolean inList(Set<String> list, ItemStack stack)
+	{
+		return stack != null && inList(list, stack.getItem(), stack.getItemDamage());
+	}
+
+	public static boolean inList(Set<String> list, Item item, int meta)
 	{
 		if (item instanceof ItemBlock)
 			return inList(list, ((ItemBlock) item).field_150939_a, meta);
@@ -124,39 +137,39 @@ public final class EventConfig
 		return inList(list, getId(item), meta);
 	}
 
-	public static final boolean inList(Set<String> list, Block block, int meta)
+	public static boolean inList(Set<String> list, Block block, int meta)
 	{
 		return inList(list, getId(block), meta);
 	}
 
-	private static final boolean inList(Set<String> list, String id, int meta)
+	private static boolean inList(Set<String> list, String id, int meta)
 	{
 		return id != null && (list.contains(id) || list.contains(id + ':' + meta));
 	}
 
-	private static final void readStringSet(Configuration cfg, String name, String category, String comment, Set<String> def)
+	private static void readStringSet(Configuration cfg, String name, String category, String comment, Set<String> def)
 	{
 		Set<String> temp = getStringSet(cfg, name, category, comment, def);
 		def.clear();
 		def.addAll(temp);
 	}
 
-	private static final Set<String> getStringSet(Configuration cfg, String name, String category, String comment, Set<String> def)
+	private static Set<String> getStringSet(Configuration cfg, String name, String category, String comment, Set<String> def)
 	{
 		return getStringSet(cfg, name, category, comment, def.toArray(new String[def.size()]));
 	}
 
-	private static final Set<String> getStringSet(Configuration cfg, String name, String category, String comment, String... def)
+	private static Set<String> getStringSet(Configuration cfg, String name, String category, String comment, String... def)
 	{
 		return Sets.newHashSet(cfg.getStringList(name, category, def, comment));
 	}
 
-	private static final String getId(Item item)
+	private static String getId(Item item)
 	{
 		return GameData.getItemRegistry().getNameForObject(item);
 	}
 
-	private static final String getId(Block block)
+	private static String getId(Block block)
 	{
 		return GameData.getBlockRegistry().getNameForObject(block);
 	}
