@@ -1,12 +1,6 @@
 package ic2.core.block.machine.tileentity;
 
-import java.util.EnumSet;
-import java.util.Set;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-
 import com.gamerforea.ic2.EventConfig;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
@@ -16,11 +10,7 @@ import ic2.core.IHasGui;
 import ic2.core.audio.AudioSource;
 import ic2.core.audio.PositionSpec;
 import ic2.core.block.TileEntityLiquidTankElectricMachine;
-import ic2.core.block.invslot.InvSlot;
-import ic2.core.block.invslot.InvSlotCharge;
-import ic2.core.block.invslot.InvSlotConsumableLiquid;
-import ic2.core.block.invslot.InvSlotOutput;
-import ic2.core.block.invslot.InvSlotUpgrade;
+import ic2.core.block.invslot.*;
 import ic2.core.block.machine.container.ContainerPump;
 import ic2.core.block.machine.gui.GuiPump;
 import ic2.core.upgrade.IUpgradableBlock;
@@ -35,11 +25,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 public class TileEntityPump extends TileEntityLiquidTankElectricMachine implements IHasGui, IUpgradableBlock
 {
@@ -138,6 +128,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 			this.miner = null;
 
 			for (Direction dir : Direction.directions)
+			{
 				if (dir != Direction.YP)
 				{
 					TileEntity te = dir.applyToTileEntity(this);
@@ -147,6 +138,7 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 						break;
 					}
 				}
+			}
 		}
 
 		FluidStack liquid = null;
@@ -414,6 +406,6 @@ public class TileEntityPump extends TileEntityLiquidTankElectricMachine implemen
 	@Override
 	public Set<UpgradableProperty> getUpgradableProperties()
 	{
-		return EnumSet.of(UpgradableProperty.Processing, new UpgradableProperty[] { UpgradableProperty.Transformer, UpgradableProperty.EnergyStorage, UpgradableProperty.ItemConsuming, UpgradableProperty.ItemProducing, UpgradableProperty.FluidProducing });
+		return EnumSet.of(UpgradableProperty.Processing, UpgradableProperty.Transformer, UpgradableProperty.EnergyStorage, UpgradableProperty.ItemConsuming, UpgradableProperty.ItemProducing, UpgradableProperty.FluidProducing);
 	}
 }

@@ -1,22 +1,5 @@
 package ic2.core.network;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.zip.DeflaterOutputStream;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
@@ -44,6 +27,12 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+
+import java.io.*;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.zip.DeflaterOutputStream;
 
 public class NetworkManager
 {
@@ -89,7 +78,9 @@ public class NetworkManager
 			os.writeShort(data.length);
 
 			for (Object o : data)
+			{
 				DataEncoder.encode(os, o);
+			}
 
 			os.close();
 		}
@@ -114,7 +105,7 @@ public class NetworkManager
 			worldData.networkedFieldsToUpdate.add(new NetworkManager.TileEntityField(te, field));
 		}
 		else if (this.getClientModifiableField(te.getClass(), field) == null)
-			IC2.log.warn(LogCategory.Network, "Field update for %s failed.", new Object[] { te });
+			IC2.log.warn(LogCategory.Network, "Field update for %s failed.", te);
 		else
 		{
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -143,12 +134,12 @@ public class NetworkManager
 		Field field = ReflectionUtil.getFieldRecursive(cls, fieldName);
 		if (field == null)
 		{
-			IC2.log.warn(LogCategory.Network, "Can\'t find field %s in %s.", new Object[] { fieldName, cls.getName() });
+			IC2.log.warn(LogCategory.Network, "Can\'t find field %s in %s.", fieldName, cls.getName());
 			return null;
 		}
 		else if (field.getAnnotation(ClientModifiable.class) == null)
 		{
-			IC2.log.warn(LogCategory.Network, "The field %s in %s is not modifiable.", new Object[] { fieldName, cls.getName() });
+			IC2.log.warn(LogCategory.Network, "The field %s in %s is not modifiable.", fieldName, cls.getName());
 			return null;
 		}
 		else
@@ -218,6 +209,7 @@ public class NetworkManager
 			int maxDistance = limitRange ? 400 : MinecraftServer.getServer().getConfigurationManager().getEntityViewDistance() + 16;
 
 			for (Object obj : te.getWorldObj().playerEntities)
+			{
 				if (obj instanceof EntityPlayerMP)
 				{
 					EntityPlayerMP entityPlayer = (EntityPlayerMP) obj;
@@ -232,6 +224,7 @@ public class NetworkManager
 					if (distance <= maxDistance)
 						this.sendPacket(packetData, entityPlayer);
 				}
+			}
 
 		}
 	}
@@ -259,6 +252,7 @@ public class NetworkManager
 		int maxDistance = limitRange ? 400 : MinecraftServer.getServer().getConfigurationManager().getEntityViewDistance() + 16;
 
 		for (Object obj : player.worldObj.playerEntities)
+		{
 			if (obj instanceof EntityPlayerMP)
 			{
 				EntityPlayerMP entityPlayer = (EntityPlayerMP) obj;
@@ -273,10 +267,13 @@ public class NetworkManager
 				if (distance <= maxDistance)
 					this.sendPacket(packetData, entityPlayer);
 			}
+		}
 
 	}
 
-	/** @deprecated */
+	/**
+	 * @deprecated
+	 */
 	@Deprecated
 	public void requestInitialData(INetworkDataProvider dataProvider)
 	{
@@ -316,7 +313,7 @@ public class NetworkManager
 				os.writeInt(entityPlayer.inventory.currentItem);
 			}
 			else
-				IC2.platform.displayError("An unknown GUI type was attempted to be displayed.\nThis could happen due to corrupted data from a player or a bug.\n\n(Technical information: " + inventory + ")", new Object[0]);
+				IC2.platform.displayError("An unknown GUI type was attempted to be displayed.\nThis could happen due to corrupted data from a player or a bug.\n\n(Technical information: " + inventory + ")");
 
 			os.writeInt(windowId);
 			os.close();
@@ -335,7 +332,9 @@ public class NetworkManager
 			WorldData worldData = WorldData.get(te.getWorldObj());
 
 			for (String field : ((INetworkDataProvider) te).getNetworkedFields())
+			{
 				worldData.networkedFieldsToUpdate.add(new NetworkManager.TileEntityField(te, field, player));
+			}
 		}
 
 	}
@@ -369,14 +368,16 @@ public class NetworkManager
 	public void sendContainerFields(ContainerBase<?> container, String... fieldNames)
 	{
 		for (String fieldName : fieldNames)
+		{
 			this.sendContainerField(container, fieldName);
+		}
 
 	}
 
 	public void sendContainerField(ContainerBase<?> container, String fieldName)
 	{
 		if (this.isClient() && this.getClientModifiableField(container.getClass(), fieldName) == null)
-			IC2.log.warn(LogCategory.Network, "Field update for %s failed.", new Object[] { container });
+			IC2.log.warn(LogCategory.Network, "Field update for %s failed.", container);
 		else
 		{
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -398,8 +399,10 @@ public class NetworkManager
 			if (IC2.platform.isSimulating())
 			{
 				for (ICrafting crafter : container.getCrafters())
+				{
 					if (crafter instanceof EntityPlayerMP)
 						this.sendPacket(packetData, (EntityPlayerMP) crafter);
+				}
 			}
 			else
 				this.sendPacket(packetData);
@@ -428,8 +431,10 @@ public class NetworkManager
 		if (IC2.platform.isSimulating())
 		{
 			for (ICrafting crafter : container.getCrafters())
+			{
 				if (crafter instanceof EntityPlayerMP)
 					this.sendPacket(packetData, (EntityPlayerMP) crafter);
+			}
 		}
 		else
 			this.sendPacket(packetData);
@@ -500,7 +505,7 @@ public class NetworkManager
 
 						if (tef.te.getWorldObj() == tef.target.worldObj)
 						{
-							receivers = Arrays.asList(new EntityPlayerMP[] { tef.target });
+							receivers = Arrays.asList(tef.target);
 							break;
 						}
 					}
@@ -540,6 +545,7 @@ public class NetworkManager
 		List<EntityPlayerMP> ret = new ArrayList();
 
 		for (Object obj : world.playerEntities)
+		{
 			if (obj instanceof EntityPlayerMP)
 			{
 				EntityPlayerMP player = (EntityPlayerMP) obj;
@@ -547,6 +553,7 @@ public class NetworkManager
 				if (distance <= MinecraftServer.getServer().getConfigurationManager().getEntityViewDistance() + 16)
 					ret.add(player);
 			}
+		}
 
 		return ret;
 	}
@@ -617,11 +624,9 @@ public class NetworkManager
 					break;
 				}
 				case 2:
-				{
 					int keyState = is.readInt();
 					IC2.keyboard.processKeyUpdate(player, keyState);
 					break;
-				}
 				case 3:
 				{
 					TileEntity te = DataEncoder.decode(is, TileEntity.class);
@@ -640,14 +645,15 @@ public class NetworkManager
 				default:
 					break;
 				case 10:
-				{
 					int slot = is.readByte();
 					Item item = DataEncoder.decode(is, Item.class);
 					int dataCount = is.readShort();
 					Object[] subData = new Object[dataCount];
 
 					for (int i = 0; i < dataCount; ++i)
+					{
 						subData[i] = DataEncoder.decode(is);
+					}
 
 					if (slot >= 0 && slot <= 9)
 					{
@@ -656,7 +662,6 @@ public class NetworkManager
 							((IPlayerItemDataListener) item).onPlayerItemNetworkData(player, slot, subData);
 					}
 					break;
-				}
 				case 11:
 				{
 					int windowId = DataEncoder.readVarInt(is);
@@ -667,21 +672,17 @@ public class NetworkManager
 					break;
 				}
 				case 12:
-				{
 					int windowId = DataEncoder.readVarInt(is);
 					String event = is.readUTF();
 					if (player.openContainer instanceof ContainerBase && player.openContainer.windowId == windowId)
 						((ContainerBase) player.openContainer).onContainerEvent(event);
 					break;
-				}
 				case 13:
-				{
 					TileEntity te = DataEncoder.decode(is, TileEntity.class);
 					String fieldName = is.readUTF();
 					Object value = DataEncoder.decode(is);
 					if (te != null && (this.isClient() || this.getClientModifiableField(te.getClass(), fieldName) != null))
 						ReflectionUtil.setValueRecursive(te, fieldName, value);
-				}
 			}
 		}
 		catch (IOException e)
@@ -722,12 +723,14 @@ public class NetworkManager
 			byte[] packetData = buffer.toByteArray();
 
 			for (Object obj : world.playerEntities)
+			{
 				if (obj instanceof EntityPlayerMP)
 				{
 					EntityPlayerMP player = (EntityPlayerMP) obj;
 					if (player.getDistanceSq(x, y, z) < 128.0D)
 						this.sendPacket(packetData, player);
 				}
+			}
 
 		}
 		catch (IOException var14)

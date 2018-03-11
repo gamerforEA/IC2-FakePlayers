@@ -50,7 +50,7 @@ public abstract class InvSlotConsumable extends InvSlot
 						if (!consumeContainers && stack.getItem().hasContainerItem(stack))
 							this.put(i, stack.getItem().getContainerItem(stack));
 						else
-							this.put(i, (ItemStack) null);
+							this.put(i, null);
 					}
 					else
 						stack.stackSize -= currentAmount;
@@ -70,7 +70,7 @@ public abstract class InvSlotConsumable extends InvSlot
 
 	public ItemStack damage(int amount, boolean simulate)
 	{
-		return this.damage(amount, simulate, (EntityLivingBase) null);
+		return this.damage(amount, simulate, null);
 	}
 
 	public ItemStack damage(int amount, boolean simulate, EntityLivingBase src)
@@ -118,7 +118,7 @@ public abstract class InvSlotConsumable extends InvSlot
 				}
 
 				if (stack.stackSize == 0 && !simulate)
-					this.put(i, (ItemStack) null);
+					this.put(i, null);
 			}
 		}
 

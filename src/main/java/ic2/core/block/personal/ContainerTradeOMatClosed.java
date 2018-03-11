@@ -1,11 +1,11 @@
 package ic2.core.block.personal;
 
-import java.util.List;
-
 import ic2.core.ContainerFullInv;
 import ic2.core.slot.SlotInvSlot;
 import ic2.core.slot.SlotInvSlotReadOnly;
 import net.minecraft.entity.player.EntityPlayer;
+
+import java.util.List;
 
 public class ContainerTradeOMatClosed extends ContainerFullInv<TileEntityTradeOMat>
 {

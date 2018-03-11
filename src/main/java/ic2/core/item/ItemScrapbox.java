@@ -1,12 +1,6 @@
 package ic2.core.item;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.gamerforea.ic2.EventConfig;
-
 import ic2.api.recipe.IScrapboxManager;
 import ic2.api.recipe.Recipes;
 import ic2.core.IC2;
@@ -21,6 +15,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ItemScrapbox extends ItemIC2
 {
@@ -205,7 +204,9 @@ public class ItemScrapbox extends ItemIC2
 			Map<ItemStack, Float> ret = new HashMap(this.drops.size());
 
 			for (ItemScrapbox.Drop drop : this.drops)
+			{
 				ret.put(drop.item, Float.valueOf(drop.originalChance.floatValue() / ItemScrapbox.Drop.topChance));
+			}
 
 			return ret;
 		}

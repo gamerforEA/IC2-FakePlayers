@@ -1,12 +1,8 @@
 package ic2.core.block.personal;
 
-import java.util.List;
-import java.util.Vector;
-
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
 import com.mojang.authlib.GameProfile;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.core.ContainerBase;
@@ -19,6 +15,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.server.MinecraftServer;
+
+import java.util.List;
+import java.util.Vector;
 
 public class TileEntityPersonalChest extends TileEntityInventory implements IPersonalBlock, IHasGui
 {
@@ -149,12 +148,12 @@ public class TileEntityPersonalChest extends TileEntityInventory implements IPer
 	{
 		if (!this.permitsAccess(player.getGameProfile()))
 		{
-			IC2.platform.messagePlayer(player, "This safe is owned by " + this.owner.getName(), new Object[0]);
+			IC2.platform.messagePlayer(player, "This safe is owned by " + this.owner.getName());
 			return false;
 		}
 		else if (!this.contentSlot.isEmpty())
 		{
-			IC2.platform.messagePlayer(player, "Can\'t wrench non-empty safe", new Object[0]);
+			IC2.platform.messagePlayer(player, "Can\'t wrench non-empty safe");
 			return false;
 		}
 		else

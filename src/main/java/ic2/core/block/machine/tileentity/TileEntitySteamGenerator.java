@@ -17,20 +17,15 @@ import ic2.core.init.InternalName;
 import ic2.core.util.BiomUtil;
 import ic2.core.util.LiquidUtil;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
 
-public class TileEntitySteamGenerator extends TileEntityInventory implements IHasGui, IFluidHandler, INetworkClientTileEntityEventListener
+public class TileEntitySteamGenerator extends TileEntityInventory
+		implements IHasGui, IFluidHandler, INetworkClientTileEntityEventListener
 {
 	private final int maxcalcification = 100000;
 	private int calcification = 0;
@@ -103,7 +98,7 @@ public class TileEntitySteamGenerator extends TileEntityInventory implements IHa
 				if (outputfluid.amount > 0)
 					if ((this.outputtyp == 2 || this.outputtyp == 3) && IC2.random.nextInt(10) == 0)
 					{
-						ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.xCoord, this.yCoord, this.zCoord, 1.0F, 1.0F, ExplosionIC2.Type.Heat);
+						ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, null, this.xCoord, this.yCoord, this.zCoord, 1.0F, 1.0F, ExplosionIC2.Type.Heat);
 
 						// TODO gamerforEA code start
 						explosion.fake.setParent(this.fake);
@@ -224,7 +219,7 @@ public class TileEntitySteamGenerator extends TileEntityInventory implements IHa
 		if (this.systemheat > this.maxsystemheat)
 		{
 			this.worldObj.setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
-			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.xCoord, this.yCoord, this.zCoord, 10.0F, 0.01F, ExplosionIC2.Type.Heat);
+			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, null, this.xCoord, this.yCoord, this.zCoord, 10.0F, 0.01F, ExplosionIC2.Type.Heat);
 
 			// TODO gamerforEA code start
 			explosion.fake.setParent(this.fake);

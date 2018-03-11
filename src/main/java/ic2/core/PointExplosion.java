@@ -5,7 +5,6 @@ import com.gamerforea.eventhelper.fake.FakePlayerContainerWorld;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
-
 import ic2.api.event.ExplosionEvent;
 import ic2.core.util.Util;
 import net.minecraft.block.Block;
@@ -59,7 +58,9 @@ public class PointExplosion extends Explosion
 		if (!MinecraftForge.EVENT_BUS.post(event))
 		{
 			for (int x = Util.roundToNegInf(this.explosionX) - 1; x <= Util.roundToNegInf(this.explosionX) + 1; ++x)
+			{
 				for (int y = Util.roundToNegInf(this.explosionY) - 1; y <= Util.roundToNegInf(this.explosionY) + 1; ++y)
+				{
 					for (int z = Util.roundToNegInf(this.explosionZ) - 1; z <= Util.roundToNegInf(this.explosionZ) + 1; ++z)
 					{
 						Block block = this.world.getBlock(x, y, z);
@@ -75,6 +76,8 @@ public class PointExplosion extends Explosion
 							this.affectedBlockPositions.add(new ChunkPosition(x, y, z));
 						}
 					}
+				}
+			}
 
 			for (Entity entity : (Iterable<Entity>) this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, AxisAlignedBB.getBoundingBox(this.explosionX - 2.0D, this.explosionY - 2.0D, this.explosionZ - 2.0D, this.explosionX + 2.0D, this.explosionY + 2.0D, this.explosionZ + 2.0D)))
 			{

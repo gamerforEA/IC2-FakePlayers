@@ -1,7 +1,6 @@
 package ic2.core.item;
 
 import com.gamerforea.ic2.EventConfig;
-
 import ic2.api.recipe.Recipes;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;

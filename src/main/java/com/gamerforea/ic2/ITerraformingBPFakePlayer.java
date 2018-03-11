@@ -8,18 +8,13 @@ public interface ITerraformingBPFakePlayer
 	/**
 	 * Perform the terraforming operation.
 	 *
-	 * @param world
-	 *            world to terraform
-	 * @param x
-	 *            X position to terraform
-	 * @param z
-	 *            Z position to terraform
-	 * @param yCoord
-	 *            Y position of the terraformer
-	 * @param player
-	 *            Terraformer owner
+	 * @param world  world to terraform
+	 * @param x      X position to terraform
+	 * @param z      Z position to terraform
+	 * @param yCoord Y position of the terraformer
+	 * @param player Terraformer owner
 	 * @return Whether the operation was successful and the terraformer should
-	 *         consume energy.
+	 * consume energy.
 	 */
-	public abstract boolean terraform(World world, int x, int z, int yCoord, EntityPlayer player);
+	boolean terraform(World world, int x, int z, int yCoord, EntityPlayer player);
 }

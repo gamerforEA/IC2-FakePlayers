@@ -1,9 +1,6 @@
 package ic2.core.block.machine.tileentity;
 
-import java.util.Random;
-
 import com.gamerforea.ic2.EventConfig;
-
 import ic2.core.IC2;
 import ic2.core.IC2DamageSource;
 import ic2.core.block.TileEntityBlock;
@@ -13,6 +10,8 @@ import ic2.core.item.armor.ItemArmorHazmat;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.WorldServer;
+
+import java.util.Random;
 
 public class TileEntityTesla extends TileEntityBlock
 {
@@ -38,7 +37,8 @@ public class TileEntityTesla extends TileEntityBlock
 		int r = 4;
 
 		for (EntityLivingBase entity : (Iterable<EntityLivingBase>) this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 4, this.yCoord - 4, this.zCoord - 4, this.xCoord + 4 + 1, this.yCoord + 4 + 1, this.zCoord + 4 + 1)))
-			// TODO gamerforEA add condition [2, 3]
+		// TODO gamerforEA add condition [2, 3]
+		{
 			if (!ItemArmorHazmat.hasCompleteHazmat(entity) && (!EventConfig.teslaEvent || !this.fake.cantDamage(entity)) && entity.attackEntityFrom(IC2DamageSource.electricity, damage))
 			{
 				if (this.worldObj instanceof WorldServer)
@@ -47,11 +47,14 @@ public class TileEntityTesla extends TileEntityBlock
 					Random rnd = world.rand;
 
 					for (int i = 0; i < damage; ++i)
+					{
 						world.func_147487_a("reddust", entity.posX + rnd.nextFloat() - 0.5D, entity.posY + rnd.nextFloat() * 2.0F - 1.0D, entity.posZ + rnd.nextFloat() - 0.5D, 0, 0.10000000149011612D, 0.10000000149011612D, 1.0D, 1.0D);
+					}
 				}
 
 				return true;
 			}
+		}
 
 		return false;
 	}

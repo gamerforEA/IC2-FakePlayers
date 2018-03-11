@@ -1,20 +1,8 @@
 package ic2.core.block;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Vector;
-
-import org.apache.commons.lang3.mutable.MutableBoolean;
-
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 import com.gamerforea.ic2.ModUtils;
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -32,8 +20,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
-public abstract class TileEntityBlock extends TileEntity implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
+import java.util.*;
+import java.util.Map.Entry;
+
+public abstract class TileEntityBlock extends TileEntity
+		implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
 {
 	private static final List<TileEntityComponent> emptyComponents = Arrays.asList();
 	private static final List<Entry<String, TileEntityComponent>> emptyNamedComponents = Arrays.asList();
@@ -116,7 +109,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 			this.loaded = false;
 			if (this.components != null)
 				for (TileEntityComponent component : this.components.values())
+				{
 					component.onUnloaded();
+				}
 
 		}
 	}
@@ -136,7 +131,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 				NBTTagCompound componentNbt = componentsNbt.getCompoundTag(name);
 				TileEntityComponent component = this.components.get(name);
 				if (component == null)
-					IC2.log.warn(LogCategory.Block, "Can\'t find component {} while loading {}.", new Object[] { name, this });
+					IC2.log.warn(LogCategory.Block, "Can\'t find component {} while loading {}.", name, this);
 				else
 					component.readFromNbt(componentNbt);
 			}
@@ -186,7 +181,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 	{
 		if (this.updatableComponents != null)
 			for (TileEntityComponent component : this.updatableComponents)
+			{
 				component.onWorldTick();
+			}
 
 		if (this.enableWorldTick)
 			if (this.worldObj.isRemote)
@@ -212,7 +209,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 			this.lastRenderIcons = new IIcon[6];
 
 		for (int side = 0; side < 6; ++side)
+		{
 			this.lastRenderIcons[side] = block.getIcon(this.worldObj, this.xCoord, this.yCoord, this.zCoord, side);
+		}
 
 		this.tesrMask = 0;
 	}
@@ -371,7 +370,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 
 	public TileEntityComponent getComponent(String name)
 	{
-		return this.components == null ? null : (TileEntityComponent) this.components.get(name);
+		return this.components == null ? null : this.components.get(name);
 	}
 
 	public final Iterable<TileEntityComponent> getComponents()
@@ -388,7 +387,9 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 	{
 		if (this.components != null)
 			for (TileEntityComponent component : this.components.values())
+			{
 				component.onNeighborUpdate(srcBlock);
+			}
 
 	}
 
@@ -409,7 +410,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 
 					try
 					{
-						cls.getDeclaredMethod("updateEntityClient", new Class[0]);
+						cls.getDeclaredMethod("updateEntityClient");
 					}
 					catch (NoSuchMethodException var9)
 					{
@@ -426,7 +427,7 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 
 					try
 					{
-						cls.getDeclaredMethod("updateEntityServer", new Class[0]);
+						cls.getDeclaredMethod("updateEntityServer");
 					}
 					catch (NoSuchMethodException var8)
 					{
@@ -456,11 +457,11 @@ public abstract class TileEntityBlock extends TileEntity implements INetworkData
 		return this.worldObj.isRemote ? subscription == TileEntityBlock.TickSubscription.Both || subscription == TileEntityBlock.TickSubscription.Client : subscription == TileEntityBlock.TickSubscription.Both || subscription == TileEntityBlock.TickSubscription.Server;
 	}
 
-	private static enum TickSubscription
+	private enum TickSubscription
 	{
 		None,
 		Client,
 		Server,
-		Both;
+		Both
 	}
 }

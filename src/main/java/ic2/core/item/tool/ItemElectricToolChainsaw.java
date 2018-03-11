@@ -1,11 +1,8 @@
 package ic2.core.item.tool;
 
-import java.util.EnumSet;
-
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ic2.api.item.ElectricItem;
 import ic2.core.IC2;
@@ -31,6 +28,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+
+import java.util.EnumSet;
 
 public class ItemElectricToolChainsaw extends ItemElectricTool implements IHitSoundOverride
 {
@@ -65,12 +64,12 @@ public class ItemElectricToolChainsaw extends ItemElectricTool implements IHitSo
 				if (compoundTag.getBoolean("disableShear"))
 				{
 					compoundTag.setBoolean("disableShear", false);
-					IC2.platform.messagePlayer(player, "ic2.tooltip.mode", new Object[] { "ic2.tooltip.mode.normal" });
+					IC2.platform.messagePlayer(player, "ic2.tooltip.mode", "ic2.tooltip.mode.normal");
 				}
 				else
 				{
 					compoundTag.setBoolean("disableShear", true);
-					IC2.platform.messagePlayer(player, "ic2.tooltip.mode", new Object[] { "ic2.tooltip.mode.noShear" });
+					IC2.platform.messagePlayer(player, "ic2.tooltip.mode", "ic2.tooltip.mode.noShear");
 				}
 			}
 
@@ -213,7 +212,7 @@ public class ItemElectricToolChainsaw extends ItemElectricTool implements IHitSo
 	@Override
 	public String getHitSoundForBlock(int x, int y, int z)
 	{
-		String[] soundEffects = new String[] { "Tools/Chainsaw/ChainsawUseOne.ogg", "Tools/Chainsaw/ChainsawUseTwo.ogg" };
+		String[] soundEffects = { "Tools/Chainsaw/ChainsawUseOne.ogg", "Tools/Chainsaw/ChainsawUseTwo.ogg" };
 		return soundEffects[itemRand.nextInt(soundEffects.length)];
 	}
 }

@@ -1,18 +1,12 @@
 package ic2.core.block.reactor.tileentity;
 
-import java.lang.ref.WeakReference;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.reactor.IReactorChamber;
 import ic2.api.tile.IWrenchable;
-import ic2.core.ContainerBase;
-import ic2.core.IC2;
-import ic2.core.IHasGui;
-import ic2.core.ITickCallback;
-import ic2.core.Ic2Items;
+import ic2.core.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,7 +20,10 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 
-public class TileEntityReactorChamberElectric extends TileEntity implements IHasGui, IWrenchable, IInventory, IReactorChamber, IEnergyEmitter, IFluidHandler
+import java.lang.ref.WeakReference;
+
+public class TileEntityReactorChamberElectric extends TileEntity
+		implements IHasGui, IWrenchable, IInventory, IReactorChamber, IEnergyEmitter, IFluidHandler
 {
 	public boolean redpowert = false;
 	private short ticker = 0;
@@ -237,7 +234,7 @@ public class TileEntityReactorChamberElectric extends TileEntity implements IHas
 	public boolean isUseableByPlayer(EntityPlayer entityplayer)
 	{
 		TileEntityNuclearReactorElectric reactor = this.getReactor();
-		return reactor == null ? false : reactor.isUseableByPlayer(entityplayer);
+		return reactor != null && reactor.isUseableByPlayer(entityplayer);
 	}
 
 	@Override
@@ -267,7 +264,7 @@ public class TileEntityReactorChamberElectric extends TileEntity implements IHas
 	public boolean isItemValidForSlot(int i, ItemStack itemstack)
 	{
 		TileEntityNuclearReactorElectric reactor = this.getReactor();
-		return reactor == null ? false : reactor.isItemValidForSlot(i, itemstack);
+		return reactor != null && reactor.isItemValidForSlot(i, itemstack);
 	}
 
 	@Override
@@ -335,14 +332,14 @@ public class TileEntityReactorChamberElectric extends TileEntity implements IHas
 	public boolean canFill(ForgeDirection from, Fluid fluid)
 	{
 		TileEntityNuclearReactorElectric reactor = this.getReactor();
-		return reactor == null ? false : reactor.canFill(from, fluid);
+		return reactor != null && reactor.canFill(from, fluid);
 	}
 
 	@Override
 	public boolean canDrain(ForgeDirection from, Fluid fluid)
 	{
 		TileEntityNuclearReactorElectric reactor = this.getReactor();
-		return reactor == null ? false : reactor.canDrain(from, fluid);
+		return reactor != null && reactor.canDrain(from, fluid);
 	}
 
 	@Override

@@ -1,15 +1,9 @@
 package ic2.core.item.tool;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
-
 import cpw.mods.fml.common.registry.IThrowableEntity;
 import ic2.api.event.LaserEvent;
 import ic2.core.ExplosionIC2;
@@ -29,14 +23,15 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EntityDamageSourceIndirect;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.*;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class EntityMiningLaser extends Entity implements IThrowableEntity
 {
@@ -44,7 +39,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	public float power;
 	public int blockBreaks;
 	public boolean explosive;
-	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(new Block[] { Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock) }));
+	public static Set<Block> unmineableBlocks = new HashSet(Arrays.asList(Blocks.brick_block, Blocks.obsidian, Blocks.lava, Blocks.flowing_lava, Blocks.water, Blocks.flowing_water, Blocks.bedrock, StackUtil.getBlock(Ic2Items.reinforcedStone), StackUtil.getBlock(Ic2Items.reinforcedDoorBlock)));
 	public static final double laserSpeed = 1.0D;
 	public EntityLivingBase owner;
 	public boolean headingSet;
@@ -211,9 +206,9 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 								return;
 							}
 							else
-							// TODO gamerforEA code end
-							if (tEvent.hitentity.attackEntityFrom(new EntityDamageSourceIndirect("arrow", this, this.owner).setProjectile(), damage) && this.owner instanceof EntityPlayer && (tEvent.hitentity instanceof EntityDragon && ((EntityDragon) tEvent.hitentity).getHealth() <= 0.0F || tEvent.hitentity instanceof EntityDragonPart && ((EntityDragonPart) tEvent.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) tEvent.hitentity).entityDragonObj).getHealth() <= 0.0F))
-								IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
+								// TODO gamerforEA code end
+								if (tEvent.hitentity.attackEntityFrom(new EntityDamageSourceIndirect("arrow", this, this.owner).setProjectile(), damage) && this.owner instanceof EntityPlayer && (tEvent.hitentity instanceof EntityDragon && ((EntityDragon) tEvent.hitentity).getHealth() <= 0.0F || tEvent.hitentity instanceof EntityDragonPart && ((EntityDragonPart) tEvent.hitentity).entityDragonObj instanceof EntityDragon && ((EntityLivingBase) ((EntityDragonPart) tEvent.hitentity).entityDragonObj).getHealth() <= 0.0F))
+									IC2.achievements.issueAchievement((EntityPlayer) this.owner, "killDragonMiningLaser");
 
 						this.setDead();
 					}
@@ -229,71 +224,71 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 						return;
 					}
 					else
-					// TODO gamerforEA code end
-					if (this.takeDataFromEvent(tEvent))
-					{
-						Block tBlock = this.worldObj.getBlock(tEvent.x, tEvent.y, tEvent.z);
-						if (tBlock != null && tBlock != Blocks.glass && tBlock != Blocks.glass_pane && !StackUtil.equals(tBlock, Ic2Items.reinforcedGlass))
-							if (!this.canMine(tBlock))
-								this.setDead();
-							else if (IC2.platform.isSimulating())
-							{
-								float resis = 0.0F;
-								resis = tBlock.getExplosionResistance(this, this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.posX, this.posY, this.posZ) + 0.3F;
-								this.power -= resis / 10.0F;
-								if (this.power >= 0.0F)
+						// TODO gamerforEA code end
+						if (this.takeDataFromEvent(tEvent))
+						{
+							Block tBlock = this.worldObj.getBlock(tEvent.x, tEvent.y, tEvent.z);
+							if (tBlock != null && tBlock != Blocks.glass && tBlock != Blocks.glass_pane && !StackUtil.equals(tBlock, Ic2Items.reinforcedGlass))
+								if (!this.canMine(tBlock))
+									this.setDead();
+								else if (IC2.platform.isSimulating())
 								{
-									if (tBlock.getMaterial() != Material.tnt && tBlock.getMaterial() != MaterialIC2TNT.instance)
+									float resis = 0.0F;
+									resis = tBlock.getExplosionResistance(this, this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.posX, this.posY, this.posZ) + 0.3F;
+									this.power -= resis / 10.0F;
+									if (this.power >= 0.0F)
 									{
-										if (this.smelt)
-											if (tBlock.getMaterial() == Material.wood)
-												tEvent.dropBlock = false;
-											else
-												for (ItemStack isa : tBlock.getDrops(this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.worldObj.getBlockMetadata(tEvent.x, tEvent.y, tEvent.z), 0))
-												{
-													ItemStack is = FurnaceRecipes.smelting().getSmeltingResult(isa);
-													if (is != null)
+										if (tBlock.getMaterial() != Material.tnt && tBlock.getMaterial() != MaterialIC2TNT.instance)
+										{
+											if (this.smelt)
+												if (tBlock.getMaterial() == Material.wood)
+													tEvent.dropBlock = false;
+												else
+													for (ItemStack isa : tBlock.getDrops(this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.worldObj.getBlockMetadata(tEvent.x, tEvent.y, tEvent.z), 0))
 													{
-														Block newBlock = StackUtil.getBlock(is);
-														if (newBlock != null && newBlock != tBlock)
+														ItemStack is = FurnaceRecipes.smelting().getSmeltingResult(isa);
+														if (is != null)
 														{
-															tEvent.removeBlock = false;
-															tEvent.dropBlock = false;
-															this.worldObj.setBlock(tEvent.x, tEvent.y, tEvent.z, newBlock, is.getItemDamage(), 7);
-														}
-														else
-														{
-															tEvent.dropBlock = false;
-															float var6 = 0.7F;
-															double var7 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
-															double var9 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
-															double var11 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
-															EntityItem var13 = new EntityItem(this.worldObj, tEvent.x + var7, tEvent.y + var9, tEvent.z + var11, is.copy());
-															var13.delayBeforeCanPickup = 10;
-															this.worldObj.spawnEntityInWorld(var13);
-														}
+															Block newBlock = StackUtil.getBlock(is);
+															if (newBlock != null && newBlock != tBlock)
+															{
+																tEvent.removeBlock = false;
+																tEvent.dropBlock = false;
+																this.worldObj.setBlock(tEvent.x, tEvent.y, tEvent.z, newBlock, is.getItemDamage(), 7);
+															}
+															else
+															{
+																tEvent.dropBlock = false;
+																float var6 = 0.7F;
+																double var7 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
+																double var9 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
+																double var11 = this.worldObj.rand.nextFloat() * var6 + (1.0F - var6) * 0.5D;
+																EntityItem var13 = new EntityItem(this.worldObj, tEvent.x + var7, tEvent.y + var9, tEvent.z + var11, is.copy());
+																var13.delayBeforeCanPickup = 10;
+																this.worldObj.spawnEntityInWorld(var13);
+															}
 
-														this.power = 0.0F;
+															this.power = 0.0F;
+														}
 													}
-												}
+										}
+										else
+											tBlock.onBlockDestroyedByExplosion(this.worldObj, tEvent.x, tEvent.y, tEvent.z, new Explosion(this.worldObj, this, tEvent.x, tEvent.y, tEvent.z, 1.0F));
+
+										if (tEvent.removeBlock)
+										{
+											if (tEvent.dropBlock)
+												tBlock.dropBlockAsItemWithChance(this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.worldObj.getBlockMetadata(tEvent.x, tEvent.y, tEvent.z), tEvent.dropChance, 0);
+
+											this.worldObj.setBlockToAir(tEvent.x, tEvent.y, tEvent.z);
+											if (this.worldObj.rand.nextInt(10) == 0 && tBlock.getMaterial().getCanBurn())
+												this.worldObj.setBlock(tEvent.x, tEvent.y, tEvent.z, Blocks.fire, 0, 7);
+										}
+
+										--this.blockBreaks;
 									}
-									else
-										tBlock.onBlockDestroyedByExplosion(this.worldObj, tEvent.x, tEvent.y, tEvent.z, new Explosion(this.worldObj, this, tEvent.x, tEvent.y, tEvent.z, 1.0F));
-
-									if (tEvent.removeBlock)
-									{
-										if (tEvent.dropBlock)
-											tBlock.dropBlockAsItemWithChance(this.worldObj, tEvent.x, tEvent.y, tEvent.z, this.worldObj.getBlockMetadata(tEvent.x, tEvent.y, tEvent.z), tEvent.dropChance, 0);
-
-										this.worldObj.setBlockToAir(tEvent.x, tEvent.y, tEvent.z);
-										if (this.worldObj.rand.nextInt(10) == 0 && tBlock.getMaterial().getCanBurn())
-											this.worldObj.setBlock(tEvent.x, tEvent.y, tEvent.z, Blocks.fire, 0, 7);
-									}
-
-									--this.blockBreaks;
 								}
-							}
-					}
+						}
 				}
 			}
 			else
@@ -361,7 +356,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 			MinecraftForge.EVENT_BUS.post(tEvent);
 			if (this.takeDataFromEvent(tEvent))
 			{
-				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.posX, this.posY, this.posZ, tEvent.explosionpower, tEvent.explosiondroprate);
+				ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, null, this.posX, this.posY, this.posZ, tEvent.explosionpower, tEvent.explosiondroprate);
 
 				// TODO gamerforEA code start
 				explosion.fake.setParent(this.fake);

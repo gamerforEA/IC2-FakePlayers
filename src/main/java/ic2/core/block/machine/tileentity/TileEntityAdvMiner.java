@@ -1,23 +1,12 @@
 package ic2.core.block.machine.tileentity;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.gamerforea.ic2.EventConfig;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.item.ElectricItem;
 import ic2.api.network.INetworkClientTileEntityEventListener;
 import ic2.api.recipe.IRecipeInput;
-import ic2.core.ContainerBase;
-import ic2.core.IC2;
-import ic2.core.IHasGui;
-import ic2.core.Ic2Items;
-import ic2.core.Ic2Player;
+import ic2.core.*;
 import ic2.core.block.comp.Redstone;
 import ic2.core.block.invslot.InvSlot;
 import ic2.core.block.invslot.InvSlotConsumableId;
@@ -41,7 +30,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.IFluidBlock;
 
-public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHasGui, INetworkClientTileEntityEventListener, IUpgradableBlock
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
+public class TileEntityAdvMiner extends TileEntityElectricMachine
+		implements IHasGui, INetworkClientTileEntityEventListener, IUpgradableBlock
 {
 	private final List<ItemStack> itemstack = new ArrayList();
 	private int currectblockscanncount;
@@ -61,7 +57,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 	private int minetargetX = -1;
 	private int minetargetZ = -1;
 	private short ticker = 0;
-	public final InvSlotConsumableId scannerSlot = new InvSlotConsumableId(this, "scanner", 1, InvSlot.Access.IO, 1, InvSlot.InvSide.BOTTOM, new Item[] { Ic2Items.odScanner.getItem(), Ic2Items.ovScanner.getItem() });
+	public final InvSlotConsumableId scannerSlot = new InvSlotConsumableId(this, "scanner", 1, InvSlot.Access.IO, 1, InvSlot.InvSide.BOTTOM, Ic2Items.odScanner.getItem(), Ic2Items.ovScanner.getItem());
 	public final InvSlotUpgrade upgradeSlot = new InvSlotUpgrade(this, "upgrade", 3, 4);
 	public final InvSlot ListSlot = new InvSlot(this, "list", 8, (InvSlot.Access) null, 15);
 	protected final Redstone redstone = this.addComponent(new Redstone(this));
@@ -214,8 +210,10 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 			int max = 0;
 
 			for (Entry<IRecipeInput, Integer> entry : IC2.valuableOres.entrySet())
+			{
 				if (entry.getKey().matches(stack))
 					++max;
+			}
 
 			if (max == 0)
 				return false;
@@ -245,16 +243,20 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine implements IHa
 					if (this.blacklist)
 					{
 						for (int i = 0; i < this.ListSlot.size(); ++i)
+						{
 							if (this.ListSlot.get(i) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(i)))
 								return false;
+						}
 
 						return true;
 					}
 					else
 					{
 						for (int i = 0; i < this.ListSlot.size(); ++i)
+						{
 							if (this.ListSlot.get(i) != null && StackUtil.isStackEqual(this.itemstack.get(0), this.ListSlot.get(i)))
 								return true;
+						}
 
 						return false;
 					}

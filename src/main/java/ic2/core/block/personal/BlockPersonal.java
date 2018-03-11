@@ -1,11 +1,6 @@
 package ic2.core.block.personal;
 
-import java.util.ArrayList;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-
 import com.gamerforea.ic2.EventConfig;
-
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -25,6 +20,9 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import java.util.ArrayList;
 
 public class BlockPersonal extends BlockMultiID
 {
@@ -122,7 +120,7 @@ public class BlockPersonal extends BlockMultiID
 				return false;
 			else if (IC2.platform.isSimulating() && meta != 1 && meta != 2 && te instanceof IPersonalBlock && !((IPersonalBlock) te).permitsAccess(player.getGameProfile()))
 			{
-				IC2.platform.messagePlayer(player, "This safe is owned by " + ((IPersonalBlock) te).getOwner().getName(), new Object[0]);
+				IC2.platform.messagePlayer(player, "This safe is owned by " + ((IPersonalBlock) te).getOwner().getName());
 				return false;
 			}
 			else

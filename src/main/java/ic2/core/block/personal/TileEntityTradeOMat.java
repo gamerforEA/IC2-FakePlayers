@@ -1,11 +1,7 @@
 package ic2.core.block.personal;
 
-import java.util.List;
-import java.util.Vector;
-
 import com.gamerforea.ic2.EventConfig;
 import com.mojang.authlib.GameProfile;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.network.INetworkClientTileEntityEventListener;
@@ -27,7 +23,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.server.MinecraftServer;
 
-public class TileEntityTradeOMat extends TileEntityInventory implements IPersonalBlock, IHasGui, INetworkTileEntityEventListener, INetworkClientTileEntityEventListener
+import java.util.List;
+import java.util.Vector;
+
+public class TileEntityTradeOMat extends TileEntityInventory
+		implements IPersonalBlock, IHasGui, INetworkTileEntityEventListener, INetworkClientTileEntityEventListener
 {
 	private int ticker = IC2.random.nextInt(64);
 	private GameProfile owner = null;
@@ -59,7 +59,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
+				return !EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) && super.accepts(stack);
 			}
 		};
 
@@ -68,7 +68,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
+				return !EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) && super.accepts(stack);
 			}
 		};
 
@@ -77,7 +77,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) ? false : super.accepts(stack);
+				return !EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) && super.accepts(stack);
 			}
 		};
 		// TODO gamerforEA code end
@@ -166,7 +166,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 
 						if (transferredIn.stackSize != offer.stackSize)
 						{
-							IC2.log.warn(LogCategory.Block, "The Trade-O-Mat at dim %d, %d/%d/%d received an inconsistent result from an adjacent trade supply inventory, the item stack %s will be lost.", new Object[] { Integer.valueOf(this.getWorldObj().provider.dimensionId), Integer.valueOf(this.xCoord), Integer.valueOf(this.yCoord), Integer.valueOf(this.zCoord), transferredIn });
+							IC2.log.warn(LogCategory.Block, "The Trade-O-Mat at dim %d, %d/%d/%d received an inconsistent result from an adjacent trade supply inventory, the item stack %s will be lost.", Integer.valueOf(this.getWorldObj().provider.dimensionId), Integer.valueOf(this.xCoord), Integer.valueOf(this.yCoord), Integer.valueOf(this.zCoord), transferredIn);
 							return;
 						}
 
@@ -277,7 +277,7 @@ public class TileEntityTradeOMat extends TileEntityInventory implements IPersona
 				IC2.audioManager.playOnce(this, PositionSpec.Center, "Machines/o-mat.ogg", true, IC2.audioManager.getDefaultVolume());
 				break;
 			default:
-				IC2.platform.displayError("An unknown event type was received over multiplayer.\nThis could happen due to corrupted data or a bug.\n\n(Technical information: event ID " + event + ", tile entity below)\n" + "T: " + this + " (" + this.xCoord + ", " + this.yCoord + ", " + this.zCoord + ")", new Object[0]);
+				IC2.platform.displayError("An unknown event type was received over multiplayer.\nThis could happen due to corrupted data or a bug.\n\n(Technical information: event ID " + event + ", tile entity below)\n" + "T: " + this + " (" + this.xCoord + ", " + this.yCoord + ", " + this.zCoord + ")");
 		}
 
 	}

@@ -1,12 +1,10 @@
 package ic2.core.item;
 
 import com.gamerforea.ic2.EventConfig;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.core.Ic2Items;
 import ic2.core.init.InternalName;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
@@ -17,11 +15,11 @@ import net.minecraft.world.World;
 
 public class ItemBooze extends ItemIC2
 {
-	public String[] solidRatio = new String[] { "Watery ", "Clear ", "Lite ", "", "Strong ", "Thick ", "Stodge ", "X" };
-	public String[] hopsRatio = new String[] { "Soup ", "Alcfree ", "White ", "", "Dark ", "Full ", "Black ", "X" };
-	public String[] timeRatioNames = new String[] { "Brew", "Youngster", "Beer", "Ale", "Dragonblood", "Black Stuff" };
-	public int[] baseDuration = new int[] { 300, 600, 900, 1200, 1600, 2000, 2400 };
-	public float[] baseIntensity = new float[] { 0.4F, 0.75F, 1.0F, 1.5F, 2.0F };
+	public String[] solidRatio = { "Watery ", "Clear ", "Lite ", "", "Strong ", "Thick ", "Stodge ", "X" };
+	public String[] hopsRatio = { "Soup ", "Alcfree ", "White ", "", "Dark ", "Full ", "Black ", "X" };
+	public String[] timeRatioNames = { "Brew", "Youngster", "Beer", "Ale", "Dragonblood", "Black Stuff" };
+	public int[] baseDuration = { 300, 600, 900, 1200, 1600, 2000, 2400 };
+	public float[] baseIntensity = { 0.4F, 0.75F, 1.0F, 1.5F, 2.0F };
 	public static float rumStackability = 2.0F;
 	public static int rumDuration = 600;
 
@@ -29,7 +27,7 @@ public class ItemBooze extends ItemIC2
 	{
 		super(internalName);
 		this.setMaxStackSize(1);
-		this.setCreativeTab((CreativeTabs) null);
+		this.setCreativeTab(null);
 	}
 
 	@Override

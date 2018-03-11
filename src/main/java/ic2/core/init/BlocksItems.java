@@ -38,7 +38,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialLiquid;
-import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemStack;
@@ -67,23 +66,23 @@ public class BlocksItems
 
 	private static void initPotions()
 	{
-		Info.POTION_RADIATION = IC2Potion.radiation = IC2Potion.registerPotion(ConfigUtil.getInt(MainConfig.get(), "misc/radiationPotionID"), true, 5149489, new ItemStack[0]);
+		Info.POTION_RADIATION = IC2Potion.radiation = IC2Potion.registerPotion(ConfigUtil.getInt(MainConfig.get(), "misc/radiationPotionID"), true, 5149489);
 	}
 
 	private static void initBlocks()
 	{
-		Ic2Items.copperOre = new ItemStack((new BlockMetaData(InternalName.blockOreCopper, Material.rock)).setHardness(3.0F).setResistance(5.0F));
-		Ic2Items.tinOre = new ItemStack((new BlockMetaData(InternalName.blockOreTin, Material.rock)).setHardness(3.0F).setResistance(5.0F));
-		Ic2Items.uraniumOre = new ItemStack((new BlockMetaData(InternalName.blockOreUran, Material.rock)).setHardness(4.0F).setResistance(6.0F));
-		Ic2Items.leadOre = new ItemStack((new BlockMetaData(InternalName.blockOreLead, Material.rock)).setHardness(2.0F).setResistance(4.0F));
+		Ic2Items.copperOre = new ItemStack(new BlockMetaData(InternalName.blockOreCopper, Material.rock).setHardness(3.0F).setResistance(5.0F));
+		Ic2Items.tinOre = new ItemStack(new BlockMetaData(InternalName.blockOreTin, Material.rock).setHardness(3.0F).setResistance(5.0F));
+		Ic2Items.uraniumOre = new ItemStack(new BlockMetaData(InternalName.blockOreUran, Material.rock).setHardness(4.0F).setResistance(6.0F));
+		Ic2Items.leadOre = new ItemStack(new BlockMetaData(InternalName.blockOreLead, Material.rock).setHardness(2.0F).setResistance(4.0F));
 		new BlockRubWood(InternalName.blockRubWood);
 		new BlockRubLeaves(InternalName.blockRubLeaves);
 		new BlockRubSapling(InternalName.blockRubSapling);
 		new BlockResin(InternalName.blockHarz);
 		new BlockRubberSheet(InternalName.blockRubber);
 		new BlockPoleFence(InternalName.blockFenceIron);
-		Ic2Items.reinforcedStone = new ItemStack((new BlockMetaData(InternalName.blockAlloy, Material.iron)).setHardness(80.0F).setResistance(180.0F).setStepSound(Block.soundTypeMetal));
-		Ic2Items.basaltBlock = new ItemStack((new BlockMetaData(InternalName.blockBasalt, Material.rock)).setHardness(20.0F).setResistance(45.0F).setStepSound(Block.soundTypeStone));
+		Ic2Items.reinforcedStone = new ItemStack(new BlockMetaData(InternalName.blockAlloy, Material.iron).setHardness(80.0F).setResistance(180.0F).setStepSound(Block.soundTypeMetal));
+		Ic2Items.basaltBlock = new ItemStack(new BlockMetaData(InternalName.blockBasalt, Material.rock).setHardness(20.0F).setResistance(45.0F).setStepSound(Block.soundTypeStone));
 		Ic2Items.reinforcedGlass = new ItemStack(new BlockTexGlass(InternalName.blockAlloyGlass));
 		Ic2Items.reinforcedDoorBlock = new ItemStack(new BlockIC2Door(InternalName.blockDoorAlloy));
 		new BlockReinforcedFoam(InternalName.blockReinforcedFoam);
@@ -166,16 +165,16 @@ public class BlocksItems
 		Ic2Items.smallUran235 = new ItemStack(new ItemRadioactive(InternalName.itemUran235small, 150, 100));
 		Ic2Items.Uran238 = new ItemStack(new ItemRadioactive(InternalName.itemUran238, 10, 90));
 		Ic2Items.fuelRod = new ItemStack(new ItemIC2(InternalName.itemFuelRod));
-		Ic2Items.RTGPellets = new ItemStack((new ItemRadioactive(InternalName.itemRTGPellet, 2, 90)).setMaxStackSize(1));
+		Ic2Items.RTGPellets = new ItemStack(new ItemRadioactive(InternalName.itemRTGPellet, 2, 90).setMaxStackSize(1));
 		Ic2Items.electronicCircuit = new ItemStack(new ItemIC2(InternalName.itemPartCircuit));
-		Ic2Items.advancedCircuit = new ItemStack((new ItemIC2(InternalName.itemPartCircuitAdv)).setRarity(1).setUnlocalizedName("itemPartCircuitAdv").setCreativeTab(IC2.tabIC2));
+		Ic2Items.advancedCircuit = new ItemStack(new ItemIC2(InternalName.itemPartCircuitAdv).setRarity(1).setUnlocalizedName("itemPartCircuitAdv").setCreativeTab(IC2.tabIC2));
 		Ic2Items.advancedAlloy = new ItemStack(new ItemIC2(InternalName.itemPartAlloy));
 		Ic2Items.carbonFiber = new ItemStack(new ItemIC2(InternalName.itemPartCarbonFibre));
 		Ic2Items.carbonMesh = new ItemStack(new ItemIC2(InternalName.itemPartCarbonMesh));
 		Ic2Items.carbonPlate = new ItemStack(new ItemIC2(InternalName.itemPartCarbonPlate));
-		Ic2Items.iridiumOre = new ItemStack((new ItemIC2(InternalName.itemOreIridium)).setRarity(2).setUnlocalizedName("itemOreIridium").setCreativeTab(IC2.tabIC2));
-		Ic2Items.iridiumPlate = new ItemStack((new ItemIC2(InternalName.itemPartIridium)).setRarity(2).setUnlocalizedName("itemPartIridium").setCreativeTab(IC2.tabIC2));
-		Ic2Items.iridiumShard = new ItemStack((new ItemIC2(InternalName.itemShardIridium)).setRarity(2).setUnlocalizedName("itemShardIridium").setCreativeTab(IC2.tabIC2));
+		Ic2Items.iridiumOre = new ItemStack(new ItemIC2(InternalName.itemOreIridium).setRarity(2).setUnlocalizedName("itemOreIridium").setCreativeTab(IC2.tabIC2));
+		Ic2Items.iridiumPlate = new ItemStack(new ItemIC2(InternalName.itemPartIridium).setRarity(2).setUnlocalizedName("itemPartIridium").setCreativeTab(IC2.tabIC2));
+		Ic2Items.iridiumShard = new ItemStack(new ItemIC2(InternalName.itemShardIridium).setRarity(2).setUnlocalizedName("itemShardIridium").setCreativeTab(IC2.tabIC2));
 		Ic2Items.treetap = new ItemStack(new ItemTreetap(InternalName.itemTreetap));
 		Ic2Items.bronzePickaxe = new ItemStack(new ItemIC2Pickaxe(InternalName.itemToolBronzePickaxe, ToolMaterial.IRON, 5.0F, "ingotBronze"));
 		Ic2Items.bronzeAxe = new ItemStack(new ItemIC2Axe(InternalName.itemToolBronzeAxe, ToolMaterial.IRON, 5.0F, "ingotBronze"));
@@ -236,12 +235,12 @@ public class BlocksItems
 		Ic2Items.chargedReBattery = new ItemStack(new ItemBattery(InternalName.itemBatRE, 10000.0D, 32.0D, 1));
 		Ic2Items.advBattery = new ItemStack(new ItemBattery(InternalName.itemAdvBat, 100000.0D, 256.0D, 2));
 		Ic2Items.energyCrystal = new ItemStack(new ItemBattery(InternalName.itemBatCrystal, 1000000.0D, 2048.0D, 3));
-		Ic2Items.lapotronCrystal = new ItemStack((new ItemBattery(InternalName.itemBatLamaCrystal, 1.0E7D, 8092.0D, 4)).setRarity(1));
+		Ic2Items.lapotronCrystal = new ItemStack(new ItemBattery(InternalName.itemBatLamaCrystal, 1.0E7D, 8092.0D, 4).setRarity(1));
 		Ic2Items.suBattery = new ItemStack(new ItemBatterySU(InternalName.itemBatSU, 1200, 1));
 		Ic2Items.chargingREBattery = new ItemStack(new ItemBatteryChargeHotbar(InternalName.itemBatChargeRE, 40000.0D, 128.0D, 1));
 		Ic2Items.chargingAdvBattery = new ItemStack(new ItemBatteryChargeHotbar(InternalName.itemBatChargeAdv, 400000.0D, 1024.0D, 2));
 		Ic2Items.chargingEnergyCrystal = new ItemStack(new ItemBatteryChargeHotbar(InternalName.itemBatChargeCrystal, 4000000.0D, 8192.0D, 3));
-		Ic2Items.chargingLapotronCrystal = new ItemStack((new ItemBatteryChargeHotbar(InternalName.itemBatChargeLamaCrystal, 4.0E7D, 32768.0D, 4)).setRarity(1));
+		Ic2Items.chargingLapotronCrystal = new ItemStack(new ItemBatteryChargeHotbar(InternalName.itemBatChargeLamaCrystal, 4.0E7D, 32768.0D, 4).setRarity(1));
 		new ItemCable(InternalName.itemCable);
 		Ic2Items.cell = new ItemStack(new ItemCell(InternalName.itemCellEmpty));
 		Ic2Items.tinCan = new ItemStack(new ItemIC2(InternalName.itemTinCan));
@@ -287,7 +286,7 @@ public class BlocksItems
 		Ic2Items.coalBall = new ItemStack(new ItemIC2(InternalName.itemPartCoalBall));
 		Ic2Items.compressedCoalBall = new ItemStack(new ItemIC2(InternalName.itemPartCoalBlock));
 		Ic2Items.coalChunk = new ItemStack(new ItemIC2(InternalName.itemPartCoalChunk));
-		Ic2Items.industrialDiamond = new ItemStack((new ItemIC2(InternalName.itemPartIndustrialDiamond)).setUnlocalizedName("itemPartIndustrialDiamond"));
+		Ic2Items.industrialDiamond = new ItemStack(new ItemIC2(InternalName.itemPartIndustrialDiamond).setUnlocalizedName("itemPartIndustrialDiamond"));
 		Ic2Items.slag = new ItemStack(new ItemIC2(InternalName.itemSlag));
 		Ic2Items.scrap = new ItemStack(new ItemIC2(InternalName.itemScrap));
 		Ic2Items.scrapBox = new ItemStack(new ItemScrapbox(InternalName.itemScrapbox));
@@ -328,7 +327,7 @@ public class BlocksItems
 		Ic2Items.hydratingCell = new ItemStack(new ItemGradual(InternalName.itemCellHydrant));
 		Ic2Items.electricHoe = new ItemStack(new ItemElectricToolHoe(InternalName.itemToolHoe));
 		Ic2Items.terraWart = new ItemStack(new ItemTerraWart(InternalName.itemTerraWart));
-		Ic2Items.weedEx = new ItemStack((new ItemIC2(InternalName.itemWeedEx)).setMaxStackSize(1).setMaxDamage(64));
+		Ic2Items.weedEx = new ItemStack(new ItemIC2(InternalName.itemWeedEx).setMaxStackSize(1).setMaxDamage(64));
 		Ic2Items.mugEmpty = new ItemStack(new ItemMug(InternalName.itemMugEmpty));
 		Ic2Items.coffeeBeans = new ItemStack(new ItemIC2(InternalName.itemCofeeBeans));
 		Ic2Items.coffeePowder = new ItemStack(new ItemIC2(InternalName.itemCofeePowder));
@@ -424,7 +423,7 @@ public class BlocksItems
 		else
 		{
 			String fluidName = "ic2" + internalName.name().substring("fluid".length()).toLowerCase(Locale.ENGLISH);
-			Fluid fluid = (new Ic2Fluid(fluidName)).setDensity(density).setViscosity(viscosity).setLuminosity(luminosity).setTemperature(temperature).setGaseous(isGaseous);
+			Fluid fluid = new Ic2Fluid(fluidName).setDensity(density).setViscosity(viscosity).setLuminosity(luminosity).setTemperature(temperature).setGaseous(isGaseous);
 			if (!FluidRegistry.registerFluid(fluid))
 			{
 				fluid = FluidRegistry.getFluid(fluidName);
@@ -454,17 +453,17 @@ public class BlocksItems
 			if (mapping.name.startsWith("IC2:"))
 			{
 				String subName = mapping.name.substring("IC2".length() + 1);
-				InternalName newName = (InternalName) renames.get(subName);
+				InternalName newName = renames.get(subName);
 				if (newName != null)
 				{
 					String name = "IC2:" + newName.name();
 					if (mapping.type == Type.BLOCK)
 					{
-						mapping.remap((Block) GameData.getBlockRegistry().getRaw(name));
+						mapping.remap(GameData.getBlockRegistry().getRaw(name));
 					}
 					else
 					{
-						mapping.remap((Item) GameData.getItemRegistry().getRaw(name));
+						mapping.remap(GameData.getItemRegistry().getRaw(name));
 					}
 				}
 				else if (dropped.contains(subName))
@@ -478,12 +477,12 @@ public class BlocksItems
 
 	public static Fluid getFluid(InternalName name)
 	{
-		return (Fluid) fluids.get(name);
+		return fluids.get(name);
 	}
 
 	public static Block getFluidBlock(InternalName name)
 	{
-		return (Block) fluidBlocks.get(name);
+		return fluidBlocks.get(name);
 	}
 
 	public static Collection<InternalName> getIc2FluidNames()

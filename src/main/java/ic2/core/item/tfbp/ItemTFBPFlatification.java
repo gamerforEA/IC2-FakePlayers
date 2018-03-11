@@ -1,12 +1,8 @@
 package ic2.core.item.tfbp;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 import com.gamerforea.ic2.ModUtils;
-
 import ic2.core.Ic2Items;
 import ic2.core.block.machine.tileentity.TileEntityTerra;
 import ic2.core.init.InternalName;
@@ -16,7 +12,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
-public class ItemTFBPFlatification extends ItemTFBP implements ITerraformingBPFakePlayer // TODO gamerforEA implement ITerraformingBPFakePlayer
+import java.util.HashSet;
+import java.util.Set;
+
+public class ItemTFBPFlatification extends ItemTFBP
+		implements ITerraformingBPFakePlayer // TODO gamerforEA implement ITerraformingBPFakePlayer
 {
 	public static Set<Block> removable = new HashSet();
 

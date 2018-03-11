@@ -1,20 +1,10 @@
 package ic2.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import com.gamerforea.eventhelper.fake.FakePlayerContainerWorld;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
-
 import ic2.api.event.ExplosionEvent;
 import ic2.api.tile.ExplosionWhitelist;
 import ic2.core.item.armor.ItemArmorHazmat;
@@ -38,6 +28,9 @@ import net.minecraft.world.ChunkCache;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ExplosionIC2 extends Explosion
 {
@@ -76,7 +69,7 @@ public class ExplosionIC2 extends Explosion
 
 	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power, float drop, Type type)
 	{
-		this(world, entity, x, y, z, power, drop, type, (EntityLivingBase) null, 0);
+		this(world, entity, x, y, z, power, drop, type, null, 0);
 	}
 
 	public ExplosionIC2(World world, Entity entity, double x, double y, double z, float power, float drop, Type type, EntityLivingBase igniter, int radiationRange)
@@ -130,13 +123,15 @@ public class ExplosionIC2 extends Explosion
 			{
 				this.chunkCache = new ChunkCache(this.worldObj, (int) this.explosionX - this.areaSize / 2, (int) this.explosionY - this.areaSize / 2, (int) this.explosionZ - this.areaSize / 2, (int) this.explosionX + this.areaSize / 2, (int) this.explosionY + this.areaSize / 2, (int) this.explosionZ + this.areaSize / 2, 0);
 
-				for (Entity entity : (Iterable<Entity>) this.worldObj.getEntitiesWithinAABBExcludingEntity((Entity) null, AxisAlignedBB.getBoundingBox(this.explosionX - this.maxDistance, this.explosionY - this.maxDistance, this.explosionZ - this.maxDistance, this.explosionX + this.maxDistance, this.explosionY + this.maxDistance, this.explosionZ + this.maxDistance)))
+				for (Entity entity : (Iterable<Entity>) this.worldObj.getEntitiesWithinAABBExcludingEntity(null, AxisAlignedBB.getBoundingBox(this.explosionX - this.maxDistance, this.explosionY - this.maxDistance, this.explosionZ - this.maxDistance, this.explosionX + this.maxDistance, this.explosionY + this.maxDistance, this.explosionZ + this.maxDistance)))
+				{
 					if (entity instanceof EntityLivingBase || entity instanceof EntityItem)
 					{
 						int distance = (int) (Util.square(entity.posX - this.explosionX) + Util.square(entity.posY - this.explosionY) + Util.square(entity.posZ - this.explosionZ));
 						double health = getEntityHealth(entity);
 						this.entitiesInRange.add(new EntityDamage(entity, distance, health));
 					}
+				}
 
 				boolean entitiesAreInRange = !this.entitiesInRange.isEmpty();
 				if (entitiesAreInRange)
@@ -152,12 +147,14 @@ public class ExplosionIC2 extends Explosion
 				int steps = (int) Math.ceil(3.141592653589793D / Math.atan(1.0D / this.maxDistance));
 
 				for (int phi_n = 0; phi_n < 2 * steps; ++phi_n)
+				{
 					for (int theta_n = 0; theta_n < steps; ++theta_n)
 					{
 						double phi = 6.283185307179586D / steps * phi_n;
 						double theta = 3.141592653589793D / steps * theta_n;
 						this.shootRay(this.explosionX, this.explosionY, this.explosionZ, phi, theta, this.power, entitiesAreInRange && phi_n % 8 == 0 && theta_n % 8 == 0);
 					}
+				}
 
 				for (EntityDamage entry : this.entitiesInRange)
 				{
@@ -185,6 +182,7 @@ public class ExplosionIC2 extends Explosion
 
 				if (this.isNuclear() && this.radiationRange >= 1)
 					for (EntityLiving entity : (Iterable<EntityLiving>) this.worldObj.getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getBoundingBox(this.explosionX - this.radiationRange, this.explosionY - this.radiationRange, this.explosionZ - this.radiationRange, this.explosionX + this.radiationRange, this.explosionY + this.radiationRange, this.explosionZ + this.radiationRange)))
+					{
 						if (!ItemArmorHazmat.hasCompleteHazmat(entity))
 						{
 							double distance = entity.getDistance(this.explosionX, this.explosionY, this.explosionZ);
@@ -196,6 +194,7 @@ public class ExplosionIC2 extends Explosion
 							if (poisonLength >= 0)
 								IC2Potion.radiation.applyTo(entity, poisonLength, 0);
 						}
+					}
 
 				IC2.network.get().initiateExplosionEffect(this.worldObj, this.explosionX, this.explosionY, this.explosionZ);
 				Random rng = this.worldObj.rand;
@@ -254,6 +253,7 @@ public class ExplosionIC2 extends Explosion
 								int meta = this.chunkCache.getBlockMetadata(x, y, z);
 
 								for (ItemStack itemStack : block.getDrops(this.worldObj, x, y, z, meta, 0))
+								{
 									if (rng.nextFloat() <= this.explosionDropRate)
 									{
 										XZposition xZposition = new XZposition(x / 2, z / 2);
@@ -267,6 +267,7 @@ public class ExplosionIC2 extends Explosion
 										else
 											map.put(isw, map.get(isw).add(itemStack.stackSize, y));
 									}
+								}
 							}
 
 							this.worldObj.setBlockToAir(x, y, z);
@@ -361,7 +362,9 @@ public class ExplosionIC2 extends Explosion
 
 			if (absorption > 10.0D)
 				for (int i = 0; i < 5; ++i)
+				{
 					this.shootRay(x, y, z, this.ExplosionRNG.nextDouble() * 2.0D * 3.141592653589793D, this.ExplosionRNG.nextDouble() * 3.141592653589793D, absorption * 0.4D, false);
+				}
 
 			power1 -= absorption;
 			x += deltaX;
@@ -552,11 +555,11 @@ public class ExplosionIC2 extends Explosion
 		}
 	}
 
-	public static enum Type
+	public enum Type
 	{
 		Normal,
 		Heat,
-		Nuclear;
+		Nuclear
 	}
 
 	private static class XZposition

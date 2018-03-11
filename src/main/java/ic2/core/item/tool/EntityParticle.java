@@ -1,13 +1,9 @@
 package ic2.core.item.tool;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
 import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
-
 import cpw.mods.fml.common.registry.IThrowableEntity;
 import ic2.core.ExplosionIC2;
 import ic2.core.IC2;
@@ -27,6 +23,9 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EntityParticle extends Entity implements IThrowableEntity
 {
@@ -145,6 +144,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		double minDistanceSq = start.distanceSquared(end);
 
 		for (Entity entity : entitiesToCheck)
+		{
 			if (entity != this.owner && entity.canBeCollidedWith())
 			{
 				MovingObjectPosition entityInfluence = entity.boundingBox.expand(this.influenceSize, this.influenceSize, this.influenceSize).calculateIntercept(start.toVec3(), end.toVec3());
@@ -163,12 +163,15 @@ public class EntityParticle extends Entity implements IThrowableEntity
 					}
 				}
 			}
+		}
 
 		double maxInfluenceDistance = Math.sqrt(minDistanceSq) + this.influenceSize;
 
 		for (MovingObjectPosition entityInfluence : entitiesInfluences)
+		{
 			if (start.distance(entityInfluence.hitVec) <= maxInfluenceDistance)
 				this.onInfluence(entityInfluence);
+		}
 
 		if (this.radialTestVectors != null)
 		{

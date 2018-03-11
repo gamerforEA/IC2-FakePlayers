@@ -1,8 +1,5 @@
 package ic2.core.item.armor;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import ic2.api.item.ElectricItem;
 import ic2.api.item.ICustomDamageItem;
 import ic2.api.item.IElectricItem;
@@ -18,7 +15,11 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.ISpecialArmor;
 
-public abstract class ItemArmorElectric extends ItemArmorIC2 implements ISpecialArmor, IElectricItem, IItemHudInfo, ICustomDamageItem
+import java.util.LinkedList;
+import java.util.List;
+
+public abstract class ItemArmorElectric extends ItemArmorIC2
+		implements ISpecialArmor, IElectricItem, IItemHudInfo, ICustomDamageItem
 {
 	protected final double maxCharge;
 	protected final double transferLimit;
@@ -27,7 +28,7 @@ public abstract class ItemArmorElectric extends ItemArmorIC2 implements ISpecial
 
 	public ItemArmorElectric(InternalName internalName, InternalName armorName, int armorType1, double maxCharge1, double transferLimit1, int tier1)
 	{
-		super(internalName, ArmorMaterial.DIAMOND, armorName, armorType1, (Object) null);
+		super(internalName, ArmorMaterial.DIAMOND, armorName, armorType1, null);
 		this.maxCharge = maxCharge1;
 		this.tier = tier1;
 		this.transferLimit = transferLimit1;
@@ -155,7 +156,6 @@ public abstract class ItemArmorElectric extends ItemArmorIC2 implements ISpecial
 			/* TODO gamerforEA code clear:
 			else
 				IC2.log.warn(LogCategory.Item, new Throwable(), "Detected invalid armor damage application:"); */
-			;
 		}
 	}
 

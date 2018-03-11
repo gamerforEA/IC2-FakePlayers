@@ -1,13 +1,8 @@
 package ic2.core.item.tfbp;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
-
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 import com.gamerforea.ic2.ModUtils;
-
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
 import ic2.core.block.machine.tileentity.TileEntityTerra;
@@ -19,7 +14,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFakePlayer // TODO gamerforEA implement ITerraformingBPFakePlayer
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Random;
+
+public class ItemTFBPCultivation extends ItemTFBP
+		implements ITerraformingBPFakePlayer // TODO gamerforEA implement ITerraformingBPFakePlayer
 {
 	public static ArrayList<Block> plants = new ArrayList();
 
@@ -103,7 +103,7 @@ public class ItemTFBPCultivation extends ItemTFBP implements ITerraformingBPFake
 				return true;
 			}
 			else
-				return block == Blocks.grass ? this.growPlantsOn(world, x, y + 1, z, block, player) : false; // TODO gamerforEA add EntityPlayer
+				return block == Blocks.grass && this.growPlantsOn(world, x, y + 1, z, block, player); // TODO gamerforEA add EntityPlayer
 		}
 	}
 

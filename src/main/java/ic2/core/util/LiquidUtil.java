@@ -1,8 +1,5 @@
 package ic2.core.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ic2.api.Direction;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,13 +8,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.BlockFluidBase;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fluids.IFluidContainerItem;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LiquidUtil
 {
@@ -236,7 +230,9 @@ public class LiquidUtil
 					world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
 
 					for (int i = 0; i < 8; ++i)
+					{
 						world.spawnParticle("largesmoke", x + Math.random(), y + Math.random(), z + Math.random(), 0.0D, 0.0D, 0.0D);
+					}
 				}
 				else
 				{
@@ -268,7 +264,7 @@ public class LiquidUtil
 	private static boolean isFullFluidBlock(World world, int x, int y, int z, Block block)
 	{
 		if (!(block instanceof IFluidBlock))
-			return block != Blocks.water && block != Blocks.flowing_water && block != Blocks.lava && block != Blocks.flowing_lava ? false : world.getBlockMetadata(x, y, z) == 0;
+			return (block == Blocks.water || block == Blocks.flowing_water || block == Blocks.lava || block == Blocks.flowing_lava) && world.getBlockMetadata(x, y, z) == 0;
 		else
 		{
 			IFluidBlock fBlock = (IFluidBlock) block;

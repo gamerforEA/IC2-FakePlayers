@@ -1,9 +1,6 @@
 package ic2.core.item.tool;
 
-import java.util.List;
-
 import com.gamerforea.eventhelper.util.EventUtils;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ic2.api.event.PaintEvent;
 import ic2.api.item.IBoxable;
@@ -31,9 +28,11 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.oredict.OreDictionary;
 
+import java.util.List;
+
 public class ItemToolPainter extends ItemIC2 implements IBoxable
 {
-	private static final String[] dyes = new String[] { "dyeBlack", "dyeRed", "dyeGreen", "dyeBrown", "dyeBlue", "dyePurple", "dyeCyan", "dyeLightGray", "dyeGray", "dyePink", "dyeLime", "dyeYellow", "dyeLightBlue", "dyeMagenta", "dyeOrange", "dyeWhite" };
+	private static final String[] dyes = { "dyeBlack", "dyeRed", "dyeGreen", "dyeBrown", "dyeBlue", "dyePurple", "dyeCyan", "dyeLightGray", "dyeGray", "dyePink", "dyeLime", "dyeYellow", "dyeLightBlue", "dyeMagenta", "dyeOrange", "dyeWhite" };
 	public final int color;
 
 	public ItemToolPainter(InternalName internalName, int col)
@@ -152,9 +151,9 @@ public class ItemToolPainter extends ItemIC2 implements IBoxable
 			boolean newValue = !nbtData.getBoolean("autoRefill");
 			nbtData.setBoolean("autoRefill", newValue);
 			if (newValue)
-				IC2.platform.messagePlayer(entityplayer, "Painter automatic refill mode enabled", new Object[0]);
+				IC2.platform.messagePlayer(entityplayer, "Painter automatic refill mode enabled");
 			else
-				IC2.platform.messagePlayer(entityplayer, "Painter automatic refill mode disabled", new Object[0]);
+				IC2.platform.messagePlayer(entityplayer, "Painter automatic refill mode disabled");
 		}
 
 		return itemstack;
@@ -174,13 +173,17 @@ public class ItemToolPainter extends ItemIC2 implements IBoxable
 			NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(player.inventory.mainInventory[player.inventory.currentItem]);
 			if (nbtData.getBoolean("autoRefill"))
 				for (int l = 0; l < player.inventory.mainInventory.length; ++l)
+				{
 					if (player.inventory.mainInventory[l] != null)
 						for (ItemStack ore : OreDictionary.getOres(dyes[this.color]))
+						{
 							if (ore.isItemEqual(player.inventory.mainInventory[l]))
 							{
 								dyeIS = l;
 								break;
 							}
+						}
+				}
 
 			if (dyeIS == -1)
 				player.inventory.mainInventory[player.inventory.currentItem] = Ic2Items.painter.copy();

@@ -40,7 +40,6 @@ import ic2.core.network.NetworkManager;
 import ic2.core.util.*;
 import ic2.core.uu.UuIndex;
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
@@ -91,13 +90,13 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 	public static final String VERSION = "2.2.827-experimental";
 	public static final String MODID = "IC2";
 	private static IC2 instance;
-	@SidedProxy(clientSide = "ic2.core.PlatformClient",
-				serverSide = "ic2.core.Platform") public static Platform platform;
+	@SidedProxy(clientSide = "ic2.core.PlatformClient", serverSide = "ic2.core.Platform")
+	public static Platform platform;
 	public static SideGateway<NetworkManager> network;
-	@SidedProxy(clientSide = "ic2.core.util.KeyboardClient",
-				serverSide = "ic2.core.util.Keyboard") public static Keyboard keyboard;
-	@SidedProxy(clientSide = "ic2.core.audio.AudioManagerClient",
-				serverSide = "ic2.core.audio.AudioManager") public static AudioManager audioManager;
+	@SidedProxy(clientSide = "ic2.core.util.KeyboardClient", serverSide = "ic2.core.util.Keyboard")
+	public static Keyboard keyboard;
+	@SidedProxy(clientSide = "ic2.core.audio.AudioManagerClient", serverSide = "ic2.core.audio.AudioManager")
+	public static AudioManager audioManager;
 	public static Log log;
 	public static IC2Achievements achievements;
 	public static TickHandler tickHandler;
@@ -147,7 +146,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 
 		for (IRecipeInput input : ConfigUtil.asRecipeInputList(MainConfig.get(), "misc/additionalValuableOres"))
 		{
-			addValuableOre((IRecipeInput) input, 1);
+			addValuableOre(input, 1);
 		}
 
 		audioManager.initialize();
@@ -417,14 +416,14 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		EntityRegistry.registerModEntity(EntityBoatRubber.class, "BoatRubber", 6, this, 80, 3, true);
 		EntityRegistry.registerModEntity(EntityBoatElectric.class, "BoatElectric", 7, this, 80, 3, true);
 		EntityRegistry.registerModEntity(EntityParticle.class, "Particle", 8, this, 160, 1, true);
-		int d = Integer.parseInt((new SimpleDateFormat("Mdd")).format(new Date()));
+		int d = Integer.parseInt(new SimpleDateFormat("Mdd").format(new Date()));
 		suddenlyHoes = (double) d > Math.cbrt(6.4E7D) && (double) d < Math.cbrt(6.5939264E7D);
 		seasonal = (double) d > Math.cbrt(1.089547389E9D) && (double) d < Math.cbrt(1.338273208E9D);
 		GameRegistry.registerWorldGenerator(this, 0);
 		GameRegistry.registerFuelHandler(this);
 		MinecraftForge.EVENT_BUS.register(new IC2BucketHandler());
 		initialized = true;
-		log.debug(LogCategory.General, "Finished pre-init after %d ms.", new Object[] { Long.valueOf((System.nanoTime() - startTime) / 1000000L) });
+		log.debug(LogCategory.General, "Finished pre-init after %d ms.", Long.valueOf((System.nanoTime() - startTime) / 1000000L));
 	}
 
 	@EventHandler
@@ -433,7 +432,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		long startTime = System.nanoTime();
 		log.debug(LogCategory.General, "Starting init.");
 		Rezepte.loadRecipes();
-		log.debug(LogCategory.General, "Finished init after %d ms.", new Object[] { Long.valueOf((System.nanoTime() - startTime) / 1000000L) });
+		log.debug(LogCategory.General, "Finished init after %d ms.", Long.valueOf((System.nanoTime() - startTime) / 1000000L));
 	}
 
 	@EventHandler
@@ -443,7 +442,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		log.debug(LogCategory.General, "Starting post-init.");
 		if (!initialized)
 		{
-			platform.displayError("IndustrialCraft 2 has failed to initialize properly.", new Object[0]);
+			platform.displayError("IndustrialCraft 2 has failed to initialize properly.");
 		}
 
 		Rezepte.loadFailedRecipes();
@@ -465,7 +464,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		label148:
 		while (it.hasNext())
 		{
-			IRecipe recipe = (IRecipe) it.next();
+			IRecipe recipe = it.next();
 			ItemStack output = recipe.getRecipeOutput();
 			if (output != null)
 			{
@@ -497,7 +496,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 			{
 				boolean found = false;
 
-				for (int oreId : OreDictionary.getOreIDs((ItemStack) entry.getValue()))
+				for (int oreId : OreDictionary.getOreIDs(entry.getValue()))
 				{
 					String oreName = OreDictionary.getOreName(oreId);
 
@@ -505,7 +504,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 					{
 						if (ore.getItem() != null && Item.itemRegistry.getNameForObject(ore.getItem()).startsWith("IC2:"))
 						{
-							entry.setValue(StackUtil.copyWithSize(ore, ((ItemStack) entry.getValue()).stackSize));
+							entry.setValue(StackUtil.copyWithSize(ore, entry.getValue().stackSize));
 							found = true;
 							break;
 						}
@@ -525,22 +524,22 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		UuIndex.instance.refresh(true);
 		platform.onPostInit();
 		platform.registerRenderers();
-		log.debug(LogCategory.General, "Finished post-init after %d ms.", new Object[] { Long.valueOf((System.nanoTime() - startTime) / 1000000L) });
-		log.info(LogCategory.General, "%s version %s loaded.", new Object[] { "IC2", "2.2.827-experimental" });
+		log.debug(LogCategory.General, "Finished post-init after %d ms.", Long.valueOf((System.nanoTime() - startTime) / 1000000L));
+		log.info(LogCategory.General, "%s version %s loaded.", "IC2", "2.2.827-experimental");
 	}
 
 	private static boolean loadSubModule(String name)
 	{
-		log.debug(LogCategory.SubModule, "Loading %s submodule: %s.", new Object[] { "IC2", name });
+		log.debug(LogCategory.SubModule, "Loading %s submodule: %s.", "IC2", name);
 
 		try
 		{
 			Class<?> subModuleClass = IC2.class.getClassLoader().loadClass("ic2." + name + ".SubModule");
-			return ((Boolean) subModuleClass.getMethod("init", new Class[0]).invoke((Object) null, new Object[0])).booleanValue();
+			return ((Boolean) subModuleClass.getMethod("init").invoke(null, new Object[0])).booleanValue();
 		}
 		catch (Throwable var2)
 		{
-			log.debug(LogCategory.SubModule, "Submodule %s not loaded.", new Object[] { name });
+			log.debug(LogCategory.SubModule, "Submodule %s not loaded.", name);
 			return false;
 		}
 	}
@@ -558,6 +557,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		BlocksItems.onMissingMappings(event);
 	}
 
+	@Override
 	public int getBurnTime(ItemStack stack)
 	{
 		if (stack != null)
@@ -596,6 +596,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		return 0;
 	}
 
+	@Override
 	public void generate(Random random1, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider)
 	{
 		if (ConfigUtil.getBool(MainConfig.get(), "worldgen/rubberTree"))
@@ -616,7 +617,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 
 				if (random1.nextInt(100) + 1 <= rubbertrees * 2)
 				{
-					(new WorldGenRubTree()).generate(world, random1, chunkX * 16 + random1.nextInt(16), rubbertrees, chunkZ * 16 + random1.nextInt(16));
+					new WorldGenRubTree().generate(world, random1, chunkX * 16 + random1.nextInt(16), rubbertrees, chunkZ * 16 + random1.nextInt(16));
 				}
 			}
 		}
@@ -633,7 +634,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 				int x = chunkX * 16 + random1.nextInt(16);
 				int y = random1.nextInt(40 * baseHeight / 64) + random1.nextInt(20 * baseHeight / 64) + 10 * baseHeight / 64;
 				int z = chunkZ * 16 + random1.nextInt(16);
-				(new WorldGenMinable(StackUtil.getBlock(Ic2Items.copperOre), Ic2Items.copperOre.getItemDamage(), 10, Blocks.stone)).generate(world, random1, x, y, z);
+				new WorldGenMinable(StackUtil.getBlock(Ic2Items.copperOre), Ic2Items.copperOre.getItemDamage(), 10, Blocks.stone).generate(world, random1, x, y, z);
 			}
 		}
 
@@ -647,7 +648,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 				int x = chunkX * 16 + random1.nextInt(16);
 				int y = random1.nextInt(40 * baseHeight / 64);
 				int z = chunkZ * 16 + random1.nextInt(16);
-				(new WorldGenMinable(StackUtil.getBlock(Ic2Items.tinOre), Ic2Items.tinOre.getItemDamage(), 6, Blocks.stone)).generate(world, random1, x, y, z);
+				new WorldGenMinable(StackUtil.getBlock(Ic2Items.tinOre), Ic2Items.tinOre.getItemDamage(), 6, Blocks.stone).generate(world, random1, x, y, z);
 			}
 		}
 
@@ -661,7 +662,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 				int x = chunkX * 16 + random1.nextInt(16);
 				int y = random1.nextInt(64 * baseHeight / 64);
 				int z = chunkZ * 16 + random1.nextInt(16);
-				(new WorldGenMinable(StackUtil.getBlock(Ic2Items.uraniumOre), Ic2Items.uraniumOre.getItemDamage(), 3, Blocks.stone)).generate(world, random1, x, y, z);
+				new WorldGenMinable(StackUtil.getBlock(Ic2Items.uraniumOre), Ic2Items.uraniumOre.getItemDamage(), 3, Blocks.stone).generate(world, random1, x, y, z);
 			}
 		}
 
@@ -675,7 +676,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 				int x = chunkX * 16 + random1.nextInt(16);
 				int y = random1.nextInt(64 * baseHeight / 64);
 				int z = chunkZ * 16 + random1.nextInt(16);
-				(new WorldGenMinable(StackUtil.getBlock(Ic2Items.leadOre), Ic2Items.leadOre.getItemDamage(), 4, Blocks.stone)).generate(world, random1, x, y, z);
+				new WorldGenMinable(StackUtil.getBlock(Ic2Items.leadOre), Ic2Items.leadOre.getItemDamage(), 4, Blocks.stone).generate(world, random1, x, y, z);
 			}
 		}
 
@@ -716,14 +717,14 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 
 		for (TileEntity tileEntity : (Iterable<? extends TileEntity>) chunk.chunkTileEntityMap.values())
 		{
-			((NetworkManager) network.get()).sendInitialData(tileEntity, event.player);
+			network.get().sendInitialData(tileEntity, event.player);
 		}
 
 	}
 
 	public static void explodeMachineAt(World world, int x, int y, int z, boolean noDrop)
 	{
-		ExplosionIC2 explosion = new ExplosionIC2(world, (Entity) null, 0.5D + (double) x, 0.5D + (double) y, 0.5D + (double) z, 2.5F, 0.75F);
+		ExplosionIC2 explosion = new ExplosionIC2(world, null, 0.5D + (double) x, 0.5D + (double) y, 0.5D + (double) z, 2.5F, 0.75F);
 		explosion.destroy(x, y, z, noDrop);
 		explosion.doExplosion();
 	}
@@ -740,7 +741,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 
 	public static void addValuableOre(Block block, int value)
 	{
-		addValuableOre((IRecipeInput) (new RecipeInputItemStack(new ItemStack(block))), value);
+		addValuableOre(new RecipeInputItemStack(new ItemStack(block)), value);
 	}
 
 	public static void addValuableOre(IRecipeInput input, int value)
@@ -812,7 +813,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 					value *= 3;
 				}
 
-				addValuableOre((IRecipeInput) (new RecipeInputItemStack(ore)), value);
+				addValuableOre(new RecipeInputItemStack(ore), value);
 			}
 
 		}
@@ -899,7 +900,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 	{
 		try
 		{
-			(new ChunkCoordinates(1, 2, 3)).getDistanceSquared(2, 3, 4);
+			new ChunkCoordinates(1, 2, 3).getDistanceSquared(2, 3, 4);
 		}
 		catch (Throwable var1)
 		{

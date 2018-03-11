@@ -186,7 +186,7 @@ public final class StackUtil
 								if (srcTransfer <= 0)
 								{
 									if (srcStack.stackSize <= 0)
-										src.setInventorySlotContents(srcSlot, (ItemStack) null);
+										src.setInventorySlotContents(srcSlot, null);
 
 									if (amount <= 0)
 										break label69;
@@ -273,7 +273,7 @@ public final class StackUtil
 				{
 					stack.stackSize -= transfer;
 					if (stack.stackSize == 0)
-						inv.setInventorySlotContents(i, (ItemStack) null);
+						inv.setInventorySlotContents(i, null);
 				}
 
 				max -= transfer;
@@ -380,7 +380,6 @@ public final class StackUtil
 
 				for (int i = 0; i < ret.length; ret[i] = i++)
 				{
-					;
 				}
 			}
 
@@ -462,7 +461,7 @@ public final class StackUtil
 	{
 		boolean aEmpty = !a.hasTagCompound() || a.getTagCompound().hasNoTags();
 		boolean bEmpty = !b.hasTagCompound() || b.getTagCompound().hasNoTags();
-		return aEmpty != bEmpty ? false : aEmpty ? true : a.getTagCompound().equals(b.getTagCompound());
+		return aEmpty == bEmpty && (aEmpty || a.getTagCompound().equals(b.getTagCompound()));
 	}
 
 	public static Block getBlock(ItemStack stack)

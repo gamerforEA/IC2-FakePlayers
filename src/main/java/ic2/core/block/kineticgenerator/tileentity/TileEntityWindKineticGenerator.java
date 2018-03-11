@@ -16,7 +16,6 @@ import ic2.core.block.invslot.InvSlotConsumableKineticRotor;
 import ic2.core.block.kineticgenerator.container.ContainerWindKineticGenerator;
 import ic2.core.block.kineticgenerator.gui.GuiWindKineticGenerator;
 import ic2.core.init.MainConfig;
-import ic2.core.network.NetworkManager;
 import ic2.core.util.ConfigUtil;
 import ic2.core.util.Util;
 import net.minecraft.block.Block;
@@ -43,6 +42,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 	private static final int nominalRotationPeriod = 500;
 	public static final float outputModifier = 10.0F * ConfigUtil.getFloat(MainConfig.get(), "balance/energy/kineticgenerator/wind");
 
+	@Override
 	protected void updateEntityServer()
 	{
 		super.updateEntityServer();
@@ -125,6 +125,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		}
 	}
 
+	@Override
 	public List<String> getNetworkedFields()
 	{
 		List<String> ret = new Vector(1);
@@ -134,11 +135,13 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		return ret;
 	}
 
+	@Override
 	public ContainerBase<TileEntityWindKineticGenerator> getGuiContainer(EntityPlayer entityPlayer)
 	{
 		return new ContainerWindKineticGenerator(entityPlayer, this);
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public GuiScreen getGui(EntityPlayer entityPlayer, boolean isAdmin)
 	{
@@ -150,11 +153,13 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		return direction.ordinal() == this.getFacing();
 	}
 
+	@Override
 	public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side)
 	{
-		return side != 0 && side != 1 ? this.getFacing() != side : false;
+		return side != 0 && side != 1 && this.getFacing() != side;
 	}
 
+	@Override
 	public void setFacing(short side)
 	{
 		super.setFacing(side);
@@ -162,28 +167,33 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 
 	public String getRotorhealth()
 	{
-		return !this.rotorSlot.isEmpty() ? StatCollector.translateToLocalFormatted("ic2.WindKineticGenerator.gui.rotorhealth", new Object[] { Integer.valueOf((int) (100.0F - (float) this.rotorSlot.get().getItemDamage() / (float) this.rotorSlot.get().getMaxDamage() * 100.0F)) }) : "";
+		return !this.rotorSlot.isEmpty() ? StatCollector.translateToLocalFormatted("ic2.WindKineticGenerator.gui.rotorhealth", Integer.valueOf((int) (100.0F - (float) this.rotorSlot.get().getItemDamage() / (float) this.rotorSlot.get().getMaxDamage() * 100.0F))) : "";
 	}
 
+	@Override
 	public int maxrequestkineticenergyTick(ForgeDirection directionFrom)
 	{
 		return this.getKuOutput();
 	}
 
+	@Override
 	public int requestkineticenergy(ForgeDirection directionFrom, int requestkineticenergy)
 	{
 		return this.facingMatchesDirection(directionFrom.getOpposite()) ? Math.min(requestkineticenergy, this.getKuOutput()) : 0;
 	}
 
+	@Override
 	public String getInventoryName()
 	{
 		return "Wind Kinetic Generator";
 	}
 
+	@Override
 	public void onGuiClosed(EntityPlayer entityPlayer)
 	{
 	}
 
+	@Override
 	public boolean shouldRenderInPass(int pass)
 	{
 		return pass == 0;
@@ -264,7 +274,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		if (this.rotationSpeed != speed)
 		{
 			this.rotationSpeed = speed;
-			((NetworkManager) IC2.network.get()).updateTileEntityField(this, "rotationSpeed");
+			IC2.network.get().updateTileEntityField(this, "rotationSpeed");
 		}
 
 	}
@@ -344,11 +354,12 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		return (int) this.windStrength;
 	}
 
+	@Override
 	public void setActive(boolean active)
 	{
 		if (active != this.getActive())
 		{
-			((NetworkManager) IC2.network.get()).updateTileEntityField(this, "rotorSlot");
+			IC2.network.get().updateTileEntityField(this, "rotorSlot");
 		}
 
 		super.setActive(active);

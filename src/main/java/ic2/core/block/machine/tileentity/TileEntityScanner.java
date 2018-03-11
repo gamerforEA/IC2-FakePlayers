@@ -1,7 +1,6 @@
 package ic2.core.block.machine.tileentity;
 
 import com.gamerforea.ic2.EventConfig;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
@@ -22,12 +21,12 @@ import ic2.core.uu.UuGraph;
 import ic2.core.uu.UuIndex;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
-public class TileEntityScanner extends TileEntityElectricMachine implements IHasGui, INetworkClientTileEntityEventListener
+public class TileEntityScanner extends TileEntityElectricMachine
+		implements IHasGui, INetworkClientTileEntityEventListener
 {
 	private ItemStack currentStack = null;
 	private ItemStack pattern = null;
@@ -35,7 +34,7 @@ public class TileEntityScanner extends TileEntityElectricMachine implements IHas
 	public int progress = 0;
 	public final int duration = 3300;
 	public final InvSlotConsumable inputSlot = new InvSlotScannable(this, "input", 0, 1);
-	public final InvSlot diskSlot = new InvSlotConsumableId(this, "disk", 0, InvSlot.Access.IO, 1, InvSlot.InvSide.ANY, new Item[] { Ic2Items.crystalmemory.getItem() });
+	public final InvSlot diskSlot = new InvSlotConsumableId(this, "disk", 0, InvSlot.Access.IO, 1, InvSlot.InvSide.ANY, Ic2Items.crystalmemory.getItem());
 	private TileEntityScanner.State state = TileEntityScanner.State.IDLE;
 	public double patternUu;
 	public double patternEu;
@@ -134,8 +133,10 @@ public class TileEntityScanner extends TileEntityElectricMachine implements IHas
 		else
 		{
 			for (ItemStack stored : storage.getPatterns())
+			{
 				if (StackUtil.isStackEqual(stored, stack))
 					return true;
+			}
 
 			return false;
 		}
@@ -298,7 +299,7 @@ public class TileEntityScanner extends TileEntityElectricMachine implements IHas
 		return this.state;
 	}
 
-	public static enum State
+	public enum State
 	{
 		IDLE,
 		SCANNING,
@@ -307,6 +308,6 @@ public class TileEntityScanner extends TileEntityElectricMachine implements IHas
 		NO_STORAGE,
 		NO_ENERGY,
 		TRANSFER_ERROR,
-		ALREADY_RECORDED;
+		ALREADY_RECORDED
 	}
 }

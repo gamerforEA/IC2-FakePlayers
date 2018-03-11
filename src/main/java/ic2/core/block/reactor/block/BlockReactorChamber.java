@@ -1,10 +1,5 @@
 package ic2.core.block.reactor.block;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -23,6 +18,10 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class BlockReactorChamber extends BlockMultiID
 {
@@ -65,8 +64,10 @@ public class BlockReactorChamber extends BlockMultiID
 		int count = 0;
 
 		for (Direction dir : Direction.directions)
+		{
 			if (dir.applyTo(world, x, y, z) instanceof TileEntityNuclearReactorElectric)
 				++count;
+		}
 
 		return count == 1;
 	}
@@ -85,12 +86,16 @@ public class BlockReactorChamber extends BlockMultiID
 				puffs = world.rand.nextInt(puffs);
 
 				for (int n = 0; n < puffs; ++n)
+				{
 					world.spawnParticle("smoke", i + random.nextFloat(), j + 0.95F, k + random.nextFloat(), 0.0D, 0.0D, 0.0D);
+				}
 
 				puffs = puffs - (world.rand.nextInt(4) + 3);
 
 				for (int n = 0; n < puffs; ++n)
+				{
 					world.spawnParticle("flame", i + random.nextFloat(), j + 1.0F, k + random.nextFloat(), 0.0D, 0.0D, 0.0D);
+				}
 
 			}
 		}
@@ -123,7 +128,7 @@ public class BlockReactorChamber extends BlockMultiID
 				return false;
 			}
 			else
-				return !IC2.platform.isSimulating() ? true : IC2.platform.launchGui(entityplayer, reactor);
+				return !IC2.platform.isSimulating() || IC2.platform.launchGui(entityplayer, reactor);
 		}
 	}
 

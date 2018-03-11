@@ -1,12 +1,8 @@
 package ic2.core.item.tool;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
-
 import ic2.api.item.IBoxable;
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
@@ -30,6 +26,9 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 {
 	public ItemSprayer(InternalName internalName)
@@ -48,7 +47,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 			mode = mode == 0 ? 1 : 0;
 			nbtData.setInteger("mode", mode);
 			String sMode = mode == 0 ? "ic2.tooltip.mode.normal" : "ic2.tooltip.mode.single";
-			IC2.platform.messagePlayer(player, "ic2.tooltip.mode", new Object[] { sMode });
+			IC2.platform.messagePlayer(player, "ic2.tooltip.mode", sMode);
 		}
 
 		return super.onItemRightClick(stack, world, player);
@@ -179,7 +178,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 	{
 		float yaw = player.rotationYaw % 360.0F;
 		float pitch = player.rotationPitch;
-		boolean[] r = new boolean[] { true, true, true, true, true, true };
+		boolean[] r = { true, true, true, true, true, true };
 		if (pitch >= -65.0F && pitch <= 65.0F)
 		{
 			if (yaw >= 300.0F && yaw <= 360.0F || yaw >= 0.0F && yaw <= 60.0F)
@@ -269,6 +268,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		int[] order = this.generateRngSpread(IC2.random);
 
 		for (int element : order)
+		{
 			if (ignoreDirections || directions[element])
 				switch (element)
 				{
@@ -290,6 +290,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 					case 5:
 						this.considerAddingCoord(new ChunkPosition(x + 1, y, z), foam);
 				}
+		}
 
 	}
 
@@ -307,7 +308,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 
 	public int[] generateRngSpread(Random random)
 	{
-		int[] re = new int[] { 0, 1, 2, 3, 4, 5 };
+		int[] re = { 0, 1, 2, 3, 4, 5 };
 
 		for (int i = 0; i < 16; ++i)
 		{
@@ -372,10 +373,10 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 		return false;
 	}
 
-	static enum Target
+	enum Target
 	{
 		Any,
 		Scaffold,
-		Cable;
+		Cable
 	}
 }

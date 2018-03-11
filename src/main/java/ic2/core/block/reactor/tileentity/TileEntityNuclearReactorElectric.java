@@ -1,11 +1,5 @@
 package ic2.core.block.reactor.tileentity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-import org.apache.logging.log4j.Level;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
@@ -16,27 +10,13 @@ import ic2.api.energy.tile.IMetaDelegate;
 import ic2.api.reactor.IReactor;
 import ic2.api.reactor.IReactorComponent;
 import ic2.api.recipe.RecipeOutput;
-import ic2.core.ContainerBase;
-import ic2.core.ExplosionIC2;
-import ic2.core.IC2;
-import ic2.core.IC2DamageSource;
-import ic2.core.IHasGui;
-import ic2.core.Ic2Items;
+import ic2.core.*;
 import ic2.core.audio.AudioSource;
 import ic2.core.audio.PositionSpec;
 import ic2.core.block.TileEntityInventory;
 import ic2.core.block.generator.block.BlockGenerator;
-import ic2.core.block.invslot.InvSlot;
-import ic2.core.block.invslot.InvSlotConsumableLiquid;
-import ic2.core.block.invslot.InvSlotConsumableLiquidByList;
-import ic2.core.block.invslot.InvSlotConsumableLiquidByTank;
-import ic2.core.block.invslot.InvSlotOutput;
-import ic2.core.block.invslot.InvSlotReactor;
-import ic2.core.block.reactor.block.BlockReactorAccessHatch;
-import ic2.core.block.reactor.block.BlockReactorChamber;
-import ic2.core.block.reactor.block.BlockReactorFluidPort;
-import ic2.core.block.reactor.block.BlockReactorRedstonePort;
-import ic2.core.block.reactor.block.BlockReactorVessel;
+import ic2.core.block.invslot.*;
+import ic2.core.block.reactor.block.*;
 import ic2.core.block.reactor.container.ContainerNuclearReactor;
 import ic2.core.block.reactor.gui.GuiNuclearReactor;
 import ic2.core.init.BlocksItems;
@@ -64,13 +44,15 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
+import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.logging.log4j.Level;
 
-public class TileEntityNuclearReactorElectric extends TileEntityInventory implements IHasGui, IReactor, IEnergySource, IMetaDelegate, IFluidHandler
+import java.util.ArrayList;
+import java.util.List;
+
+public class TileEntityNuclearReactorElectric extends TileEntityInventory
+		implements IHasGui, IReactor, IEnergySource, IMetaDelegate, IFluidHandler
 {
 	public float output = 0.0F;
 	public int updateTicker = IC2.random.nextInt(this.getTickRate());
@@ -91,7 +73,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 	public final InvSlotReactor reactorSlot = new InvSlotReactor(this, "reactor", 0, 54);
 	public final InvSlotOutput coolantoutputSlot;
 	public final InvSlotOutput hotcoolantoutputSlot;
-	public final InvSlotConsumableLiquidByList coolantinputSlot = new InvSlotConsumableLiquidByList(this, "coolantinputSlot", 55, InvSlot.Access.I, 1, InvSlot.InvSide.ANY, InvSlotConsumableLiquid.OpType.Drain, new Fluid[] { BlocksItems.getFluid(InternalName.fluidCoolant) });
+	public final InvSlotConsumableLiquidByList coolantinputSlot = new InvSlotConsumableLiquidByList(this, "coolantinputSlot", 55, InvSlot.Access.I, 1, InvSlot.InvSide.ANY, InvSlotConsumableLiquid.OpType.Drain, BlocksItems.getFluid(InternalName.fluidCoolant));
 	public final InvSlotConsumableLiquidByTank hotcoolinputSlot;
 	public boolean addedToEnergyNet = false;
 	private static final float huOutputModifier = 2.0F * ConfigUtil.getFloat(MainConfig.get(), "balance/energy/FluidReactor/outputModifier");
@@ -351,7 +333,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 			ItemStack stack = this.reactorSlot.get(i);
 			if (stack != null && !this.isUsefulItem(stack, false))
 			{
-				this.reactorSlot.put(i, (ItemStack) null);
+				this.reactorSlot.put(i, null);
 				this.eject(stack);
 			}
 		}
@@ -359,7 +341,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		for (int i = this.reactorSlot.size(); i < this.reactorSlot.rawSize(); ++i)
 		{
 			ItemStack stack = this.reactorSlot.get(i);
-			this.reactorSlot.put(i, (ItemStack) null);
+			this.reactorSlot.put(i, null);
 			this.eject(stack);
 		}
 
@@ -368,7 +350,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 	public boolean isUsefulItem(ItemStack stack, boolean forInsertion)
 	{
 		Item item = stack.getItem();
-		return item == null ? false : forInsertion && this.fluidcoolreactor && item.getClass() == ItemReactorHeatStorage.class && ((ItemReactorHeatStorage) item).getCustomDamage(stack) > 0 ? false : item instanceof IReactorComponent ? true : item == Ic2Items.TritiumCell.getItem() || item == Ic2Items.reactorDepletedUraniumSimple.getItem() || item == Ic2Items.reactorDepletedUraniumDual.getItem() || item == Ic2Items.reactorDepletedUraniumQuad.getItem() || item == Ic2Items.reactorDepletedMOXSimple.getItem() || item == Ic2Items.reactorDepletedMOXDual.getItem() || item == Ic2Items.reactorDepletedMOXQuad.getItem();
+		return item != null && (!forInsertion || !this.fluidcoolreactor || item.getClass() != ItemReactorHeatStorage.class || ((ItemReactorHeatStorage) item).getCustomDamage(stack) <= 0) && (item instanceof IReactorComponent || item == Ic2Items.TritiumCell.getItem() || item == Ic2Items.reactorDepletedUraniumSimple.getItem() || item == Ic2Items.reactorDepletedUraniumDual.getItem() || item == Ic2Items.reactorDepletedUraniumQuad.getItem() || item == Ic2Items.reactorDepletedMOXSimple.getItem() || item == Ic2Items.reactorDepletedMOXDual.getItem() || item == Ic2Items.reactorDepletedMOXQuad.getItem());
 	}
 
 	public void eject(ItemStack drop)
@@ -422,7 +404,6 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 								else
 									this.worldObj.setBlock(coord[0], coord[1], coord[2], Blocks.flowing_lava, 15, 7);
 							}
-							;
 						}
 					}
 				}
@@ -477,7 +458,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 			return null;
 		else
 		{
-			int[] c = new int[] { this.xCoord + this.worldObj.rand.nextInt(2 * radius + 1) - radius, this.yCoord + this.worldObj.rand.nextInt(2 * radius + 1) - radius, this.zCoord + this.worldObj.rand.nextInt(2 * radius + 1) - radius };
+			int[] c = { this.xCoord + this.worldObj.rand.nextInt(2 * radius + 1) - radius, this.yCoord + this.worldObj.rand.nextInt(2 * radius + 1) - radius, this.zCoord + this.worldObj.rand.nextInt(2 * radius + 1) - radius };
 			return c[0] == this.xCoord && c[1] == this.yCoord && c[2] == this.zCoord ? null : c;
 		}
 	}
@@ -487,7 +468,9 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		int size = this.getReactorSize();
 
 		for (int pass = 0; pass < 2; ++pass)
+		{
 			for (int y = 0; y < 6; ++y)
+			{
 				for (int x = 0; x < size; ++x)
 				{
 					ItemStack stack = this.reactorSlot.get(x, y);
@@ -497,6 +480,8 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 						comp.processChamber(this, stack, x, y, pass == 0);
 					}
 				}
+			}
+		}
 
 	}
 
@@ -527,8 +512,10 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 					++cols;
 			} */
 			for (TileEntity target : this.getSubTiles())
+			{
 				if (target instanceof TileEntityReactorChamberElectric)
 					++cols;
+			}
 			// TODO gamerforEA code end
 
 			return cols;
@@ -692,11 +679,11 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 					boomPower += f;
 			}
 
-			this.reactorSlot.put(i, (ItemStack) null);
+			this.reactorSlot.put(i, null);
 		}
 
 		boomPower = boomPower * this.hem * boomMod;
-		IC2.log.log(LogCategory.PlayerActivity, Level.INFO, "Nuclear Reactor at %s melted (raw explosion power %f)", new Object[] { Util.formatPosition(this), Float.valueOf(boomPower) });
+		IC2.log.log(LogCategory.PlayerActivity, Level.INFO, "Nuclear Reactor at %s melted (raw explosion power %f)", Util.formatPosition(this), Float.valueOf(boomPower));
 		boomPower = Math.min(boomPower, ConfigUtil.getFloat(MainConfig.get(), "protection/reactorExplosionPowerLimit"));
 
 		for (Direction direction : Direction.directions)
@@ -707,7 +694,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		}
 
 		this.worldObj.setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
-		ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.xCoord, this.yCoord, this.zCoord, boomPower, 0.01F, ExplosionIC2.Type.Nuclear);
+		ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, null, this.xCoord, this.yCoord, this.zCoord, boomPower, 0.01F, ExplosionIC2.Type.Nuclear);
 
 		// TODO gamerforEA code start
 		explosion.fake.setParent(this.fake);
@@ -766,9 +753,9 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 			if (this.coolantinputSlot.transferToTank(this.inputTank, output, simulate) && (output.getValue() == null || this.coolantoutputSlot.canAdd(output.getValue())))
 			{
 				if (output.getValue() == null)
-					return new RecipeOutput((NBTTagCompound) null, new ItemStack[0]);
+					return new RecipeOutput(null);
 
-				return new RecipeOutput((NBTTagCompound) null, new ItemStack[] { output.getValue() });
+				return new RecipeOutput(null, output.getValue());
 			}
 		}
 
@@ -783,9 +770,9 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 			if (this.hotcoolinputSlot.transferFromTank(this.outputTank, output, simulate) && (output.getValue() == null || this.hotcoolantoutputSlot.canAdd(output.getValue())))
 			{
 				if (output.getValue() == null)
-					return new RecipeOutput((NBTTagCompound) null, new ItemStack[0]);
+					return new RecipeOutput(null);
 
-				return new RecipeOutput((NBTTagCompound) null, new ItemStack[] { output.getValue() });
+				return new RecipeOutput(null, output.getValue());
 			}
 		}
 
@@ -804,14 +791,17 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		{
 			if (this.inputTank.getFluidAmount() < 1000 && this.outputTank.getFluidAmount() < 1000)
 			{
-				this.inputTank.setFluid((FluidStack) null);
-				this.outputTank.setFluid((FluidStack) null);
+				this.inputTank.setFluid(null);
+				this.outputTank.setFluid(null);
 			}
 			else
 			{
 				for (int yoffset = 1; yoffset < 4; ++yoffset)
+				{
 					for (int xoffset = 1; xoffset < 4; ++xoffset)
+					{
 						for (int zoffset = 1; zoffset < 4; ++zoffset)
+						{
 							if (this.surroundings[xoffset][yoffset][zoffset] instanceof BlockAir)
 								if (this.inputTank.getFluidAmount() >= 1000)
 								{
@@ -823,12 +813,15 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 									this.worldObj.setBlock(xoffset + this.xCoord - 2, yoffset + this.yCoord - 2, zoffset + this.zCoord - 2, this.outputTank.getFluid().getFluid().getBlock());
 									this.outputTank.drain(1000, true);
 								}
+						}
+					}
+				}
 
 				if (this.inputTank.getFluidAmount() < 1000)
-					this.inputTank.setFluid((FluidStack) null);
+					this.inputTank.setFluid(null);
 
 				if (this.outputTank.getFluidAmount() < 1000)
-					this.outputTank.setFluid((FluidStack) null);
+					this.outputTank.setFluid(null);
 			}
 		}
 		else
@@ -839,8 +832,11 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 			Block hotCoolantBlock = BlocksItems.getFluidBlock(InternalName.fluidHotCoolant);
 
 			for (int yoffset = 1; yoffset < 4; ++yoffset)
+			{
 				for (int xoffset = 1; xoffset < 4; ++xoffset)
+				{
 					for (int zoffset = 1; zoffset < 4; ++zoffset)
+					{
 						if (this.surroundings[xoffset][yoffset][zoffset] == coolantBlock)
 						{
 							this.worldObj.setBlock(xoffset + this.xCoord - 2, yoffset + this.yCoord - 2, zoffset + this.zCoord - 2, Blocks.air);
@@ -851,6 +847,9 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 							this.worldObj.setBlock(xoffset + this.xCoord - 2, yoffset + this.yCoord - 2, zoffset + this.zCoord - 2, Blocks.air);
 							this.outputTank.fill(new FluidStack(hotCoolantFluid, 1000), true);
 						}
+					}
+				}
+			}
 		}
 
 	}
@@ -861,8 +860,11 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		Block hotCoolantBlock = BlocksItems.getFluidBlock(InternalName.fluidHotCoolant);
 
 		for (int xoffset = -2; xoffset < 3; ++xoffset)
+		{
 			for (int yoffset = -2; yoffset < 3; ++yoffset)
+			{
 				for (int zoffset = -2; zoffset < 3; ++zoffset)
+				{
 					if (this.worldObj.isAirBlock(xoffset + this.xCoord, yoffset + this.yCoord, zoffset + this.zCoord))
 						this.surroundings[xoffset + 2][yoffset + 2][zoffset + 2] = Blocks.air;
 					else
@@ -873,14 +875,24 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 						else
 							this.surroundings[xoffset + 2][yoffset + 2][zoffset + 2] = block;
 					}
+				}
+			}
+		}
 
 		for (int xoffset = 1; xoffset < 4; ++xoffset)
+		{
 			for (int yoffset = 1; yoffset < 4; ++yoffset)
+			{
 				for (int zoffset = 1; zoffset < 4; ++zoffset)
+				{
 					if (!(this.surroundings[xoffset][yoffset][zoffset] instanceof BlockGenerator) && !(this.surroundings[xoffset][yoffset][zoffset] instanceof BlockReactorChamber) && this.surroundings[xoffset][yoffset][zoffset] != coolantBlock && this.surroundings[xoffset][yoffset][zoffset] != hotCoolantBlock && !(this.surroundings[xoffset][yoffset][zoffset] instanceof BlockAir))
 						return false;
+				}
+			}
+		}
 
 		for (int xoffset = 0; xoffset < 5; ++xoffset)
+		{
 			for (int yoffset = 0; yoffset < 5; ++yoffset)
 			{
 				if (!(this.surroundings[xoffset][4][yoffset] instanceof BlockReactorVessel) && !(this.surroundings[xoffset][4][yoffset] instanceof BlockReactorAccessHatch) && !(this.surroundings[xoffset][4][yoffset] instanceof BlockReactorRedstonePort) && !(this.surroundings[xoffset][4][yoffset] instanceof BlockReactorFluidPort))
@@ -901,6 +913,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 				if (!(this.surroundings[yoffset][xoffset][4] instanceof BlockReactorVessel) && !(this.surroundings[yoffset][xoffset][4] instanceof BlockReactorAccessHatch) && !(this.surroundings[yoffset][xoffset][4] instanceof BlockReactorRedstonePort) && !(this.surroundings[yoffset][xoffset][4] instanceof BlockReactorFluidPort))
 					return false;
 			}
+		}
 
 		return true;
 	}
@@ -943,7 +956,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 	@Override
 	public boolean canFill(ForgeDirection from, Fluid fluid)
 	{
-		return !this.fluidcoolreactor ? false : fluid == BlocksItems.getFluid(InternalName.fluidCoolant);
+		return this.fluidcoolreactor && fluid == BlocksItems.getFluid(InternalName.fluidCoolant);
 	}
 
 	@Override
@@ -954,7 +967,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory implem
 		else
 		{
 			FluidStack fluidStack = this.outputTank.getFluid();
-			return fluidStack == null ? false : fluidStack.isFluidEqual(new FluidStack(fluid, 1));
+			return fluidStack != null && fluidStack.isFluidEqual(new FluidStack(fluid, 1));
 		}
 	}
 

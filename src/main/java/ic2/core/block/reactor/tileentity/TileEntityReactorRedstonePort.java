@@ -53,13 +53,17 @@ public class TileEntityReactorRedstonePort extends TileEntity implements IWrench
 	public TileEntity getReactor()
 	{
 		for (int xoffset = -1; xoffset < 2; ++xoffset)
+		{
 			for (int yoffset = -1; yoffset < 2; ++yoffset)
+			{
 				for (int zoffset = -1; zoffset < 2; ++zoffset)
 				{
 					TileEntity te = this.worldObj.getTileEntity(this.xCoord + xoffset, this.yCoord + yoffset, this.zCoord + zoffset);
 					if (te instanceof IReactorChamber || te instanceof IReactor)
 						return te;
 				}
+			}
+		}
 
 		// TODO gamerforEA code replace, old code: Block blk = this.getBlockType();
 		Block blk = this.worldObj.getBlock(this.xCoord, this.yCoord, this.zCoord);

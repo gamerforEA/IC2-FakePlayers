@@ -107,7 +107,7 @@ public class TileEntityReactorAccessHatch extends TileEntity implements IWrencha
 	public boolean isUseableByPlayer(EntityPlayer entityplayer)
 	{
 		IInventory reactor = this.getReactor();
-		return reactor == null ? false : reactor.isUseableByPlayer(entityplayer);
+		return reactor != null && reactor.isUseableByPlayer(entityplayer);
 	}
 
 	@Override
@@ -137,19 +137,23 @@ public class TileEntityReactorAccessHatch extends TileEntity implements IWrencha
 	public boolean isItemValidForSlot(int i, ItemStack itemstack)
 	{
 		IInventory reactor = this.getReactor();
-		return reactor == null ? false : reactor.isItemValidForSlot(i, itemstack);
+		return reactor != null && reactor.isItemValidForSlot(i, itemstack);
 	}
 
 	public IInventory getReactor()
 	{
 		for (int xoffset = -1; xoffset < 2; ++xoffset)
+		{
 			for (int yoffset = -1; yoffset < 2; ++yoffset)
+			{
 				for (int zoffset = -1; zoffset < 2; ++zoffset)
 				{
 					TileEntity te = this.worldObj.getTileEntity(this.xCoord + xoffset, this.yCoord + yoffset, this.zCoord + zoffset);
 					if (te instanceof IReactorChamber || te instanceof IReactor)
 						return (IInventory) te;
 				}
+			}
+		}
 
 		// TODO gamerforEA code replace, old code: Block blk = this.getBlockType();
 		Block blk = this.worldObj.getBlock(this.xCoord, this.yCoord, this.zCoord);
@@ -172,7 +176,8 @@ public class TileEntityReactorAccessHatch extends TileEntity implements IWrencha
 			int[] accessibleSlots = new int[this.getSizeInventory()];
 
 			for (int i = 0; i < accessibleSlots.length; accessibleSlots[i] = i++)
-				;
+			{
+			}
 
 			return accessibleSlots;
 		}
@@ -189,6 +194,6 @@ public class TileEntityReactorAccessHatch extends TileEntity implements IWrencha
 	public boolean canExtractItem(int p_102008_1_, ItemStack p_102008_2_, int p_102008_3_)
 	{
 		IInventory reactor = this.getReactor();
-		return reactor instanceof ISidedInventory ? ((ISidedInventory) reactor).canExtractItem(p_102008_1_, p_102008_2_, p_102008_3_) : true;
+		return !(reactor instanceof ISidedInventory) || ((ISidedInventory) reactor).canExtractItem(p_102008_1_, p_102008_2_, p_102008_3_);
 	}
 }

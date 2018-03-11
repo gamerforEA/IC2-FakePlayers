@@ -3,7 +3,6 @@ package ic2.core.block.machine.tileentity;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ITerraformingBPFakePlayer;
 import com.gamerforea.ic2.ModUtils;
-
 import ic2.api.item.ITerraformingBP;
 import ic2.core.IC2;
 import ic2.core.audio.AudioSource;

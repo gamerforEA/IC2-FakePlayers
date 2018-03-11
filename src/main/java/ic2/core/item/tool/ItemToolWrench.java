@@ -1,9 +1,6 @@
 package ic2.core.item.tool;
 
-import java.util.List;
-
 import com.gamerforea.eventhelper.util.EventUtils;
-
 import cpw.mods.fml.common.registry.GameData;
 import ic2.api.item.IBoxable;
 import ic2.api.tile.IWrenchable;
@@ -22,6 +19,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.List;
 
 public class ItemToolWrench extends ItemIC2 implements IBoxable
 {
@@ -95,7 +94,7 @@ public class ItemToolWrench extends ItemIC2 implements IBoxable
 							{
 								String playerName = player.getGameProfile().getName() + "/" + player.getGameProfile().getId();
 								String blockName = tileEntity.getClass().getName().replace("TileEntity", "");
-								IC2.log.info(LogCategory.PlayerActivity, "Player %s used the wrench to remove the %s (%s-%d) at %s.", new Object[] { playerName, blockName, GameData.getBlockRegistry().getNameForObject(block), Integer.valueOf(metaData), Util.formatPosition(world, x, y, z) });
+								IC2.log.info(LogCategory.PlayerActivity, "Player %s used the wrench to remove the %s (%s-%d) at %s.", playerName, blockName, GameData.getBlockRegistry().getNameForObject(block), Integer.valueOf(metaData), Util.formatPosition(world, x, y, z));
 							}
 
 							boolean dropOriginalBlock = false;
@@ -103,7 +102,7 @@ public class ItemToolWrench extends ItemIC2 implements IBoxable
 							{
 								if (!this.canTakeDamage(stack, 200))
 								{
-									IC2.platform.messagePlayer(player, "Not enough energy for lossless wrench operation", new Object[0]);
+									IC2.platform.messagePlayer(player, "Not enough energy for lossless wrench operation");
 									return true;
 								}
 
@@ -128,7 +127,9 @@ public class ItemToolWrench extends ItemIC2 implements IBoxable
 							}
 
 							for (ItemStack itemStack : drops)
+							{
 								StackUtil.dropAsEntity(world, x, y, z, itemStack);
+							}
 
 							world.setBlockToAir(x, y, z);
 						}

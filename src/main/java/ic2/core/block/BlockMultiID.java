@@ -1,14 +1,5 @@
 package ic2.core.block;
 
-import java.lang.reflect.Constructor;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.lang3.mutable.MutableObject;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.tile.IWrenchable;
@@ -41,6 +32,10 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.ForgeDirection;
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import java.lang.reflect.Constructor;
+import java.util.*;
 
 public abstract class BlockMultiID extends BlockBase
 {
@@ -87,6 +82,7 @@ public abstract class BlockMultiID extends BlockBase
 			String name = IC2.textureDomain + ":" + textureFolder + this.getTextureName(index);
 
 			for (int active = 0; active < 2; ++active)
+			{
 				for (int side = 0; side < 6; ++side)
 				{
 					int subIndex = active * 6 + side;
@@ -95,6 +91,7 @@ public abstract class BlockMultiID extends BlockBase
 					this.textures[index][subIndex] = texture;
 					((TextureMap) iconRegister).setTextureEntry(subName, texture);
 				}
+			}
 		}
 
 	}
@@ -121,7 +118,7 @@ public abstract class BlockMultiID extends BlockBase
 			}
 			catch (Exception var12)
 			{
-				IC2.platform.displayError(var12, "Coordinates: %d/%d/%d\nSide: %d\nBlock: %s\nMeta: %d\nFacing: %d\nActive: %s\nIndex: %d\nSubIndex: %d", new Object[] { Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Integer.valueOf(side), this, Integer.valueOf(meta), Integer.valueOf(facing), Boolean.valueOf(active), Integer.valueOf(index), Integer.valueOf(subIndex) });
+				IC2.platform.displayError(var12, "Coordinates: %d/%d/%d\nSide: %d\nBlock: %s\nMeta: %d\nFacing: %d\nActive: %s\nIndex: %d\nSubIndex: %d", Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Integer.valueOf(side), this, Integer.valueOf(meta), Integer.valueOf(facing), Boolean.valueOf(active), Integer.valueOf(index), Integer.valueOf(subIndex));
 				return null;
 			}
 		}
@@ -143,7 +140,7 @@ public abstract class BlockMultiID extends BlockBase
 			}
 			catch (Exception var7)
 			{
-				IC2.platform.displayError(var7, "Side: " + side + "\n" + "Block: " + this + "\n" + "Meta: " + meta + "\n" + "Facing: " + facing + "\n" + "Index: " + index + "\n" + "SubIndex: " + subIndex, new Object[0]);
+				IC2.platform.displayError(var7, "Side: " + side + "\n" + "Block: " + this + "\n" + "Meta: " + meta + "\n" + "Facing: " + facing + "\n" + "Index: " + index + "\n" + "SubIndex: " + subIndex);
 				return null;
 			}
 	}
@@ -158,7 +155,7 @@ public abstract class BlockMultiID extends BlockBase
 	@SideOnly(Side.CLIENT)
 	public boolean shouldSideBeRendered(IBlockAccess blockAccess, int x, int y, int z, int side)
 	{
-		return (this.renderMask & 1 << side) != 0 ? super.shouldSideBeRendered(blockAccess, x, y, z, side) : false;
+		return (this.renderMask & 1 << side) != 0 && super.shouldSideBeRendered(blockAccess, x, y, z, side);
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -178,7 +175,7 @@ public abstract class BlockMultiID extends BlockBase
 		else
 		{
 			TileEntity te = this.getOwnTe(world, x, y, z);
-			return te instanceof IHasGui ? IC2.platform.isSimulating() ? IC2.platform.launchGui(entityPlayer, (IHasGui) te) : true : false;
+			return te instanceof IHasGui && (!IC2.platform.isSimulating() || IC2.platform.launchGui(entityPlayer, (IHasGui) te));
 		}
 	}
 
@@ -233,6 +230,7 @@ public abstract class BlockMultiID extends BlockBase
 		{
 			if (te instanceof IHasGui)
 				for (Object obj : world.playerEntities)
+				{
 					if (obj instanceof EntityPlayerMP)
 					{
 						EntityPlayerMP player = (EntityPlayerMP) obj;
@@ -243,6 +241,7 @@ public abstract class BlockMultiID extends BlockBase
 								player.closeScreen();
 						}
 					}
+				}
 
 			if (tesBeforeBreak.size() >= 8)
 				tesBeforeBreak.pop();
@@ -375,7 +374,7 @@ public abstract class BlockMultiID extends BlockBase
 			te = blockAccess.getTileEntity(x, y, z);
 		}
 
-		Class<? extends TileEntity> expectedClass = this.getTeClass(meta, (MutableObject<Class<?>[]>) null, (MutableObject<Object[]>) null);
+		Class<? extends TileEntity> expectedClass = this.getTeClass(meta, null, null);
 		Class<? extends TileEntity> actualClass = te != null ? te.getClass() : null;
 		if (actualClass != expectedClass)
 		{
@@ -384,13 +383,13 @@ public abstract class BlockMultiID extends BlockBase
 				if (Util.inDev())
 				{
 					StackTraceElement[] st = new Throwable().getStackTrace();
-					IC2.log.warn(LogCategory.Block, "Own tile entity query from %s to foreign block %s instead of %s at %s.", new Object[] { st.length > 1 ? st[1] : "?", block != null ? block.getClass() : null, this.getClass(), Util.formatPosition(blockAccess, x, y, z) });
+					IC2.log.warn(LogCategory.Block, "Own tile entity query from %s to foreign block %s instead of %s at %s.", st.length > 1 ? st[1] : "?", block != null ? block.getClass() : null, this.getClass(), Util.formatPosition(blockAccess, x, y, z));
 				}
 
 				return null;
 			}
 
-			IC2.log.warn(LogCategory.Block, "Mismatched tile entity at %s, got %s, expected %s.", new Object[] { Util.formatPosition(blockAccess, x, y, z), actualClass, expectedClass });
+			IC2.log.warn(LogCategory.Block, "Mismatched tile entity at %s, got %s, expected %s.", Util.formatPosition(blockAccess, x, y, z), actualClass, expectedClass);
 			if (!(blockAccess instanceof World))
 				return null;
 
@@ -405,7 +404,7 @@ public abstract class BlockMultiID extends BlockBase
 	public final boolean isActive(IBlockAccess blockAccess, int x, int y, int z)
 	{
 		TileEntity te = this.getOwnTe(blockAccess, x, y, z);
-		return te instanceof TileEntityBlock ? ((TileEntityBlock) te).getActive() : false;
+		return te instanceof TileEntityBlock && ((TileEntityBlock) te).getActive();
 	}
 
 	@Override
@@ -444,7 +443,7 @@ public abstract class BlockMultiID extends BlockBase
 			{
 				IWrenchable te = (IWrenchable) tileEntity;
 				int newFacing = ForgeDirection.getOrientation(te.getFacing()).getRotation(axis).ordinal();
-				if (te.wrenchCanSetFacing((EntityPlayer) null, newFacing))
+				if (te.wrenchCanSetFacing(null, newFacing))
 					te.setFacing((short) newFacing);
 			}
 

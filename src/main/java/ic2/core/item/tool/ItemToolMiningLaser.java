@@ -1,10 +1,6 @@
 package ic2.core.item.tool;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.gamerforea.ic2.EventConfig;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.event.LaserEvent;
@@ -22,6 +18,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class ItemToolMiningLaser extends ItemElectricTool implements INetworkItemEventListener
 {
@@ -75,7 +74,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 				return;
 		}
 
-		list.add(StatCollector.translateToLocalFormatted("ic2.tooltip.mode", new Object[] { mode }));
+		list.add(StatCollector.translateToLocalFormatted("ic2.tooltip.mode", mode));
 	}
 
 	@Override
@@ -85,7 +84,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 		NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(itemStack);
 		String mode = StatCollector.translateToLocal(getModeString(nbtData.getInteger("laserSetting")));
 		info.addAll(super.getHudInfo(itemStack));
-		info.add(StatCollector.translateToLocalFormatted("ic2.tooltip.mode", new Object[] { mode }));
+		info.add(StatCollector.translateToLocalFormatted("ic2.tooltip.mode", mode));
 		return info;
 	}
 
@@ -102,7 +101,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 			{
 				laserSetting = (laserSetting + 1) % 7;
 				nbtData.setInteger("laserSetting", laserSetting);
-				IC2.platform.messagePlayer(player, "ic2.tooltip.mode", new Object[] { getModeString(laserSetting) });
+				IC2.platform.messagePlayer(player, "ic2.tooltip.mode", getModeString(laserSetting));
 			}
 			else
 			{
@@ -164,8 +163,12 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 						// TODO gamerforEA code end
 
 						for (int x = -2; x <= 2; ++x)
+						{
 							for (int y = -2; y <= 2; ++y)
+							{
 								this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, false, false, player.rotationYaw + 20.0F * x, player.rotationPitch + 20.0F * y);
+							}
+						}
 
 						IC2.network.get().initiateItemEvent(player, stack, 5, true);
 						break;
@@ -195,7 +198,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 						IC2.network.get().initiateItemEvent(entityPlayer, itemstack, 3, true);
 				}
 				else
-					IC2.platform.messagePlayer(entityPlayer, "Mining laser aiming angle too steep", new Object[0]);
+					IC2.platform.messagePlayer(entityPlayer, "Mining laser aiming angle too steep");
 
 			return false;
 		}

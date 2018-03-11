@@ -1,7 +1,5 @@
 package ic2.core.item.block;
 
-import java.util.List;
-
 import ic2.api.item.IBoxable;
 import ic2.core.Ic2Items;
 import ic2.core.block.wiring.BlockCable;
@@ -16,6 +14,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public class ItemCable extends ItemIC2 implements IBoxable
 {
@@ -160,12 +160,14 @@ public class ItemCable extends ItemIC2 implements IBoxable
 	public void getSubItems(Item item, CreativeTabs tabs, List itemList)
 	{
 		for (int meta = 0; meta < 32767; ++meta)
+		{
 			if (meta != 4 && meta != 7 && meta != 8)
 			{
 				ItemStack stack = new ItemStack(this, 1, meta);
 				if (this.getUnlocalizedName(stack) != null)
 					itemList.add(stack);
 			}
+		}
 
 	}
 

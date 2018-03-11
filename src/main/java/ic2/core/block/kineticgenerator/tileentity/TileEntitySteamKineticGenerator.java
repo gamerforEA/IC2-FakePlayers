@@ -1,17 +1,10 @@
 package ic2.core.block.kineticgenerator.tileentity;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.api.energy.tile.IKineticSource;
-import ic2.core.ContainerBase;
-import ic2.core.ExplosionIC2;
-import ic2.core.IC2;
-import ic2.core.IHasGui;
-import ic2.core.Ic2Items;
+import ic2.core.*;
 import ic2.core.block.TileEntityInventory;
 import ic2.core.block.invslot.InvSlotConsumable;
 import ic2.core.block.invslot.InvSlotConsumableId;
@@ -27,21 +20,18 @@ import ic2.core.upgrade.IUpgradeItem;
 import ic2.core.upgrade.UpgradableProperty;
 import ic2.core.util.ConfigUtil;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
 
-public class TileEntitySteamKineticGenerator extends TileEntityInventory implements IKineticSource, IFluidHandler, IHasGui, IUpgradableBlock
+import java.util.EnumSet;
+import java.util.Set;
+
+public class TileEntitySteamKineticGenerator extends TileEntityInventory
+		implements IKineticSource, IFluidHandler, IHasGui, IUpgradableBlock
 {
 	private boolean isturbefilledupwithwater = false;
 	private float condensationprogress = 0.0F;
@@ -50,7 +40,7 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory impleme
 	protected final FluidTank SteamTank = new FluidTank(21000);
 	protected final FluidTank distilledwaterTank = new FluidTank(1000);
 	public final InvSlotUpgrade upgradeSlot = new InvSlotUpgrade(this, "upgrade", 1, 1);
-	public final InvSlotConsumable turbineSlot = new InvSlotConsumableId(this, "Turbineslot", 0, 1, new Item[] { Ic2Items.steamturbine.getItem() });
+	public final InvSlotConsumable turbineSlot = new InvSlotConsumableId(this, "Turbineslot", 0, 1, Ic2Items.steamturbine.getItem());
 	private static final float outputModifier = ConfigUtil.getFloat(MainConfig.get(), "balance/energy/kineticgenerator/steam");
 
 	@Override
@@ -92,7 +82,7 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory impleme
 		{
 			ItemStack stack = this.upgradeSlot.get(i);
 			if (stack != null && stack.getItem() instanceof IUpgradeItem && ((IUpgradeItem) stack.getItem()).onTick(stack, this))
-				super.markDirty();
+				this.markDirty();
 		}
 
 		if (needsInvUpdate)
@@ -196,7 +186,7 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory impleme
 
 		if (amount > 0.0F && IC2.random.nextInt(10) == 0)
 		{
-			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, (Entity) null, this.xCoord, this.yCoord, this.zCoord, 1.0F, 1.0F, ExplosionIC2.Type.Heat);
+			ExplosionIC2 explosion = new ExplosionIC2(this.worldObj, null, this.xCoord, this.yCoord, this.zCoord, 1.0F, 1.0F, ExplosionIC2.Type.Heat);
 
 			// TODO gamerforEA code start
 			explosion.fake.setParent(this.fake);
@@ -255,7 +245,7 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory impleme
 	@Override
 	public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side)
 	{
-		return side != 0 && side != 1 ? this.getFacing() != side : false;
+		return side != 0 && side != 1 && this.getFacing() != side;
 	}
 
 	@Override
@@ -328,7 +318,7 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory impleme
 	@Override
 	public boolean canFill(ForgeDirection from, Fluid fluid)
 	{
-		return from.getOpposite().ordinal() != this.getFacing() && from.ordinal() != this.getFacing() ? fluid != BlocksItems.getFluid(InternalName.fluidSteam) && fluid != BlocksItems.getFluid(InternalName.fluidSuperheatedSteam) ? fluid != FluidRegistry.WATER && fluid != BlocksItems.getFluid(InternalName.fluidDistilledWater) ? false : this.distilledwaterTank.getFluidAmount() < this.distilledwaterTank.getCapacity() : this.SteamTank.getFluidAmount() < this.SteamTank.getCapacity() : false;
+		return from.getOpposite().ordinal() != this.getFacing() && from.ordinal() != this.getFacing() && (fluid != BlocksItems.getFluid(InternalName.fluidSteam) && fluid != BlocksItems.getFluid(InternalName.fluidSuperheatedSteam) ? (fluid == FluidRegistry.WATER || fluid == BlocksItems.getFluid(InternalName.fluidDistilledWater)) && this.distilledwaterTank.getFluidAmount() < this.distilledwaterTank.getCapacity() : this.SteamTank.getFluidAmount() < this.SteamTank.getCapacity());
 	}
 
 	@Override

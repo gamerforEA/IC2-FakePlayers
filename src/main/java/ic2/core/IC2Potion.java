@@ -1,17 +1,16 @@
 package ic2.core;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-
 import com.gamerforea.ic2.EventConfig;
 import com.google.common.base.Throwables;
-
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 public class IC2Potion extends Potion
 {
@@ -76,7 +75,7 @@ public class IC2Potion extends Potion
 		if (this.id == radiation.id)
 		{
 			int rate = 25 >> amplifier;
-			return rate > 0 ? duration % rate == 0 : true;
+			return rate <= 0 || duration % rate == 0;
 		}
 		else
 			return false;
