@@ -1,12 +1,6 @@
 package ic2.core.item.resources;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.gamerforea.eventhelper.util.EventUtils;
-
 import ic2.core.IC2;
 import ic2.core.Ic2Items;
 import ic2.core.init.BlocksItems;
@@ -23,10 +17,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ItemCell extends ItemIC2
 {
@@ -37,15 +37,15 @@ public class ItemCell extends ItemIC2
 	{
 		super(internalName);
 		this.setHasSubtypes(true);
-		Ic2Items.cell = this.addCell(0, InternalName.itemCellEmpty, new Block[0]);
-		Ic2Items.waterCell = this.addCell(1, InternalName.itemCellWater, new Block[] { Blocks.water, Blocks.flowing_water });
-		Ic2Items.lavaCell = this.addCell(2, InternalName.itemCellLava, new Block[] { Blocks.lava, Blocks.flowing_lava });
+		Ic2Items.cell = this.addCell(0, InternalName.itemCellEmpty);
+		Ic2Items.waterCell = this.addCell(1, InternalName.itemCellWater, Blocks.water, Blocks.flowing_water);
+		Ic2Items.lavaCell = this.addCell(2, InternalName.itemCellLava, Blocks.lava, Blocks.flowing_lava);
 		Ic2Items.uuMatterCell = this.addRegisterCell(3, InternalName.itemCellUuMatter, InternalName.fluidUuMatter);
 		Ic2Items.CFCell = this.addRegisterCell(4, InternalName.itemCellCF, InternalName.fluidConstructionFoam);
-		Ic2Items.airCell = this.addCell(5, InternalName.itemCellAir, new Block[0]);
+		Ic2Items.airCell = this.addCell(5, InternalName.itemCellAir);
 		Ic2Items.biomassCell = this.addRegisterCell(6, InternalName.itemCellBiomass, InternalName.fluidBiomass);
 		Ic2Items.biogasCell = this.addRegisterCell(7, InternalName.itemCellBiogas, InternalName.fluidBiogas);
-		Ic2Items.electrolyzedWaterCell = this.addCell(8, InternalName.itemCellWaterElectro, new Block[0]);
+		Ic2Items.electrolyzedWaterCell = this.addCell(8, InternalName.itemCellWaterElectro);
 		Ic2Items.coolantCell = this.addRegisterCell(9, InternalName.itemCellCoolant, InternalName.fluidCoolant);
 		Ic2Items.hotcoolantCell = this.addRegisterCell(10, InternalName.itemCellHotCoolant, InternalName.fluidHotCoolant);
 		Ic2Items.pahoehoelavaCell = this.addRegisterCell(11, InternalName.itemCellPahoehoelava, InternalName.fluidPahoehoeLava);
@@ -65,7 +65,7 @@ public class ItemCell extends ItemIC2
 	@Override
 	public String getUnlocalizedName(ItemStack stack)
 	{
-		InternalName ret = this.names.get(Integer.valueOf(stack.getItemDamage()));
+		InternalName ret = this.names.get(stack.getItemDamage());
 		return ret == null ? null : "ic2." + ret.name();
 	}
 
@@ -86,6 +86,11 @@ public class ItemCell extends ItemIC2
 	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float xOffset, float yOffset, float zOffset)
 	{
+		// TODO gamerforEA code start
+		if (player instanceof FakePlayer)
+			return false;
+		// TODO gamerforEA code end
+
 		if (!IC2.platform.isSimulating())
 			return false;
 		else
@@ -152,18 +157,20 @@ public class ItemCell extends ItemIC2
 
 	private ItemStack addCell(int meta, InternalName name, Block... blocks)
 	{
-		this.names.put(Integer.valueOf(meta), name);
+		this.names.put(meta, name);
 		ItemStack ret = new ItemStack(this, 1, meta);
 
 		for (Block block : blocks)
+		{
 			this.cells.put(block, ret);
+		}
 
 		return ret;
 	}
 
 	private ItemStack addRegisterCell(int meta, InternalName name, InternalName blockName)
 	{
-		ItemStack ret = this.addCell(meta, name, new Block[] { BlocksItems.getFluidBlock(blockName) });
+		ItemStack ret = this.addCell(meta, name, BlocksItems.getFluidBlock(blockName));
 		FluidContainerRegistry.registerFluidContainer(BlocksItems.getFluid(blockName), ret.copy(), Ic2Items.cell.copy());
 		return ret;
 	}

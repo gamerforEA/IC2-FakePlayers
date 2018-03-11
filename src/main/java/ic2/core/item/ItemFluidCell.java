@@ -1,9 +1,6 @@
 package ic2.core.item;
 
-import java.util.List;
-
 import com.gamerforea.eventhelper.util.EventUtils;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.core.IC2;
@@ -21,12 +18,11 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
+
+import java.util.List;
 
 public class ItemFluidCell extends ItemIC2FluidContainer
 {
@@ -70,6 +66,11 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float xOffset, float yOffset, float zOffset)
 	{
+		// TODO gamerforEA code start
+		if (player instanceof FakePlayer)
+			return false;
+		// TODO gamerforEA code end
+
 		if (!IC2.platform.isSimulating())
 			return false;
 		else if (this.interactWithTank(stack, player, world, x, y, z, side))
@@ -136,12 +137,14 @@ public class ItemFluidCell extends ItemIC2FluidContainer
 		itemList.add(Ic2Items.FluidCell.copy());
 
 		for (Fluid fluid : FluidRegistry.getRegisteredFluids().values())
+		{
 			if (fluid != null)
 			{
 				ItemStack stack = Ic2Items.FluidCell.copy();
 				this.fill(stack, new FluidStack(fluid, Integer.MAX_VALUE), true);
 				itemList.add(stack);
 			}
+		}
 
 	}
 
