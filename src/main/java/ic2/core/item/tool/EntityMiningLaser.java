@@ -215,8 +215,9 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 				{
 					LaserEvent.LaserHitsBlockEvent tEvent = new LaserEvent.LaserHitsBlockEvent(this.worldObj, this, this.owner, this.range, this.power, this.blockBreaks, this.explosive, this.smelt, movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ, movingobjectposition.sideHit, 0.9F, true, true);
 					MinecraftForge.EVENT_BUS.post(tEvent);
+
 					// TODO gamerforEA code start
-					if (!EventConfig.laserBreakBlock || EventConfig.laserEvent && this.fake.cantBreak(tEvent.x, tEvent.y, tEvent.z))
+					if (tEvent.y > EventConfig.laserMaxBreakY || !EventConfig.laserBreakBlock || EventConfig.laserEvent && this.fake.cantBreak(tEvent.x, tEvent.y, tEvent.z))
 					{
 						this.setDead();
 						return;

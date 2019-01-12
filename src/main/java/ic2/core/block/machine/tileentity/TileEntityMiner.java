@@ -477,12 +477,16 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 
 			this.energy -= energyCost;
 
+			int meta = this.worldObj.getBlockMetadata(x, y, z);
+
 			// TODO gamerforEA code start
+			if (EventConfig.minerBreakBlackList.contains(block, meta))
+				return false;
 			if (EventConfig.minerEvent && this.fake.cantBreak(x, y, z))
 				return false;
 			// TODO gamerforEA code end
 
-			ArrayList<ItemStack> drops = block.getDrops(this.worldObj, x, y, z, this.worldObj.getBlockMetadata(x, y, z), 0);
+			ArrayList<ItemStack> drops = block.getDrops(this.worldObj, x, y, z, meta, 0);
 			if (drops != null)
 				for (ItemStack drop : drops)
 				{

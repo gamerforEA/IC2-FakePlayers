@@ -12,6 +12,7 @@ import ic2.core.init.InternalName;
 import ic2.core.item.block.ItemPersonalBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
@@ -40,6 +41,20 @@ public class BlockPersonal extends BlockMultiID
 		GameRegistry.registerTileEntity(TileEntityTradeOMat.class, "Trade-O-Mat");
 		GameRegistry.registerTileEntity(TileEntityEnergyOMat.class, "Energy-O-Mat");
 	}
+
+	// TODO gamerforEA code start
+	@Override
+	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemStack)
+	{
+		super.onBlockPlacedBy(world, x, y, z, entityliving, itemStack);
+		if (EventConfig.autoTradeOMatPrivateEnabled && entityliving instanceof EntityPlayer)
+		{
+			TileEntity tile = world.getTileEntity(x, y, z);
+			if (tile instanceof TileEntityTradeOMat)
+				((TileEntityTradeOMat) tile).permitsAccess(((EntityPlayer) entityliving).getGameProfile());
+		}
+	}
+	// TODO gamerforEA code end
 
 	@Override
 	public String getTextureFolder(int id)

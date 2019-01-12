@@ -1,5 +1,6 @@
 package ic2.core.util;
 
+import com.gamerforea.ic2.EventConfig;
 import ic2.api.Direction;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -179,11 +180,14 @@ public class LiquidUtil
 			FluidStack ret = source.drain(dir.toForgeDirection(), amount, false);
 			if (ret != null && ret.amount > 0)
 			{
-				if (ret.amount > amount)
+				// TODO gamerforEA add condition [1]
+				if (EventConfig.liquidChecks && ret.amount > amount)
 					throw new IllegalStateException("The fluid handler " + source + " drained more than the requested amount.");
 
 				int cAmount = target.fill(dir.getInverse().toForgeDirection(), ret, false);
-				if (cAmount > amount)
+
+				// TODO gamerforEA add condition [1]
+				if (EventConfig.liquidChecks && cAmount > amount)
 					throw new IllegalStateException("The fluid handler " + target + " filled more than the requested amount.");
 
 				amount = cAmount;
@@ -194,11 +198,15 @@ public class LiquidUtil
 					return null;
 
 				ret = source.drain(dir.toForgeDirection(), cAmount, true);
-				if (ret.amount != cAmount)
+
+				// TODO gamerforEA add condition [1]
+				if (EventConfig.liquidChecks && ret.amount != cAmount)
 					throw new IllegalStateException("The fluid handler " + source + " drained inconsistently. Expected " + cAmount + ", got " + ret.amount + ".");
 
 				amount = target.fill(dir.getInverse().toForgeDirection(), ret, true);
-				if (amount != ret.amount)
+
+				// TODO gamerforEA add condition [1]
+				if (EventConfig.liquidChecks && amount != ret.amount)
 					throw new IllegalStateException("The fluid handler " + target + " filled inconsistently. Expected " + ret.amount + ", got " + amount + ".");
 
 				return ret;

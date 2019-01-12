@@ -1,6 +1,7 @@
 package ic2.core.item.tool;
 
 import com.gamerforea.ic2.EventConfig;
+import com.google.common.base.Strings;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.event.LaserEvent;
@@ -15,6 +16,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -80,10 +83,9 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 	@Override
 	public List<String> getHudInfo(ItemStack itemStack)
 	{
-		List<String> info = new LinkedList();
 		NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(itemStack);
 		String mode = StatCollector.translateToLocal(getModeString(nbtData.getInteger("laserSetting")));
-		info.addAll(super.getHudInfo(itemStack));
+		List<String> info = new LinkedList<>(super.getHudInfo(itemStack));
 		info.add(StatCollector.translateToLocalFormatted("ic2.tooltip.mode", mode));
 		return info;
 	}
@@ -93,115 +95,127 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 	{
 		if (!IC2.platform.isSimulating())
 			return stack;
+		NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(stack);
+		int laserSetting = nbtData.getInteger("laserSetting");
+		if (IC2.keyboard.isModeSwitchKeyDown(player))
+		{
+			laserSetting = (laserSetting + 1) % 7;
+			nbtData.setInteger("laserSetting", laserSetting);
+			IC2.platform.messagePlayer(player, "ic2.tooltip.mode", getModeString(laserSetting));
+		}
 		else
 		{
-			NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(stack);
-			int laserSetting = nbtData.getInteger("laserSetting");
-			if (IC2.keyboard.isModeSwitchKeyDown(player))
+			// TODO gamerforEA code replace, old code: int consume = new int[] { 1250, 100, 5000, 0, 2500, 10000, 5000 }[laserSetting];
+			if (MathHelper.floor_float((float) player.posY + player.getEyeHeight()) > EventConfig.laserMaxBreakY)
 			{
-				laserSetting = (laserSetting + 1) % 7;
-				nbtData.setInteger("laserSetting", laserSetting);
-				IC2.platform.messagePlayer(player, "ic2.tooltip.mode", getModeString(laserSetting));
+				String msg = EventConfig.laserMaxBreakYWarnMsg;
+				if (!Strings.isNullOrEmpty(msg))
+					player.addChatComponentMessage(new ChatComponentText(String.format(msg, EventConfig.laserMaxBreakY)));
+				return stack;
 			}
-			else
+
+			int consume;
+			switch (laserSetting)
 			{
-				// TODO gamerforEA code replace, old code: int consume = new int[] { 1250, 100, 5000, 0, 2500, 10000, 5000 }[laserSetting];
-				int consume;
-				switch (laserSetting)
-				{
-					case 0:
-						consume = EventConfig.laserMining;
-						break;
-					case 1:
-						consume = EventConfig.laserLowFocus;
-						break;
-					case 2:
-						consume = EventConfig.laserLongRange;
-						break;
-					case 4:
-						consume = EventConfig.laserSuperHeat;
-						break;
-					case 5:
-						consume = EventConfig.laserScatter;
-						break;
-					case 6:
-						consume = EventConfig.laserExplosive;
-						break;
-					default:
-						consume = 0;
-						break;
-				}
-				// TODO gamerforEA code end
+				case 0:
+					consume = EventConfig.laserMining;
+					break;
+				case 1:
+					consume = EventConfig.laserLowFocus;
+					break;
+				case 2:
+					consume = EventConfig.laserLongRange;
+					break;
+				case 4:
+					consume = EventConfig.laserSuperHeat;
+					break;
+				case 5:
+					consume = EventConfig.laserScatter;
+					break;
+				case 6:
+					consume = EventConfig.laserExplosive;
+					break;
+				default:
+					consume = 0;
+					break;
+			}
+			// TODO gamerforEA code end
 
-				if (!ElectricItem.manager.use(stack, consume, player))
-					return stack;
+			if (!ElectricItem.manager.use(stack, consume, player))
+				return stack;
 
-				switch (laserSetting)
-				{
-					case 0:
-						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false))
-							IC2.network.get().initiateItemEvent(player, stack, 0, true);
+			switch (laserSetting)
+			{
+				case 0:
+					if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false))
+						IC2.network.get().initiateItemEvent(player, stack, 0, true);
+					break;
+				case 1:
+					if (this.shootLaser(world, player, stack, 4.0F, 5.0F, 1, false, false))
+						IC2.network.get().initiateItemEvent(player, stack, 1, true);
+					break;
+				case 2:
+					if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 20.0F, Integer.MAX_VALUE, false, false))
+						IC2.network.get().initiateItemEvent(player, stack, 2, true);
+				case 3:
+				default:
+					break;
+				case 4:
+					if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 8.0F, Integer.MAX_VALUE, false, true))
+						IC2.network.get().initiateItemEvent(player, stack, 4, true);
+					break;
+				case 5:
+					// TODO gamerforEA code start
+					if (!EventConfig.laserScatterEnabled)
 						break;
-					case 1:
-						if (this.shootLaser(world, player, stack, 4.0F, 5.0F, 1, false, false))
-							IC2.network.get().initiateItemEvent(player, stack, 1, true);
-						break;
-					case 2:
-						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 20.0F, Integer.MAX_VALUE, false, false))
-							IC2.network.get().initiateItemEvent(player, stack, 2, true);
-					case 3:
-					default:
-						break;
-					case 4:
-						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 8.0F, Integer.MAX_VALUE, false, true))
-							IC2.network.get().initiateItemEvent(player, stack, 4, true);
-						break;
-					case 5:
-						// TODO gamerforEA code start
-						if (!EventConfig.laserscatterEnabled)
-							break;
-						// TODO gamerforEA code end
+					// TODO gamerforEA code end
 
-						for (int x = -2; x <= 2; ++x)
+					for (int x = -2; x <= 2; ++x)
+					{
+						for (int y = -2; y <= 2; ++y)
 						{
-							for (int y = -2; y <= 2; ++y)
-							{
-								this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, false, false, player.rotationYaw + 20.0F * x, player.rotationPitch + 20.0F * y);
-							}
+							this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, false, false, player.rotationYaw + 20.0F * x, player.rotationPitch + 20.0F * y);
 						}
+					}
 
-						IC2.network.get().initiateItemEvent(player, stack, 5, true);
-						break;
-					case 6:
-						if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, true, false))
-							IC2.network.get().initiateItemEvent(player, stack, 6, true);
-				}
+					IC2.network.get().initiateItemEvent(player, stack, 5, true);
+					break;
+				case 6:
+					if (this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 12.0F, Integer.MAX_VALUE, true, false))
+						IC2.network.get().initiateItemEvent(player, stack, 6, true);
 			}
-
-			return super.onItemRightClick(stack, world, player);
 		}
+
+		return super.onItemRightClick(stack, world, player);
 	}
 
 	@Override
-	public boolean onItemUseFirst(ItemStack itemstack, EntityPlayer entityPlayer, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ)
+	public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ)
 	{
 		if (!IC2.platform.isSimulating())
 			return false;
-		else
-		{
-			NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(itemstack);
-			if (!IC2.keyboard.isModeSwitchKeyDown(entityPlayer) && nbtData.getInteger("laserSetting") == 3)
-				if (Math.abs(entityPlayer.posY + entityPlayer.getEyeHeight() - 0.1D - (y + 0.5D)) < 1.5D)
+		NBTTagCompound nbtData = StackUtil.getOrCreateNbtData(stack);
+		if (!IC2.keyboard.isModeSwitchKeyDown(player) && nbtData.getInteger("laserSetting") == 3)
+			if (Math.abs(player.posY + player.getEyeHeight() - 0.1D - (y + 0.5D)) < 1.5D)
+			{
+				// TODO gamerforEA code start
+				if (MathHelper.floor_float((float) player.posY + player.getEyeHeight()) > EventConfig.laserMaxBreakY)
 				{
-					// TODO gamerforEA code replace, old value: 3000.0D
-					if (ElectricItem.manager.use(itemstack, EventConfig.laserHorizontal, entityPlayer) && this.shootLaser(world, entityPlayer, itemstack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false, entityPlayer.rotationYaw, 0.0D, y + 0.5D))
-						IC2.network.get().initiateItemEvent(entityPlayer, itemstack, 3, true);
+					String msg = EventConfig.laserMaxBreakYWarnMsg;
+					if (!Strings.isNullOrEmpty(msg))
+						player.addChatComponentMessage(new ChatComponentText(String.format(msg, EventConfig.laserMaxBreakY)));
+					return false;
 				}
-				else
-					IC2.platform.messagePlayer(entityPlayer, "Mining laser aiming angle too steep");
+				// TODO gamerforEA code end
 
-			return false;
-		}
+				// TODO gamerforEA code replace, old value: 3000.0D
+				if (ElectricItem.manager.use(stack, EventConfig.laserHorizontal, player) && this.shootLaser(world, player, stack, Float.POSITIVE_INFINITY, 5.0F, Integer.MAX_VALUE, false, false, player.rotationYaw, 0.0D, y + 0.5D))
+					IC2.network.get().initiateItemEvent(player, stack, 3, true);
+			}
+			else
+				IC2.platform.messagePlayer(player, "Mining laser aiming angle too steep");
+
+		return false;
 	}
 
 	public boolean shootLaser(World world, EntityLivingBase entityliving, ItemStack laseritem, float range, float power, int blockBreaks, boolean explosive, boolean smelt)
@@ -224,8 +238,7 @@ public class ItemToolMiningLaser extends ItemElectricTool implements INetworkIte
 			world.spawnEntityInWorld(tLaser);
 			return true;
 		}
-		else
-			return false;
+		return false;
 	}
 
 	@Override
