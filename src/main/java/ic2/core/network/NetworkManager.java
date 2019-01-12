@@ -208,7 +208,10 @@ public class NetworkManager
 			byte[] packetData = buffer.toByteArray();
 			int maxDistance = limitRange ? 400 : MinecraftServer.getServer().getConfigurationManager().getEntityViewDistance() + 16;
 
-			for (Object obj : te.getWorldObj().playerEntities)
+			// TODO gamerforEA code replace, old code:
+			// for (Object obj : te.getWorldObj().playerEntities)
+			for (Object obj : new ArrayList<Object>(te.getWorldObj().playerEntities))
+			// TODO gamerforEA code end
 			{
 				if (obj instanceof EntityPlayerMP)
 				{
@@ -222,7 +225,14 @@ public class NetworkManager
 						distance = Math.max(Math.abs(distanceX), Math.abs(distanceZ));
 
 					if (distance <= maxDistance)
+					{
+						// TODO gamerforEA code start
+						if (entityPlayer.playerNetServerHandler == null)
+							continue;
+						// TODO gamerforEA code end
+
 						this.sendPacket(packetData, entityPlayer);
+					}
 				}
 			}
 

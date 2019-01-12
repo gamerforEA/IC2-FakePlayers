@@ -698,9 +698,15 @@ public final class EnergyNetLocal
 	{
 		for (Node node : tile.nodes)
 		{
-			node.getGrid().remove(node);
-		}
+			Grid grid = node.getGrid();
 
+			// TODO gamerforEA code start
+			if (grid == null)
+				continue;
+			// TODO gamerforEA code end
+
+			grid.remove(node);
+		}
 	}
 
 	private void processChanges()
