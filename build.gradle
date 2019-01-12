@@ -29,6 +29,11 @@ version = "2-2.2.827-experimental"
 group= "ic2"
 archivesBaseName = "industrialcraft"
 
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+	sourceCompatibility = targetCompatibility = '1.8'
+}
+
 minecraft {
 	version = "1.7.10-10.13.4.1614-1.7.10"
 	runDir = "eclipse"
