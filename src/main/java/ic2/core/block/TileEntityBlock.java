@@ -1,7 +1,6 @@
 package ic2.core.block;
 
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 import com.gamerforea.ic2.ModUtils;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -46,7 +45,7 @@ public abstract class TileEntityBlock extends TileEntity
 	private static final int defaultTesrTtl = 500;
 
 	// TODO gamerforEA code start
-	public final FakePlayerContainer fake = new FakePlayerContainerTileEntity(ModUtils.profile, this);
+	public final FakePlayerContainer fake = ModUtils.NEXUS_FACTORY.wrapFake(this);
 	// TODO gamerforEA code end
 
 	@Override

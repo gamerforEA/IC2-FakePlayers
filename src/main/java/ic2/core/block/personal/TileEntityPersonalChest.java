@@ -1,7 +1,7 @@
 package ic2.core.block.personal;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
-import com.gamerforea.ic2.ModUtils;
 import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -180,7 +180,7 @@ public class TileEntityPersonalChest extends TileEntityInventory implements IPer
 					return true;
 
 				// TODO gamerforEA code start
-				if (ModUtils.hasPermission(profile.getId(), EventConfig.safeAccessPermission))
+				if (EventUtils.hasPermission(profile.getId(), EventConfig.safeAccessPermission))
 					return true;
 				// TODO gamerforEA code end
 			}

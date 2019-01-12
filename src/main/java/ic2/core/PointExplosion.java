@@ -1,7 +1,6 @@
 package ic2.core;
 
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerWorld;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
@@ -38,7 +37,7 @@ public class PointExplosion extends Explosion
 		this.entityDamage = entityDamage1;
 
 		// TODO gamerforEA code start
-		this.fake = new FakePlayerContainerWorld(ModUtils.profile, this.world);
+		this.fake = ModUtils.NEXUS_FACTORY.wrapFake(this.world);
 		if (entity instanceof EntityPlayer)
 			this.fake.setRealPlayer((EntityPlayer) entity);
 		else if (exploder instanceof EntityPlayer)

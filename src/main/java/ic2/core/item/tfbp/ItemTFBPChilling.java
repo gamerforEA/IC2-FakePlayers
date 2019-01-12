@@ -34,17 +34,17 @@ public class ItemTFBPChilling extends ItemTFBP
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 
 	public boolean isSurroundedBySnow(World world, int x, int y, int z)
 	{
-		return this.isSurroundedBySnow(world, x, y, z, ModUtils.getModFake(world));
+		return this.isSurroundedBySnow(world, x, y, z, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 
 	public boolean isSnowHere(World world, int x, int y, int z)
 	{
-		return this.isSnowHere(world, x, y, z, ModUtils.getModFake(world));
+		return this.isSnowHere(world, x, y, z, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 	// TODO gamerforEA code end
 

@@ -1,7 +1,6 @@
 package ic2.core;
 
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerWorld;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
@@ -101,7 +100,7 @@ public class ExplosionIC2 extends Explosion
 		this.destroyedBlockPositions = new long[this.mapHeight][];
 
 		// TODO gamerforEA code start
-		this.fake = new FakePlayerContainerWorld(ModUtils.profile, this.worldObj);
+		this.fake = ModUtils.NEXUS_FACTORY.wrapFake(world);
 		if (entity instanceof EntityPlayer)
 			this.fake.setRealPlayer((EntityPlayer) entity);
 		else if (igniter instanceof EntityPlayer)

@@ -1,7 +1,6 @@
 package ic2.core.item.tool;
 
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
 import cpw.mods.fml.common.registry.IThrowableEntity;
@@ -47,7 +46,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 	private int ticksInAir;
 
 	// TODO gamerforEA code start
-	public final FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.profile, this);
+	public final FakePlayerContainer fake = ModUtils.NEXUS_FACTORY.wrapFake(this);
 	// TODO gamerforEA code end
 
 	public EntityMiningLaser(World world)
@@ -108,8 +107,7 @@ public class EntityMiningLaser extends Entity implements IThrowableEntity
 		this.explosive = explosive;
 
 		// TODO gamerforEA code start
-		if (entityliving instanceof EntityPlayer)
-			this.fake.setRealPlayer((EntityPlayer) entityliving);
+		this.fake.setRealPlayer(entityliving);
 		// TODO gamerforEA code end
 	}
 

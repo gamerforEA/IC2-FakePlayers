@@ -206,7 +206,7 @@ public class ItemSprayer extends ItemIC2FluidContainer implements IBoxable
 	// TODO gamerforEA code start
 	public int sprayFoam(World world, int x, int y, int z, boolean[] directions, Target target, int maxFoamBlocks)
 	{
-		return this.sprayFoam(world, x, y, z, directions, target, maxFoamBlocks, ModUtils.getModFake(world));
+		return this.sprayFoam(world, x, y, z, directions, target, maxFoamBlocks, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 	// TODO gamerforEA code end
 

@@ -38,17 +38,17 @@ public class ItemTFBPIrrigation extends ItemTFBP
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 
 	public void createLeaves(World world, int x, int y, int z, Block oldBlock, int meta)
 	{
-		this.createLeaves(world, x, y, z, oldBlock, meta, ModUtils.getModFake(world));
+		this.createLeaves(world, x, y, z, oldBlock, meta, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 
 	public boolean spreadGrass(World world, int x, int y, int z)
 	{
-		return this.spreadGrass(world, x, y, z, ModUtils.getModFake(world));
+		return this.spreadGrass(world, x, y, z, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 	// TODO gamerforEA code end
 

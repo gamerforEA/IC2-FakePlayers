@@ -36,7 +36,7 @@ public class ItemTFBPDesertification extends ItemTFBP
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 	// TODO gamerforEA code end
 

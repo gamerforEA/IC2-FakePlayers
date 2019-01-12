@@ -41,7 +41,7 @@ minecraft {
 
 dependencies {
 	compile name: 'bukkit-1.7.10'
-	compile name: 'EventHelper-1.7-dev'
+	compile name: 'EventHelper-1.7.10-1.9-dev'
 	compile name: 'EJML-core-0.26'
 	compile name: archivesBaseName + '-' + version + '-dev'
 }

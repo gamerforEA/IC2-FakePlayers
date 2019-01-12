@@ -37,12 +37,12 @@ public class ItemTFBPMushroom extends ItemTFBP
 	@Override
 	public boolean terraform(World world, int x, int z, int yCoord)
 	{
-		return this.terraform(world, x, z, yCoord, ModUtils.getModFake(world));
+		return this.terraform(world, x, z, yCoord, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 
 	public boolean growBlockWithDependancy(World world, int x, int y, int z, Block target, Block dependancy)
 	{
-		return this.growBlockWithDependancy(world, x, y, z, target, dependancy, ModUtils.getModFake(world));
+		return this.growBlockWithDependancy(world, x, y, z, target, dependancy, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 	// TODO gamerforEA code end
 

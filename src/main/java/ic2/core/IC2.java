@@ -1,5 +1,6 @@
 package ic2.core;
 
+import com.gamerforea.eventhelper.config.ConfigUtils;
 import com.gamerforea.ic2.EventConfig;
 import cpw.mods.fml.common.IFuelHandler;
 import cpw.mods.fml.common.IWorldGenerator;
@@ -138,7 +139,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		MainConfig.load();
 
 		// TODO gamerforEA code start
-		EventConfig.init();
+		ConfigUtils.readConfig(EventConfig.class);
 		// TODO gamerforEA code end
 
 		Localization.preInit(event.getSourceFile());

@@ -1,7 +1,6 @@
 package ic2.core.item.tool;
 
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import com.gamerforea.ic2.EventConfig;
 import com.gamerforea.ic2.ModUtils;
 import cpw.mods.fml.common.registry.IThrowableEntity;
@@ -12,7 +11,6 @@ import ic2.core.util.Vector3;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -36,7 +34,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 	private Vector3[] radialTestVectors;
 
 	// TODO gamerforEA code start
-	public final FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.profile, this);
+	public final FakePlayerContainer fake = ModUtils.NEXUS_FACTORY.wrapFake(this);
 	// TODO gamerforEA code end
 
 	public EntityParticle(World world)
@@ -46,14 +44,14 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		this.lifeTime = 6000;
 	}
 
-	public EntityParticle(World world, EntityLivingBase owner1, float speed, double coreSize1, double influenceSize1)
+	public EntityParticle(World world, EntityLivingBase owner, float speed, double coreSize1, double influenceSize1)
 	{
 		this(world);
 		this.coreSize = coreSize1;
 		this.influenceSize = influenceSize1;
-		this.owner = owner1;
-		this.setPosition(owner1.posX, owner1.posY + owner1.getEyeHeight(), owner1.posZ);
-		Vector3 motion = new Vector3(owner1.getLookVec());
+		this.owner = owner;
+		this.setPosition(owner.posX, owner.posY + owner.getEyeHeight(), owner.posZ);
+		Vector3 motion = new Vector3(owner.getLookVec());
 		Vector3 ortho = motion.copy().cross(Vector3.UP).scaleTo(influenceSize1);
 		double stepAngle = Math.atan(0.5D / influenceSize1) * 2.0D;
 		int steps = (int) Math.ceil(6.283185307179586D / stepAngle);
@@ -73,8 +71,7 @@ public class EntityParticle extends Entity implements IThrowableEntity
 		this.motionZ = motion.z;
 
 		// TODO gamerforEA code start
-		if (owner1 instanceof EntityPlayer)
-			this.fake.setRealPlayer((EntityPlayer) owner1);
+		this.fake.setRealPlayer(owner);
 		// TODO gamerforEA code end
 	}
 

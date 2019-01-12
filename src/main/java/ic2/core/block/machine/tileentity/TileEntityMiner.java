@@ -214,7 +214,7 @@ public class TileEntityMiner extends TileEntityElectricMachine implements IHasGu
 		if (pipe != null && pipe.getItem() != Ic2Items.miningPipe.getItem())
 		{
 			// TODO gamerforEA code start
-			if (EventConfig.inList(EventConfig.minerBlackList, pipe))
+			if (EventConfig.minerPlaceBlackList.contains(pipe))
 				return;
 			// TODO gamerforEA code end
 

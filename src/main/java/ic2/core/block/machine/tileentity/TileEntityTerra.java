@@ -172,7 +172,7 @@ public class TileEntityTerra extends TileEntityElectricMachine
 	// TODO gamerforEA code start
 	public static boolean switchGround(World world, Block from, Block to, int x, int y, int z, boolean upwards)
 	{
-		return switchGround(world, from, to, x, y, z, upwards, ModUtils.getModFake(world));
+		return switchGround(world, from, to, x, y, z, upwards, ModUtils.NEXUS_FACTORY.getFake(world));
 	}
 	// TODO gamerforEA code end
 

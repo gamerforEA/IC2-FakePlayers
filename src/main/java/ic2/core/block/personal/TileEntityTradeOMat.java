@@ -59,7 +59,7 @@ public class TileEntityTradeOMat extends TileEntityInventory
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return !EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) && super.accepts(stack);
+				return !EventConfig.tradeOMatBlackList.contains(stack) && super.accepts(stack);
 			}
 		};
 
@@ -68,7 +68,7 @@ public class TileEntityTradeOMat extends TileEntityInventory
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return !EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) && super.accepts(stack);
+				return !EventConfig.tradeOMatBlackList.contains(stack) && super.accepts(stack);
 			}
 		};
 
@@ -77,7 +77,7 @@ public class TileEntityTradeOMat extends TileEntityInventory
 			@Override
 			public boolean accepts(ItemStack stack)
 			{
-				return !EventConfig.inList(EventConfig.tradeOMatBlackList, stack.getItem(), stack.getItemDamage()) && super.accepts(stack);
+				return !EventConfig.tradeOMatBlackList.contains(stack) && super.accepts(stack);
 			}
 		};
 		// TODO gamerforEA code end

@@ -1,176 +1,252 @@
 package com.gamerforea.ic2;
 
-import com.gamerforea.eventhelper.util.FastUtils;
-import com.google.common.collect.Sets;
-import cpw.mods.fml.common.registry.GameData;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.config.Configuration;
-
-import java.util.Set;
+import com.gamerforea.eventhelper.config.*;
+import net.minecraft.util.EnumChatFormatting;
 
 import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
+import static net.minecraftforge.common.config.Configuration.CATEGORY_SPLITTER;
 
+@Config(name = "IC2")
 public final class EventConfig
 {
-	public static final Set<String> tradeOMatBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
-	public static final Set<String> scannerBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
-	public static final Set<String> minerBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
+	private static final String CATEGORY_EVENTS = "events";
+	private static final String CATEGORY_OTHER = "other";
+	private static final String CATEGORY_PERFORMANCE = "performance";
+	private static final String CATEGORY_ENERGY = "energy";
+	private static final String CATEGORY_LASER = "laser";
+	private static final String CATEGORY_LASER_ENERGY = CATEGORY_LASER + CATEGORY_SPLITTER + CATEGORY_ENERGY;
+	private static final String CATEGORY_WIND_ROTORS = "windRotors";
+	private static final String CATEGORY_BLACKLISTS = "blacklists";
 
+	@ConfigItemBlockList(name = "tradeOMat",
+						 category = CATEGORY_BLACKLISTS,
+						 comment = "Чёрный список предметов для Обменного аппарата",
+						 oldName = "tradeOMatBlackList")
+	public static final ItemBlockList tradeOMatBlackList = new ItemBlockList(true);
+
+	@ConfigItemBlockList(name = "scanner",
+						 category = CATEGORY_BLACKLISTS,
+						 comment = "Чёрный список предметов для Сканера",
+						 oldName = "scannerBlackList")
+	public static final ItemBlockList scannerBlackList = new ItemBlockList(true);
+
+	@ConfigItemBlockList(name = "minerPlace",
+						 category = CATEGORY_BLACKLISTS,
+						 comment = "Чёрный список устанавливаемых блоков для Буровой установки",
+						 oldName = "minerBlackList")
+	public static final ItemBlockList minerPlaceBlackList = new ItemBlockList(true);
+
+	@ConfigItemBlockList(name = "minerBreak",
+						 category = CATEGORY_BLACKLISTS,
+						 comment = "Чёрный список разрушаемых блоков для Буровой установки",
+						 oldName = "minerBreakBlackList")
+	public static final ItemBlockList minerBreakBlackList = new ItemBlockList(true);
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Терраформер (работа только в привате)",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean terraRegionOnly = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Терраформер (замена/установка блоков)",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean terraEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS, comment = "Помпа (выкачивание жидкости)", oldCategory = CATEGORY_GENERAL)
 	public static boolean pumpEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Буровая установка (разрушение блоков)",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean minerEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Продвинутая буровая установка (разрушение блоков)",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean advminerEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Катушка Теслы (урон по мобам)",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean teslaEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Пульверизатор (установка блоков)",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean sprayerEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Шахтёрский лазер (разрушение блоков и урон по мобам)",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean laserEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS, comment = "Плазменная пушка (взрыв)", oldCategory = CATEGORY_GENERAL)
 	public static boolean plasmaEvent = true;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS,
+				   comment = "Взрывы (разрушение блоков только в привате)",
+				   oldCategory = CATEGORY_OTHER)
+	public static boolean explosionRegionOnly = false;
+
+	@ConfigBoolean(category = CATEGORY_EVENTS, comment = "Взрывы (разрушение блоков)", oldCategory = CATEGORY_GENERAL)
 	public static boolean explosionEvent = true;
 
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Плазменная пушка")
 	public static boolean plasmaEnabled = false;
+
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Радиация")
 	public static boolean radiationEnabled = false;
+
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Взрывы")
 	public static boolean explosionEnabled = false;
-	public static boolean explosionRegionOnly = false;
-	public static boolean laserscatterEnabled = true;
+
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Комбинирование эффектов от выпивки")
 	public static boolean boozeCombineEffectEnabled = false;
+
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Дроп предметов из Утильсырья")
 	public static boolean scrapboxDropEnabled = true;
+
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Установка блоков Буровой установкой")
 	public static boolean minerPlacingEnabled = false;
 
-	public static String safeAccessPermission = "ic2.accesssafe";
-	public static boolean skipTicks = false;
-	public static int skipTicksAmount = 1;
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Автоматическая привязка Торгового аппарата к владельцу")
+	public static boolean autoTradeOMatPrivateEnabled = true;
+
+	@ConfigBoolean(category = CATEGORY_OTHER,
+				   comment = "Возможность пользоваться Торговым аппаратом одновременно лишь одним человеком")
 	public static boolean tradeOMatOnePlayer = true;
 
-	public static int laserMining = 1250;
-	public static int laserLowFocus = 100;
-	public static int laserLongRange = 5000;
-	public static int laserHorizontal = 3000;
-	public static int laserSuperHeat = 2500;
-	public static int laserScatter = 10000;
-	public static int laserExplosive = 5000;
-	public static boolean laserBreakBlock = true;
+	@ConfigString(category = CATEGORY_OTHER,
+				   comment = "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)")
+	public static String safeAccessPermission = "ic2.accesssafe";
 
+	@ConfigBoolean(category = CATEGORY_OTHER,
+				   comment = "Проверки корректности выполнения операций при работе с жидкостямии (может вызывать краши)")
+	public static boolean liquidChecks = true;
+
+	@ConfigInt(category = CATEGORY_OTHER,
+			   comment = "Максимальное количество Ускорителей в механизме (0 - без ограничений)",
+			   min = 0)
+	public static int maxOverclockerCount = 0;
+
+	@ConfigInt(category = CATEGORY_WIND_ROTORS, comment = "Урон ветровым роторам в тик", min = 0)
+	public static int windRotorDamage = 1;
+
+	@ConfigInt(category = CATEGORY_WIND_ROTORS,
+			   comment = "Минимальное расстояние в блоках между лопастями роторов",
+			   min = 0)
+	public static int additionalWindRotorRadius = 0;
+
+	@ConfigFloat(category = CATEGORY_ENERGY,
+				 comment = "Множитель энергии Буровой установки",
+				 min = 0,
+				 oldCategory = "miner")
 	public static float minerEnergyMultiplier = 1;
+
+	@ConfigFloat(category = CATEGORY_ENERGY,
+				 comment = "Множитель энергии Продвинутой буровой установки",
+				 min = 0,
+				 oldCategory = "miner")
 	public static float advMinerEnergyMultiplier = 1;
 
-	public static int windRotorDamage = 1;
-	public static int additionalWindRotorRadius = 0;
+	@ConfigFloat(category = CATEGORY_ENERGY, comment = "Множитель энергии Реактора", min = 0, oldCategory = "reactor")
+	public static float reactorEnergyMultiplier = 1;
+
+	@ConfigBoolean(category = CATEGORY_PERFORMANCE,
+				   comment = "Пропускать тики при обработки энергосетей",
+				   oldCategory = CATEGORY_OTHER)
+	public static boolean skipTicks = false;
+
+	@ConfigInt(category = CATEGORY_PERFORMANCE,
+			   comment = "Количество пропускаемых тиков",
+			   oldCategory = CATEGORY_OTHER,
+			   min = 1)
+	public static int skipTicksAmount = 1;
+
+	@ConfigBoolean(category = CATEGORY_PERFORMANCE,
+				   comment = "Оптимизация Ветрогенератора",
+				   oldCategory = CATEGORY_OTHER)
+	public static boolean optimizeWindGenerator = false;
+
+	@ConfigInt(name = "mining",
+			   category = CATEGORY_LASER_ENERGY,
+			   comment = "Энергия для режима 'Добыча'",
+			   min = 1,
+			   oldName = "laserMining",
+			   oldCategory = CATEGORY_LASER)
+	public static int laserMining = 1250;
+
+	@ConfigInt(name = "focus",
+			   category = CATEGORY_LASER_ENERGY,
+			   comment = "Энергия для режима 'Короткого фокуса'",
+			   min = 1,
+			   oldName = "laserLowFocus",
+			   oldCategory = CATEGORY_LASER)
+	public static int laserLowFocus = 100;
+
+	@ConfigInt(name = "longRange",
+			   category = CATEGORY_LASER_ENERGY,
+			   comment = "Энергия для режима 'Дальнего действия'",
+			   min = 1,
+			   oldName = "laserLongRange",
+			   oldCategory = CATEGORY_LASER)
+	public static int laserLongRange = 5000;
+
+	@ConfigInt(name = "horizontal",
+			   category = CATEGORY_LASER_ENERGY,
+			   comment = "Энергия для режима 'Горизонтальный'",
+			   min = 1,
+			   oldName = "laserHorizontal",
+			   oldCategory = CATEGORY_LASER)
+	public static int laserHorizontal = 3000;
+
+	@ConfigInt(name = "superHeat",
+			   category = CATEGORY_LASER_ENERGY,
+			   comment = "Энергия для режима 'Перегревающий'",
+			   min = 1,
+			   oldName = "laserSuperHeat",
+			   oldCategory = CATEGORY_LASER)
+	public static int laserSuperHeat = 2500;
+
+	@ConfigInt(name = "scatter",
+			   category = CATEGORY_LASER_ENERGY,
+			   comment = "Энергия для режима 'Разброс'",
+			   min = 1,
+			   oldName = "laserScatter",
+			   oldCategory = CATEGORY_LASER)
+	public static int laserScatter = 10000;
+
+	@ConfigInt(name = "explosive",
+			   category = CATEGORY_LASER_ENERGY,
+			   comment = "Энергия для режима 'Взрывоопасный'",
+			   min = 1,
+			   oldName = "laserExplosive",
+			   oldCategory = CATEGORY_LASER)
+	public static int laserExplosive = 5000;
+
+	@ConfigBoolean(name = "breakBlock", category = CATEGORY_LASER, comment = "Разрушение блоков Шахтёрским лазером", oldName = "laserBreakBlock")
+	public static boolean laserBreakBlock = true;
+
+	@ConfigInt(name = "maxBreakY",
+			   category = CATEGORY_LASER,
+			   comment = "Максимальная высота, на которой может работать Шахтёрский лазер",
+			   min = 1, oldName = "laserMaxBreakY")
+	public static int laserMaxBreakY = 255;
+
+	@ConfigBoolean(name = "scatterEnabled",
+				   category = CATEGORY_LASER,
+				   comment = "Шахтёрский лазер (режим 'Разброс')",
+				   oldName = "laserscatterEnabled")
+	public static boolean laserScatterEnabled = true;
+
+	@ConfigString(name = "maxBreakYWarnMsg",
+				  category = CATEGORY_LASER,
+				  comment = "Предупреждение, отправляемое игроку при попытке использовать Шахтёрский лазер выше максимальной высоты",
+				  oldName = "laserMaxBreakYWarnMsg")
+	public static String laserMaxBreakYWarnMsg = EnumChatFormatting.RED + "Шахтёрский лазер нельзя использовать на высоте выше %d";
 
 	static
 	{
-		init();
-	}
-
-	public static void init()
-	{
-		try
-		{
-			Configuration cfg = FastUtils.getConfig("IC2");
-
-			String c = CATEGORY_GENERAL;
-			terraRegionOnly = cfg.getBoolean("terraRegionOnly", c, terraRegionOnly, "Терраформер (работа только в привате)");
-			terraEvent = cfg.getBoolean("terraEvent", c, terraEvent, "Терраформер (замена/установка блоков)");
-			pumpEvent = cfg.getBoolean("pumpEvent", c, pumpEvent, "Помпа (выкачивание жидкости)");
-			minerEvent = cfg.getBoolean("minerEvent", c, minerEvent, "Буровая установка (разрушение блоков)");
-			advminerEvent = cfg.getBoolean("advMinerEvent", c, advminerEvent, "Продвинутая буровая установка (разрушение блоков)");
-			teslaEvent = cfg.getBoolean("teslaEvent", c, teslaEvent, "Катушка Теслы (урон по мобам)");
-			sprayerEvent = cfg.getBoolean("sprayerEvent", c, sprayerEvent, "Пульверизатор (установка блоков)");
-			laserEvent = cfg.getBoolean("laserEvent", c, laserEvent, "Шахтёрский лазер (разрушение блоков и урон по мобам)");
-			plasmaEvent = cfg.getBoolean("plasmaEvent", c, plasmaEvent, "Плазменная пушка (взрыв)");
-			explosionEvent = cfg.getBoolean("explosionEvent", c, explosionEvent, "Взрывы (разрушение блоков)");
-
-			plasmaEnabled = cfg.getBoolean("plasmaEnabled", "other", plasmaEnabled, "Плазменная пушка");
-			radiationEnabled = cfg.getBoolean("radiationEnabled", "other", radiationEnabled, "Радиация");
-			explosionEnabled = cfg.getBoolean("explosionEnabled", "other", explosionEnabled, "Взрывы");
-			explosionRegionOnly = cfg.getBoolean("explosionRegionOnly", "other", explosionRegionOnly, "Взрывы только в приватах");
-			laserscatterEnabled = cfg.getBoolean("laserscatterEnabled", "other", laserscatterEnabled, "Шахтёрский лазер (режим \"Разброс\")");
-			boozeCombineEffectEnabled = cfg.getBoolean("boozeCombineEffectEnabled", "other", boozeCombineEffectEnabled, "Комбинирование эффектов от выпивки");
-			scrapboxDropEnabled = cfg.getBoolean("scrapbosDropEnabled", "other", scrapboxDropEnabled, "Дроп предметов из Утильсырья");
-			minerPlacingEnabled = cfg.getBoolean("minerPlacingEnabled", "other", minerPlacingEnabled, "Установка блоков Буровой установкой");
-
-			safeAccessPermission = cfg.getString("safeAccessPermission", "other", safeAccessPermission, "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)");
-			skipTicks = cfg.getBoolean("skipTicks", "other", skipTicks, "Пропускать тики при обработки энергосетей");
-			skipTicksAmount = cfg.getInt("skipTicksAmount", "other", skipTicksAmount, 1, Integer.MAX_VALUE, "Количество пропускаемых тиков");
-			tradeOMatOnePlayer = cfg.getBoolean("tradeOMatOnePlayer", "other", tradeOMatOnePlayer, "Возможность пользоваться Торговым аппаратом одновременно лишь одним человеком");
-
-			laserMining = cfg.getInt("laserMining", "laser", laserMining, 1, Integer.MAX_VALUE, "Энергия для режима Короткого фокуса");
-			laserLowFocus = cfg.getInt("laserLowFocus", "laser", laserLowFocus, 1, Integer.MAX_VALUE, "Энергия для режима Короткого фокуса");
-			laserLongRange = cfg.getInt("laserLongRange", "laser", laserLongRange, 1, Integer.MAX_VALUE, "Энергия для режима Дальнего действия");
-			laserHorizontal = cfg.getInt("laserHorizontal", "laser", laserHorizontal, 1, Integer.MAX_VALUE, "Энергия для режима Горизонтальный");
-			laserSuperHeat = cfg.getInt("laserSuperHeat", "laser", laserSuperHeat, 1, Integer.MAX_VALUE, "Энергия для режима Перегревающий");
-			laserScatter = cfg.getInt("laserScatter", "laser", laserScatter, 1, Integer.MAX_VALUE, "Энергия для режима Разброс");
-			laserExplosive = cfg.getInt("laserExplosive", "laser", laserExplosive, 1, Integer.MAX_VALUE, "Энергия для режима Взрывоопасный");
-			laserBreakBlock = cfg.getBoolean("laserBreakBlock", "laser", laserBreakBlock, "Разрушение блоков Шахтёрским лазером");
-
-			minerEnergyMultiplier = cfg.getFloat("minerEnergyMultiplier", "miner", minerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Буровой установки");
-			advMinerEnergyMultiplier = cfg.getFloat("advMinerEnergyMultiplier", "miner", advMinerEnergyMultiplier, 0, Float.MAX_VALUE, "Множитель энергии Продвинутой буровой установки");
-
-			windRotorDamage = cfg.getInt("windRotorDamage", "windRotors", windRotorDamage, 0, Integer.MAX_VALUE, "Урон ветровым роторам в тик");
-			additionalWindRotorRadius = cfg.getInt("additionalWindRotorRadius", "windRotors", additionalWindRotorRadius, 0, Integer.MAX_VALUE, "Минимальное расстояние в блоках между лопастями роторов");
-
-			readStringSet(cfg, "tradeOMatBlackList", "blacklists", "Чёрный список предметов для Обменного аппарата", tradeOMatBlackList);
-			readStringSet(cfg, "scannerBlackList", "blacklists", "Чёрный список предметов для Сканера", scannerBlackList);
-			readStringSet(cfg, "minerBlackList", "blacklists", "Чёрный список устанавливаемых блоков для Буровой установки", minerBlackList);
-
-			cfg.save();
-		}
-		catch (Throwable throwable)
-		{
-			System.err.println("Failed load config. Use default values.");
-			throwable.printStackTrace();
-		}
-	}
-
-	public static boolean inList(Set<String> list, ItemStack stack)
-	{
-		return stack != null && inList(list, stack.getItem(), stack.getItemDamage());
-	}
-
-	public static boolean inList(Set<String> list, Item item, int meta)
-	{
-		if (item instanceof ItemBlock)
-			return inList(list, ((ItemBlock) item).field_150939_a, meta);
-
-		return inList(list, getId(item), meta);
-	}
-
-	public static boolean inList(Set<String> list, Block block, int meta)
-	{
-		return inList(list, getId(block), meta);
-	}
-
-	private static boolean inList(Set<String> list, String id, int meta)
-	{
-		return id != null && (list.contains(id) || list.contains(id + ':' + meta));
-	}
-
-	private static void readStringSet(Configuration cfg, String name, String category, String comment, Set<String> def)
-	{
-		Set<String> temp = getStringSet(cfg, name, category, comment, def);
-		def.clear();
-		def.addAll(temp);
-	}
-
-	private static Set<String> getStringSet(Configuration cfg, String name, String category, String comment, Set<String> def)
-	{
-		return getStringSet(cfg, name, category, comment, def.toArray(new String[def.size()]));
-	}
-
-	private static Set<String> getStringSet(Configuration cfg, String name, String category, String comment, String... def)
-	{
-		return Sets.newHashSet(cfg.getStringList(name, category, def, comment));
-	}
-
-	private static String getId(Item item)
-	{
-		return GameData.getItemRegistry().getNameForObject(item);
-	}
-
-	private static String getId(Block block)
-	{
-		return GameData.getBlockRegistry().getNameForObject(block);
+		ConfigUtils.readConfig(EventConfig.class);
 	}
 }
