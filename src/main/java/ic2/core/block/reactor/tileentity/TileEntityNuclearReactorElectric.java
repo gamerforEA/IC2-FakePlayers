@@ -742,6 +742,10 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 	@Override
 	public float addOutput(float energy)
 	{
+		// TODO gamerforEA code start
+		energy *= EventConfig.reactorEnergyMultiplier;
+		// TODO gamerforEA code end
+
 		return this.output += energy;
 	}
 
