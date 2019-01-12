@@ -1,5 +1,6 @@
 package ic2.core.block.reactor.tileentity;
 
+import com.gamerforea.ic2.EventConfig;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
@@ -30,7 +31,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -196,7 +196,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 	{
 		if (this.subTiles == null)
 		{
-			this.subTiles = new ArrayList();
+			this.subTiles = new ArrayList<>();
 			this.subTiles.add(this);
 
 			for (Direction dir : Direction.directions)
@@ -410,12 +410,15 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 
 				if (power >= 0.7F)
 				{
-					List list1 = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 3, this.yCoord - 3, this.zCoord - 3, this.xCoord + 4, this.yCoord + 4, this.zCoord + 4));
-
-					for (int l = 0; l < list1.size(); ++l)
+					List<EntityLivingBase> entities = this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(this.xCoord - 3, this.yCoord - 3, this.zCoord - 3, this.xCoord + 4, this.yCoord + 4, this.zCoord + 4));
+					for (EntityLivingBase entity : entities)
 					{
-						Entity ent = (Entity) list1.get(l);
-						ent.attackEntityFrom(IC2DamageSource.radiation, (int) (this.worldObj.rand.nextInt(4) * this.hem));
+						// TODO gamerforEA code start
+						if (this.fake.cantDamage(entity))
+							continue;
+						// TODO gamerforEA code end
+
+						entity.attackEntityFrom(IC2DamageSource.radiation, (int) (this.worldObj.rand.nextInt(4) * this.hem));
 					}
 				}
 
@@ -425,7 +428,8 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 					if (coord != null)
 					{
 						Block block = this.worldObj.getBlock(coord[0], coord[1], coord[2]);
-						if (block.getMaterial() == Material.water)
+						// TODO gamerforEA add condition [2]
+						if (block.getMaterial() == Material.water && !this.fake.cantBreak(coord[0], coord[1], coord[2]))
 							this.worldObj.setBlockToAir(coord[0], coord[1], coord[2]);
 					}
 				}
@@ -683,7 +687,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 		}
 
 		boomPower = boomPower * this.hem * boomMod;
-		IC2.log.log(LogCategory.PlayerActivity, Level.INFO, "Nuclear Reactor at %s melted (raw explosion power %f)", Util.formatPosition(this), Float.valueOf(boomPower));
+		IC2.log.log(LogCategory.PlayerActivity, Level.INFO, "Nuclear Reactor at %s melted (raw explosion power %f)", Util.formatPosition(this), boomPower);
 		boomPower = Math.min(boomPower, ConfigUtil.getFloat(MainConfig.get(), "protection/reactorExplosionPowerLimit"));
 
 		for (Direction direction : Direction.directions)
@@ -753,7 +757,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 	{
 		if (!this.coolantinputSlot.isEmpty())
 		{
-			MutableObject<ItemStack> output = new MutableObject();
+			MutableObject<ItemStack> output = new MutableObject<>();
 			if (this.coolantinputSlot.transferToTank(this.inputTank, output, simulate) && (output.getValue() == null || this.coolantoutputSlot.canAdd(output.getValue())))
 			{
 				if (output.getValue() == null)
@@ -770,7 +774,7 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 	{
 		if (!this.hotcoolinputSlot.isEmpty())
 		{
-			MutableObject<ItemStack> output = new MutableObject();
+			MutableObject<ItemStack> output = new MutableObject<>();
 			if (this.hotcoolinputSlot.transferFromTank(this.outputTank, output, simulate) && (output.getValue() == null || this.hotcoolantoutputSlot.canAdd(output.getValue())))
 			{
 				if (output.getValue() == null)
@@ -807,16 +811,32 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 						for (int zoffset = 1; zoffset < 4; ++zoffset)
 						{
 							if (this.surroundings[xoffset][yoffset][zoffset] instanceof BlockAir)
+							{
+								int x = xoffset + this.xCoord - 2;
+								int y = yoffset + this.yCoord - 2;
+								int z = zoffset + this.zCoord - 2;
+
 								if (this.inputTank.getFluidAmount() >= 1000)
 								{
-									this.worldObj.setBlock(xoffset + this.xCoord - 2, yoffset + this.yCoord - 2, zoffset + this.zCoord - 2, this.inputTank.getFluid().getFluid().getBlock());
+									// TODO gamerforEA code start
+									if (this.fake.cantBreak(x, y, z))
+										continue;
+									// TODO gamerforEA code end
+
+									this.worldObj.setBlock(x, y, z, this.inputTank.getFluid().getFluid().getBlock());
 									this.inputTank.drain(1000, true);
 								}
 								else if (this.outputTank.getFluidAmount() >= 1000)
 								{
-									this.worldObj.setBlock(xoffset + this.xCoord - 2, yoffset + this.yCoord - 2, zoffset + this.zCoord - 2, this.outputTank.getFluid().getFluid().getBlock());
+									// TODO gamerforEA code start
+									if (this.fake.cantBreak(x, y, z))
+										continue;
+									// TODO gamerforEA code end
+
+									this.worldObj.setBlock(x, y, z, this.outputTank.getFluid().getFluid().getBlock());
 									this.outputTank.drain(1000, true);
 								}
+							}
 						}
 					}
 				}
@@ -841,14 +861,28 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 				{
 					for (int zoffset = 1; zoffset < 4; ++zoffset)
 					{
+						int x = xoffset + this.xCoord - 2;
+						int y = yoffset + this.yCoord - 2;
+						int z = zoffset + this.zCoord - 2;
+
 						if (this.surroundings[xoffset][yoffset][zoffset] == coolantBlock)
 						{
-							this.worldObj.setBlock(xoffset + this.xCoord - 2, yoffset + this.yCoord - 2, zoffset + this.zCoord - 2, Blocks.air);
+							// TODO gamerforEA code start
+							if (this.fake.cantBreak(x, y, z))
+								continue;
+							// TODO gamerforEA code end
+
+							this.worldObj.setBlock(x, y, z, Blocks.air);
 							this.inputTank.fill(new FluidStack(coolantFluid, 1000), true);
 						}
 						else if (this.surroundings[xoffset][yoffset][zoffset] == hotCoolantBlock)
 						{
-							this.worldObj.setBlock(xoffset + this.xCoord - 2, yoffset + this.yCoord - 2, zoffset + this.zCoord - 2, Blocks.air);
+							// TODO gamerforEA code start
+							if (this.fake.cantBreak(x, y, z))
+								continue;
+							// TODO gamerforEA code end
+
+							this.worldObj.setBlock(x, y, z, Blocks.air);
 							this.outputTank.fill(new FluidStack(hotCoolantFluid, 1000), true);
 						}
 					}
