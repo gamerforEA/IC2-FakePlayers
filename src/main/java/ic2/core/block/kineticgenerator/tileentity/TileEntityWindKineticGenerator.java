@@ -1,6 +1,8 @@
 package ic2.core.block.kineticgenerator.tileentity;
 
 import com.gamerforea.ic2.EventConfig;
+import com.gamerforea.ic2.LazyChunkCache;
+import com.google.common.base.Preconditions;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.energy.tile.IKineticSource;
@@ -25,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.ChunkCache;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.List;
@@ -48,34 +51,29 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		super.updateEntityServer();
 		if (this.updateTicker++ % this.getTickRate() == 0)
 		{
-			boolean needsInvUpdate = false;
+			boolean needsInvUpdate;
 			if (!this.rotorSlot.isEmpty())
-			{
-				if (this.checkSpace(1, true) == 0)
+				// TODO gamerforEA code replace, old code:
+				// if (this.checkSpace(1, true) == 0)
+				if (this.checkSpace(1, true, 1) == 0)
+				// TODO gamerforEA code end
 				{
 					if (!this.getActive())
-					{
 						this.setActive(true);
-					}
 
 					needsInvUpdate = true;
 				}
 				else
 				{
 					if (this.getActive())
-					{
 						this.setActive(false);
-					}
 
 					needsInvUpdate = true;
 				}
-			}
 			else
 			{
 				if (this.getActive())
-				{
 					this.setActive(false);
-				}
 
 				needsInvUpdate = true;
 			}
@@ -86,9 +84,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 				this.crossSection *= this.crossSection;
 				this.obstructedCrossSection = this.checkSpace(this.getRotorDiameter() * 3, false);
 				if (this.obstructedCrossSection > 0 && this.obstructedCrossSection <= (this.getRotorDiameter() + 1) / 2)
-				{
 					this.obstructedCrossSection = 0;
-				}
 
 				if (this.obstructedCrossSection < 0)
 				{
@@ -118,9 +114,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 			}
 
 			if (needsInvUpdate)
-			{
 				this.markDirty();
-			}
 
 		}
 	}
@@ -167,7 +161,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 
 	public String getRotorhealth()
 	{
-		return !this.rotorSlot.isEmpty() ? StatCollector.translateToLocalFormatted("ic2.WindKineticGenerator.gui.rotorhealth", Integer.valueOf((int) (100.0F - (float) this.rotorSlot.get().getItemDamage() / (float) this.rotorSlot.get().getMaxDamage() * 100.0F))) : "";
+		return !this.rotorSlot.isEmpty() ? StatCollector.translateToLocalFormatted("ic2.WindKineticGenerator.gui.rotorhealth", (int) (100.0F - (float) this.rotorSlot.get().getItemDamage() / (float) this.rotorSlot.get().getMaxDamage() * 100.0F)) : "";
 	}
 
 	@Override
@@ -199,8 +193,20 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		return pass == 0;
 	}
 
+	// TODO gamerforEA code end
 	public int checkSpace(int length, boolean onlyrotor)
 	{
+		return this.checkSpace(length, onlyrotor, Integer.MAX_VALUE);
+	}
+	// TODO gamerforEA code end
+
+	// TODO gamerforEA add
+	public int checkSpace(int length, boolean onlyrotor, int maxOccupiedCount)
+	{
+		// TODO gamerforEA code start
+		Preconditions.checkArgument(maxOccupiedCount > 0);
+		// TODO gamerforEA code end
+
 		int box = this.getRotorDiameter() / 2;
 		int lentemp = 0;
 		if (onlyrotor)
@@ -210,16 +216,22 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		}
 
 		if (!onlyrotor)
-		{
 			box *= 2;
-		}
 
 		ForgeDirection fwdDir = ForgeDirection.VALID_DIRECTIONS[this.getFacing()];
 		ForgeDirection rightDir = fwdDir.getRotation(ForgeDirection.DOWN);
 		int xMaxDist = Math.abs(length * fwdDir.offsetX + box * rightDir.offsetX);
 		int zMaxDist = Math.abs(length * fwdDir.offsetZ + box * rightDir.offsetZ);
-		ChunkCache chunkCache = new ChunkCache(this.worldObj, this.xCoord - xMaxDist, this.yCoord - box, this.zCoord - zMaxDist, this.xCoord + xMaxDist, this.yCoord + box, this.zCoord + zMaxDist, 0);
-		int ret = 0;
+		int occupiedCount = 0;
+
+		// TODO gamerforEA code replace, old code:
+		// ChunkCache chunkCache = new ChunkCache(this.worldObj, this.xCoord - xMaxDist, this.yCoord - box, this.zCoord - zMaxDist, this.xCoord + xMaxDist, this.yCoord + box, this.zCoord + zMaxDist, 0);
+		IBlockAccess chunkCache;
+		if (EventConfig.optimizeWindGenerator)
+			chunkCache = new LazyChunkCache(this.worldObj, this.xCoord - xMaxDist, this.yCoord - box, this.zCoord - zMaxDist, this.xCoord + xMaxDist, this.yCoord + box, this.zCoord + zMaxDist, false);
+		else
+			chunkCache = new ChunkCache(this.worldObj, this.xCoord - xMaxDist, this.yCoord - box, this.zCoord - zMaxDist, this.xCoord + xMaxDist, this.yCoord + box, this.zCoord + zMaxDist, 0);
+		// TODO gamerforEA code end
 
 		for (int up = -box; up <= box; ++up)
 		{
@@ -235,28 +247,36 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 					int z = this.zCoord + fwd * fwdDir.offsetZ + right * rightDir.offsetZ;
 
 					assert Math.abs(x - this.xCoord) <= xMaxDist;
-
 					assert Math.abs(z - this.zCoord) <= zMaxDist;
 
 					Block block = chunkCache.getBlock(x, y, z);
 					if (!block.isAir(chunkCache, x, y, z))
 					{
 						occupied = true;
+
+						// TODO gamerforEA code start
+						if (onlyrotor)
+							break;
+						// TODO gamerforEA code end
+
 						if ((up != 0 || right != 0 || fwd != 0) && chunkCache.getTileEntity(x, y, z) instanceof TileEntityWindKineticGenerator && !onlyrotor)
-						{
 							return -1;
-						}
 					}
 				}
 
 				if (occupied)
 				{
-					++ret;
+					++occupiedCount;
+
+					// TODO gamerforEA code start
+					if (occupiedCount >= maxOccupiedCount)
+						return occupiedCount;
+					// TODO gamerforEA code end
 				}
 			}
 		}
 
-		return ret;
+		return occupiedCount;
 	}
 
 	public boolean checkrotor()
@@ -266,7 +286,10 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 
 	public boolean rotorspace()
 	{
-		return this.checkSpace(1, true) == 0;
+		// TODO gamerforEA code replace, old code:
+		// return this.checkSpace(1, true) == 0;
+		return this.checkSpace(1, true, 1) == 0;
+		// TODO gamerforEA code end
 	}
 
 	private void setRotationSpeed(float speed)
@@ -298,10 +321,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 			long period = (long) (5.0E8F / this.rotationSpeed);
 			return (float) (System.nanoTime() % period) / (float) period * 360.0F;
 		}
-		else
-		{
-			return 0.0F;
-		}
+		return 0.0F;
 	}
 
 	public float getefficiency()
@@ -358,9 +378,7 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 	public void setActive(boolean active)
 	{
 		if (active != this.getActive())
-		{
 			IC2.network.get().updateTileEntityField(this, "rotorSlot");
-		}
 
 		super.setActive(active);
 	}
