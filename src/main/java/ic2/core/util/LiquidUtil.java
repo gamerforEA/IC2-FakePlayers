@@ -138,8 +138,7 @@ public class LiquidUtil
 
 	public static int distributeTo(IFluidHandler target, FluidStack stack, Direction dirTo, boolean simulate)
 	{
-		int amount = target.fill(dirTo.getInverse().toForgeDirection(), stack, !simulate);
-		return amount;
+		return target.fill(dirTo.getInverse().toForgeDirection(), stack, !simulate);
 	}
 
 	public static int distributeAll(IFluidHandler source, int amount)

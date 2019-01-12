@@ -156,7 +156,7 @@ public class ItemScrapbox extends ItemIC2
 		Drop(ItemStack item1, float chance)
 		{
 			this.item = item1;
-			this.originalChance = Float.valueOf(chance);
+			this.originalChance = chance;
 			this.upperChanceBound = topChance += chance;
 		}
 	}
@@ -176,36 +176,34 @@ public class ItemScrapbox extends ItemIC2
 		{
 			if (this.drops.isEmpty())
 				return null;
-			else
+
+			if (adjustInput)
+				--input.stackSize;
+
+			float chance = IC2.random.nextFloat() * ItemScrapbox.Drop.topChance;
+			int low = 0;
+			int high = this.drops.size() - 1;
+
+			while (low < high)
 			{
-				if (adjustInput)
-					--input.stackSize;
-
-				float chance = IC2.random.nextFloat() * ItemScrapbox.Drop.topChance;
-				int low = 0;
-				int high = this.drops.size() - 1;
-
-				while (low < high)
-				{
-					int mid = (high + low) / 2;
-					if (chance < this.drops.get(mid).upperChanceBound)
-						high = mid;
-					else
-						low = mid + 1;
-				}
-
-				return this.drops.get(low).item.copy();
+				int mid = (high + low) / 2;
+				if (chance < this.drops.get(mid).upperChanceBound)
+					high = mid;
+				else
+					low = mid + 1;
 			}
+
+			return this.drops.get(low).item.copy();
 		}
 
 		@Override
 		public Map<ItemStack, Float> getDrops()
 		{
-			Map<ItemStack, Float> ret = new HashMap(this.drops.size());
+			Map<ItemStack, Float> ret = new HashMap<>(this.drops.size());
 
 			for (ItemScrapbox.Drop drop : this.drops)
 			{
-				ret.put(drop.item, Float.valueOf(drop.originalChance.floatValue() / ItemScrapbox.Drop.topChance));
+				ret.put(drop.item, drop.originalChance / Drop.topChance);
 			}
 
 			return ret;

@@ -282,25 +282,19 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory
 	{
 		if (!this.canFill(from, resource.getFluid()))
 			return 0;
-		else if (resource.getFluid() != BlocksItems.getFluid(InternalName.fluidSteam) && resource.getFluid() != BlocksItems.getFluid(InternalName.fluidSuperheatedSteam))
+		if (resource.getFluid() != BlocksItems.getFluid(InternalName.fluidSteam) && resource.getFluid() != BlocksItems.getFluid(InternalName.fluidSuperheatedSteam))
 		{
 			if (resource.getFluid() != FluidRegistry.WATER && resource.getFluid() != BlocksItems.getFluid(InternalName.fluidDistilledWater))
 				return 0;
-			else
-			{
-				if (this.distilledwaterTank.getFluid() != null && this.distilledwaterTank.getFluid().getFluid() != resource.getFluid())
-					this.distilledwaterTank.drain(this.distilledwaterTank.getFluidAmount(), true);
+			if (this.distilledwaterTank.getFluid() != null && this.distilledwaterTank.getFluid().getFluid() != resource.getFluid())
+				this.distilledwaterTank.drain(this.distilledwaterTank.getFluidAmount(), true);
 
-				return this.distilledwaterTank.fill(resource, doFill);
-			}
+			return this.distilledwaterTank.fill(resource, doFill);
 		}
-		else
-		{
-			if (this.SteamTank.getFluid() != null && this.SteamTank.getFluid().getFluid() != resource.getFluid())
-				this.SteamTank.drain(this.SteamTank.getFluidAmount(), true);
+		if (this.SteamTank.getFluid() != null && this.SteamTank.getFluid().getFluid() != resource.getFluid())
+			this.SteamTank.drain(this.SteamTank.getFluidAmount(), true);
 
-			return this.SteamTank.fill(resource, doFill);
-		}
+		return this.SteamTank.fill(resource, doFill);
 	}
 
 	@Override
@@ -329,22 +323,18 @@ public class TileEntitySteamKineticGenerator extends TileEntityInventory
 			FluidStack fs = this.distilledwaterTank.getFluid();
 			return fs != null && fs.getFluid() == fluid;
 		}
-		else
-			return false;
+		return false;
 	}
 
 	public int gaugeLiquidScaled(int i, int tank)
 	{
-		switch (tank)
+		if (tank == 0)
 		{
-			case 0:
-				if (this.distilledwaterTank.getFluidAmount() <= 0)
-					return 0;
-
-				return this.distilledwaterTank.getFluidAmount() * i / this.distilledwaterTank.getCapacity();
-			default:
-				return 0;
+			int fluidAmount = this.distilledwaterTank.getFluidAmount();
+			if (fluidAmount > 0)
+				return fluidAmount * i / this.distilledwaterTank.getCapacity();
 		}
+		return 0;
 	}
 
 	@Override

@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.zip.DeflaterOutputStream;
@@ -137,13 +138,12 @@ public class NetworkManager
 			IC2.log.warn(LogCategory.Network, "Can\'t find field %s in %s.", fieldName, cls.getName());
 			return null;
 		}
-		else if (field.getAnnotation(ClientModifiable.class) == null)
+		if (field.getAnnotation(ClientModifiable.class) == null)
 		{
 			IC2.log.warn(LogCategory.Network, "The field %s in %s is not modifiable.", fieldName, cls.getName());
 			return null;
 		}
-		else
-			return field;
+		return field;
 	}
 
 	public void updateTileEntityFieldTo(TileEntity te, String field, EntityPlayerMP player)
@@ -160,30 +160,28 @@ public class NetworkManager
 
 		if (player.worldObj != te.getWorldObj())
 			throw new IllegalArgumentException("mismatched world (te " + te.getWorldObj() + ", player " + player.worldObj + ")");
-		else
+
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream(64);
+		DataOutputStream os = new DataOutputStream(buffer);
+
+		try
 		{
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream(64);
-			DataOutputStream os = new DataOutputStream(buffer);
-
-			try
-			{
-				os.writeByte(7);
-				os.writeInt(te.getWorldObj().provider.dimensionId);
-				os.writeInt(te.xCoord);
-				os.writeInt(te.yCoord);
-				os.writeInt(te.zCoord);
-				os.writeUTF(componentName);
-				os.writeInt(data.size());
-				data.writeTo(os);
-				os.close();
-			}
-			catch (IOException var8)
-			{
-				throw new RuntimeException(var8);
-			}
-
-			this.sendPacket(buffer.toByteArray(), player);
+			os.writeByte(7);
+			os.writeInt(te.getWorldObj().provider.dimensionId);
+			os.writeInt(te.xCoord);
+			os.writeInt(te.yCoord);
+			os.writeInt(te.zCoord);
+			os.writeUTF(componentName);
+			os.writeInt(data.size());
+			data.writeTo(os);
+			os.close();
 		}
+		catch (IOException var8)
+		{
+			throw new RuntimeException(var8);
+		}
+
+		this.sendPacket(buffer.toByteArray(), player);
 	}
 
 	public void initiateTileEntityEvent(TileEntity te, int event, boolean limitRange)
@@ -343,7 +341,7 @@ public class NetworkManager
 
 			for (String field : ((INetworkDataProvider) te).getNetworkedFields())
 			{
-				worldData.networkedFieldsToUpdate.add(new NetworkManager.TileEntityField(te, field, player));
+				worldData.networkedFieldsToUpdate.add(new TileEntityField(te, field, player));
 			}
 		}
 
@@ -351,27 +349,13 @@ public class NetworkManager
 
 	public void sendChat(EntityPlayerMP player, String message)
 	{
-		try
-		{
-			this.sendLargePacket(player, 1, message.getBytes("UTF-8"));
-		}
-		catch (UnsupportedEncodingException var4)
-		{
-			IC2.log.warn(LogCategory.Network, var4, "String encoding failed.");
-		}
+		this.sendLargePacket(player, 1, message.getBytes(StandardCharsets.UTF_8));
 
 	}
 
 	public void sendConsole(EntityPlayerMP player, String message)
 	{
-		try
-		{
-			this.sendLargePacket(player, 2, message.getBytes("UTF-8"));
-		}
-		catch (UnsupportedEncodingException var4)
-		{
-			IC2.log.warn(LogCategory.Network, var4, "String encoding failed.");
-		}
+		this.sendLargePacket(player, 2, message.getBytes(StandardCharsets.UTF_8));
 
 	}
 
@@ -407,13 +391,11 @@ public class NetworkManager
 
 			byte[] packetData = buffer.toByteArray();
 			if (IC2.platform.isSimulating())
-			{
 				for (ICrafting crafter : container.getCrafters())
 				{
 					if (crafter instanceof EntityPlayerMP)
 						this.sendPacket(packetData, (EntityPlayerMP) crafter);
 				}
-			}
 			else
 				this.sendPacket(packetData);
 
@@ -439,13 +421,11 @@ public class NetworkManager
 
 		byte[] packetData = buffer.toByteArray();
 		if (IC2.platform.isSimulating())
-		{
 			for (ICrafting crafter : container.getCrafters())
 			{
 				if (crafter instanceof EntityPlayerMP)
 					this.sendPacket(packetData, (EntityPlayerMP) crafter);
 			}
-		}
 		else
 			this.sendPacket(packetData);
 
@@ -456,8 +436,8 @@ public class NetworkManager
 		WorldData worldData = WorldData.get(world);
 		if (!worldData.networkedFieldsToUpdate.isEmpty())
 		{
-			Map<EntityPlayerMP, Map<TileEntity, ByteArrayOutputStream>> data = new HashMap();
-			Iterator iter = worldData.networkedFieldsToUpdate.iterator();
+			Map<EntityPlayerMP, Map<TileEntity, ByteArrayOutputStream>> data = new HashMap<>();
+			Iterator<TileEntityField> iter = worldData.networkedFieldsToUpdate.iterator();
 
 			while (true)
 			{
@@ -504,7 +484,7 @@ public class NetworkManager
 						}
 					}
 
-					tef = (NetworkManager.TileEntityField) iter.next();
+					tef = iter.next();
 					if (!tef.te.isInvalid())
 					{
 						if (tef.target == null)
@@ -515,7 +495,7 @@ public class NetworkManager
 
 						if (tef.te.getWorldObj() == tef.target.worldObj)
 						{
-							receivers = Arrays.asList(tef.target);
+							receivers = Collections.singletonList(tef.target);
 							break;
 						}
 					}
@@ -523,19 +503,8 @@ public class NetworkManager
 
 				for (EntityPlayerMP player : receivers)
 				{
-					Map<TileEntity, ByteArrayOutputStream> playerData = data.get(player);
-					if (playerData == null)
-					{
-						playerData = new HashMap();
-						data.put(player, playerData);
-					}
-
-					ByteArrayOutputStream teData = playerData.get(tef.te);
-					if (teData == null)
-					{
-						teData = new ByteArrayOutputStream(512);
-						playerData.put(tef.te, teData);
-					}
+					Map<TileEntity, ByteArrayOutputStream> playerData = data.computeIfAbsent(player, k -> new HashMap<>());
+					ByteArrayOutputStream teData = playerData.computeIfAbsent(tef.te, k -> new ByteArrayOutputStream(512));
 
 					try
 					{
@@ -552,7 +521,7 @@ public class NetworkManager
 
 	private static List<EntityPlayerMP> getPlayersInRange(World world, TileEntity te)
 	{
-		List<EntityPlayerMP> ret = new ArrayList();
+		List<EntityPlayerMP> ret = new ArrayList<>();
 
 		for (Object obj : world.playerEntities)
 		{
@@ -809,11 +778,8 @@ public class NetworkManager
 		{
 			if (!(obj instanceof NetworkManager.TileEntityField))
 				return false;
-			else
-			{
-				NetworkManager.TileEntityField tef = (NetworkManager.TileEntityField) obj;
-				return tef.te == this.te && tef.field.equals(this.field) && tef.target == this.target;
-			}
+			NetworkManager.TileEntityField tef = (NetworkManager.TileEntityField) obj;
+			return tef.te == this.te && tef.field.equals(this.field) && tef.target == this.target;
 		}
 
 		@Override

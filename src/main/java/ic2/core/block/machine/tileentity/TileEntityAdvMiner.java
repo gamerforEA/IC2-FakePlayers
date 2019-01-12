@@ -59,7 +59,7 @@ public class TileEntityAdvMiner extends TileEntityElectricMachine
 	private short ticker = 0;
 	public final InvSlotConsumableId scannerSlot = new InvSlotConsumableId(this, "scanner", 1, InvSlot.Access.IO, 1, InvSlot.InvSide.BOTTOM, Ic2Items.odScanner.getItem(), Ic2Items.ovScanner.getItem());
 	public final InvSlotUpgrade upgradeSlot = new InvSlotUpgrade(this, "upgrade", 3, 4);
-	public final InvSlot ListSlot = new InvSlot(this, "list", 8, (InvSlot.Access) null, 15);
+	public final InvSlot ListSlot = new InvSlot(this, "list", 8, null, 15);
 	protected final Redstone redstone = this.addComponent(new Redstone(this));
 
 	public TileEntityAdvMiner()

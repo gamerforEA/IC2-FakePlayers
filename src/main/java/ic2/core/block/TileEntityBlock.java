@@ -9,7 +9,6 @@ import ic2.api.network.INetworkDataProvider;
 import ic2.api.network.INetworkUpdateListener;
 import ic2.api.tile.IWrenchable;
 import ic2.core.IC2;
-import ic2.core.ITickCallback;
 import ic2.core.block.comp.TileEntityComponent;
 import ic2.core.util.LogCategory;
 import net.minecraft.block.Block;
@@ -18,7 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import java.util.*;
@@ -27,8 +25,8 @@ import java.util.Map.Entry;
 public abstract class TileEntityBlock extends TileEntity
 		implements INetworkDataProvider, INetworkUpdateListener, IWrenchable
 {
-	private static final List<TileEntityComponent> emptyComponents = Arrays.asList();
-	private static final List<Entry<String, TileEntityComponent>> emptyNamedComponents = Arrays.asList();
+	private static final List<TileEntityComponent> emptyComponents = Collections.emptyList();
+	private static final List<Entry<String, TileEntityComponent>> emptyNamedComponents = Collections.emptyList();
 	private Map<String, TileEntityComponent> components;
 	private List<TileEntityComponent> updatableComponents;
 	private boolean active = false;
@@ -52,18 +50,12 @@ public abstract class TileEntityBlock extends TileEntity
 	public final void validate()
 	{
 		super.validate();
-		IC2.tickHandler.addSingleTickCallback(this.worldObj, new ITickCallback()
-		{
-			@Override
-			public void tickCallback(World world)
+		IC2.tickHandler.addSingleTickCallback(this.worldObj, world -> {
+			if (!this.isInvalid() && world.blockExists(this.xCoord, this.yCoord, this.zCoord))
 			{
-				if (!TileEntityBlock.this.isInvalid() && world.blockExists(TileEntityBlock.this.xCoord, TileEntityBlock.this.yCoord, TileEntityBlock.this.zCoord))
-				{
-					TileEntityBlock.this.onLoaded();
-					if (!TileEntityBlock.this.isInvalid() && (TileEntityBlock.this.enableWorldTick || TileEntityBlock.this.updatableComponents != null))
-						world.loadedTileEntityList.add(TileEntityBlock.this);
-
-				}
+				this.onLoaded();
+				if (!this.isInvalid() && (this.enableWorldTick || this.updatableComponents != null))
+					world.loadedTileEntityList.add(this);
 			}
 		});
 	}
@@ -363,8 +355,8 @@ public abstract class TileEntityBlock extends TileEntity
 		TileEntityComponent prev = this.components.put(name, component);
 		if (prev != null)
 			throw new RuntimeException("ambiguous component name " + name + " when adding " + component + ", already used by " + prev + ".");
-		else
-			return component;
+
+		return component;
 	}
 
 	public TileEntityComponent getComponent(String name)
@@ -439,16 +431,14 @@ public abstract class TileEntityBlock extends TileEntity
 			}
 
 			if (hasUpdateClient)
-			{
 				if (hasUpdateServer)
-					subscription = TileEntityBlock.TickSubscription.Both;
+					subscription = TickSubscription.Both;
 				else
-					subscription = TileEntityBlock.TickSubscription.Client;
-			}
+					subscription = TickSubscription.Client;
 			else if (hasUpdateServer)
-				subscription = TileEntityBlock.TickSubscription.Server;
+				subscription = TickSubscription.Server;
 			else
-				subscription = TileEntityBlock.TickSubscription.None;
+				subscription = TickSubscription.None;
 
 			tickSubscriptions.put(this.getClass(), subscription);
 		}

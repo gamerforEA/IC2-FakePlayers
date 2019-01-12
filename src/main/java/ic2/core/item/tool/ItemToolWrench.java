@@ -94,7 +94,7 @@ public class ItemToolWrench extends ItemIC2 implements IBoxable
 							{
 								String playerName = player.getGameProfile().getName() + "/" + player.getGameProfile().getId();
 								String blockName = tileEntity.getClass().getName().replace("TileEntity", "");
-								IC2.log.info(LogCategory.PlayerActivity, "Player %s used the wrench to remove the %s (%s-%d) at %s.", playerName, blockName, GameData.getBlockRegistry().getNameForObject(block), Integer.valueOf(metaData), Util.formatPosition(world, x, y, z));
+								IC2.log.info(LogCategory.PlayerActivity, "Player %s used the wrench to remove the %s (%s-%d) at %s.", playerName, blockName, GameData.getBlockRegistry().getNameForObject(block), metaData, Util.formatPosition(world, x, y, z));
 							}
 
 							boolean dropOriginalBlock = false;

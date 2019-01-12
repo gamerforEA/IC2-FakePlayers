@@ -41,7 +41,7 @@ public class TileEntityBlastFurnace extends TileEntityInventory implements IHasG
 	public final InvSlotOutput slagOutputSlot = new InvSlotOutput(this, "OuputslagSlot", 4, 1);
 	public final InvSlotOutput airOutputSlot = new InvSlotOutput(this, "AirOutputSlot", 3, 1);
 	public final InvSlotUpgrade upgradeSlot = new InvSlotUpgrade(this, "upgrade", 5, 2);
-	protected final Redstone redstone = (Redstone) this.addComponent(new Redstone(this));
+	protected final Redstone redstone = this.addComponent(new Redstone(this));
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound)
@@ -70,109 +70,78 @@ public class TileEntityBlastFurnace extends TileEntityInventory implements IHasG
 		super.updateEntityServer();
 		this.heatup();
 		if (this.isHot())
-		{
 			this.newActive = this.work();
-		}
 
 		if (this.getActive() != this.newActive)
-		{
 			this.setActive(this.newActive);
-		}
 
 		for (int i = 0; i < this.upgradeSlot.size(); ++i)
 		{
 			ItemStack stack = this.upgradeSlot.get(i);
 			if (stack != null && stack.getItem() instanceof IUpgradeItem && ((IUpgradeItem) stack.getItem()).onTick(stack, this))
-			{
 				this.markDirty();
-			}
 		}
 
 	}
 
 	private RecipeOutput getRecipeOutput()
 	{
-		RecipeOutput ro = Recipes.blastfurance.getOutputFor(this.inputSlot.get(), false);
-		return ro;
+		return Recipes.blastfurance.getOutputFor(this.inputSlot.get(), false);
 	}
 
 	private boolean work()
 	{
 		if (this.inputSlot.isEmpty())
-		{
 			return false;
-		}
-		else
+		RecipeOutput ro = this.getRecipeOutput();
+		if (ro == null)
+			return false;
+		ItemStack firstResult = ro.items.get(0);
+		ItemStack secondResult = null;
+		if (ro.items.size() > 1)
+			secondResult = ro.items.get(1);
+
+		// TODO gamerforEA code replace, old code:
+		// if (this.outputSlot.canAdd(firstResult) && (secondResult == null || this.outputSlot.canAdd(secondResult)))
+		if (this.outputSlot.canAdd(firstResult) && (secondResult == null || this.slagOutputSlot.canAdd(secondResult)))
+		// TODO gamerforEA code end
 		{
-			RecipeOutput ro = this.getRecipeOutput();
-			if (ro == null)
+			if (this.progress == 0)
 			{
+				++this.progress;
+				return true;
+			}
+			if ((this.progress == 1 || this.progress == 1000 || this.progress == 2000 || this.progress == 3000 || this.progress == 4000 || this.progress == 5000) && !this.airSlot.isEmpty() && this.airOutputSlot.canAdd(Ic2Items.cell))
+			{
+				this.airSlot.consume(1);
+				this.airOutputSlot.add(Ic2Items.cell);
+				++this.progress;
+				if (this.outOfAir)
+					this.outOfAir = false;
+
+				return true;
+			}
+			if (this.progress >= this.maxprogress)
+			{
+				this.outputSlot.add(firstResult);
+				if (secondResult != null)
+					this.slagOutputSlot.add(secondResult);
+
+				this.inputSlot.consume(1);
+				this.progress = 0;
 				return false;
 			}
-			else
+			if (this.progress != 0 && this.progress != 1 && this.progress != 1000 && this.progress != 2000 && this.progress != 3000 && this.progress != 4000 && this.progress != 5000)
 			{
-				ItemStack firstResult = ro.items.get(0);
-				ItemStack secondResult = null;
-				if (ro.items.size() > 1)
-				{
-					secondResult = ro.items.get(1);
-				}
-
-				// TODO gamerforEA code replace, old code:
-				// if (this.outputSlot.canAdd(firstResult) && (secondResult == null || this.outputSlot.canAdd(secondResult)))
-				if (this.outputSlot.canAdd(firstResult) && (secondResult == null || this.slagOutputSlot.canAdd(secondResult)))
-				// TODO gamerforEA code end
-				{
-					if (this.progress == 0)
-					{
-						++this.progress;
-						return true;
-					}
-					else if ((this.progress == 1 || this.progress == 1000 || this.progress == 2000 || this.progress == 3000 || this.progress == 4000 || this.progress == 5000) && !this.airSlot.isEmpty() && this.airOutputSlot.canAdd(Ic2Items.cell))
-					{
-						this.airSlot.consume(1);
-						this.airOutputSlot.add(Ic2Items.cell);
-						++this.progress;
-						if (this.outOfAir)
-						{
-							this.outOfAir = false;
-						}
-
-						return true;
-					}
-					else if (this.progress >= this.maxprogress)
-					{
-						this.outputSlot.add(firstResult);
-						if (secondResult != null)
-						{
-							this.slagOutputSlot.add(secondResult);
-						}
-
-						this.inputSlot.consume(1);
-						this.progress = 0;
-						return false;
-					}
-					else if (this.progress != 0 && this.progress != 1 && this.progress != 1000 && this.progress != 2000 && this.progress != 3000 && this.progress != 4000 && this.progress != 5000)
-					{
-						++this.progress;
-						return true;
-					}
-					else
-					{
-						if (this.progress != 0 && !this.outOfAir)
-						{
-							this.outOfAir = true;
-						}
-
-						return false;
-					}
-				}
-				else
-				{
-					return false;
-				}
+				++this.progress;
+				return true;
 			}
+			if (this.progress != 0 && !this.outOfAir)
+				this.outOfAir = true;
+
+			return false;
 		}
+		return false;
 	}
 
 	private void heatup()
@@ -181,13 +150,9 @@ public class TileEntityBlastFurnace extends TileEntityInventory implements IHasG
 		int heatRequested = 0;
 		int gainhU = 0;
 		if ((!this.inputSlot.isEmpty() || this.progress >= 1) && this.heat <= maxHeat)
-		{
 			heatRequested = maxHeat - this.heat + 100;
-		}
 		else if (this.redstone.hasRedstoneInput() && this.heat <= maxHeat)
-		{
 			heatRequested = maxHeat - this.heat + 100;
-		}
 
 		if (heatRequested > 0)
 		{
@@ -200,14 +165,10 @@ public class TileEntityBlastFurnace extends TileEntityInventory implements IHasG
 			}
 
 			if (gainhU == 0)
-			{
 				this.heat -= Math.min(this.heat, 1);
-			}
 		}
 		else
-		{
 			this.heat -= Math.min(this.heat, 1);
-		}
 
 	}
 

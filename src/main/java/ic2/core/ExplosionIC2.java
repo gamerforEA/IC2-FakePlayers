@@ -134,14 +134,7 @@ public class ExplosionIC2 extends Explosion
 
 				boolean entitiesAreInRange = !this.entitiesInRange.isEmpty();
 				if (entitiesAreInRange)
-					Collections.sort(this.entitiesInRange, new Comparator<EntityDamage>()
-					{
-						@Override
-						public int compare(EntityDamage a, EntityDamage b)
-						{
-							return a.distance - b.distance;
-						}
-					});
+					this.entitiesInRange.sort(Comparator.comparingInt(a -> a.distance));
 
 				int steps = (int) Math.ceil(3.141592653589793D / Math.atan(1.0D / this.maxDistance));
 
@@ -392,8 +385,7 @@ public class ExplosionIC2 extends Explosion
 
 			return ret;
 		}
-		else
-			return ret;
+		return ret;
 	}
 
 	private void damageEntities(double x, double y, double z, int step, double power)
@@ -405,7 +397,7 @@ public class ExplosionIC2 extends Explosion
 			int indexStart = 0;
 			int indexEnd = this.entitiesInRange.size() - 1;
 
-			while (true)
+			do
 			{
 				index = (indexStart + indexEnd) / 2;
 				int distance = this.entitiesInRange.get(index).distance;
@@ -416,9 +408,8 @@ public class ExplosionIC2 extends Explosion
 				else
 					indexEnd = index;
 
-				if (indexStart >= indexEnd)
-					break;
 			}
+			while (indexStart < indexEnd);
 		}
 		else
 			index = 0;
@@ -577,11 +568,8 @@ public class ExplosionIC2 extends Explosion
 		{
 			if (!(obj instanceof XZposition))
 				return false;
-			else
-			{
-				XZposition xZposition = (XZposition) obj;
-				return xZposition.x == this.x && xZposition.z == this.z;
-			}
+			XZposition xZposition = (XZposition) obj;
+			return xZposition.x == this.x && xZposition.z == this.z;
 		}
 
 		@Override

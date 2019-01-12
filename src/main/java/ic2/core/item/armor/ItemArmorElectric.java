@@ -150,7 +150,7 @@ public abstract class ItemArmorElectric extends ItemArmorIC2
 		if (damage != stack.getItemDamage())
 		{
 			Boolean allow = this.allowDamaging.get();
-			if (allow != null && allow.booleanValue())
+			if (allow != null && allow)
 				super.setDamage(stack, damage);
 
 			/* TODO gamerforEA code clear:
@@ -174,9 +174,9 @@ public abstract class ItemArmorElectric extends ItemArmorIC2
 	@Override
 	public void setCustomDamage(ItemStack stack, int damage)
 	{
-		this.allowDamaging.set(Boolean.valueOf(true));
+		this.allowDamaging.set(Boolean.TRUE);
 		stack.setItemDamage(damage);
-		this.allowDamaging.set(Boolean.valueOf(false));
+		this.allowDamaging.set(Boolean.FALSE);
 	}
 
 	@Override

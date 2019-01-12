@@ -30,14 +30,14 @@ public final class EnergyNetLocal
 	public static final boolean enableCache = true;
 	private static int nextGridUid = 0;
 	private static int nextNodeUid = 0;
-	protected final Set<Grid> grids = new HashSet();
-	protected List<Change> changes = new ArrayList();
-	private final Map<ChunkCoordinates, Tile> registeredTiles = new HashMap();
-	private Map<TileEntity, Integer> pendingAdds = new WeakHashMap();
-	private final Set<Tile> removedTiles = new HashSet();
+	protected final Set<Grid> grids = new HashSet<>();
+	protected List<Change> changes = new ArrayList<>();
+	private final Map<ChunkCoordinates, Tile> registeredTiles = new HashMap<>();
+	private Map<TileEntity, Integer> pendingAdds = new WeakHashMap<>();
+	private final Set<Tile> removedTiles = new HashSet<>();
 	private boolean locked = false;
 	private static final long logSuppressionTimeout = 300000000000L;
-	private final Map<String, Long> recentLogs = new HashMap();
+	private final Map<String, Long> recentLogs = new HashMap<>();
 
 	protected void addTileEntity(TileEntity te)
 	{
@@ -47,7 +47,7 @@ public final class EnergyNetLocal
 	protected void addTileEntity(TileEntity te, int retry)
 	{
 		if (EnergyNetGlobal.debugTileManagement)
-			IC2.log.debug(LogCategory.EnergyNet, "EnergyNet.addTileEntity(%s, %d), world=%s, chunk=%s, this=%s", te, Integer.valueOf(retry), te.getWorldObj(), te.getWorldObj().getChunkFromBlockCoords(te.xCoord, te.zCoord), this);
+			IC2.log.debug(LogCategory.EnergyNet, "EnergyNet.addTileEntity(%s, %d), world=%s, chunk=%s, this=%s", te, retry, te.getWorldObj(), te.getWorldObj().getChunkFromBlockCoords(te.xCoord, te.zCoord), this);
 
 		if (!(te instanceof IEnergyTile))
 			this.logWarn("EnergyNet.addTileEntity: " + te + " doesn\'t implement IEnergyTile, aborting");
@@ -63,14 +63,14 @@ public final class EnergyNetLocal
 			else if (this.locked)
 			{
 				this.logDebug("EnergyNet.addTileEntity: adding " + te + " while locked, postponing.");
-				this.pendingAdds.put(te, Integer.valueOf(retry));
+				this.pendingAdds.put(te, retry);
 			}
 			else
 			{
 				Tile tile = new Tile(this, te);
 				if (EnergyNetGlobal.debugTileManagement)
 				{
-					List<String> posStrings = new ArrayList(tile.positions.size());
+					List<String> posStrings = new ArrayList<>(tile.positions.size());
 
 					for (TileEntity pos : tile.positions)
 					{
@@ -92,7 +92,7 @@ public final class EnergyNetLocal
 						if (te == conflicting.entity)
 							this.logDebug("EnergyNet.addTileEntity: " + pos + " (" + te + ") is already added using the same position, aborting");
 						else if (retry < 2)
-							this.pendingAdds.put(te, Integer.valueOf(retry + 1));
+							this.pendingAdds.put(te, retry + 1);
 						else if (!conflicting.entity.isInvalid() && !EnergyNetGlobal.replaceConflicting)
 							this.logWarn("EnergyNet.addTileEntity: " + pos + " (" + te + ") is still conflicting with " + conflicting.entity + " using the same position (overlapping), aborting");
 						else
@@ -122,7 +122,7 @@ public final class EnergyNetLocal
 						if (retry < 1)
 						{
 							this.logWarn("EnergyNet.addTileEntity: " + pos + " (" + te + ") was added too early, postponing");
-							this.pendingAdds.put(te, Integer.valueOf(retry + 1));
+							this.pendingAdds.put(te, retry + 1);
 						}
 						else
 							this.logWarn("EnergyNet.addTileEntity: " + pos + " (" + te + ") unloaded, aborting");
@@ -166,72 +166,69 @@ public final class EnergyNetLocal
 	{
 		if (this.locked)
 			throw new IllegalStateException("removeTileEntity isn\'t allowed from this context");
+		if (EnergyNetGlobal.debugTileManagement)
+			IC2.log.debug(LogCategory.EnergyNet, "EnergyNet.removeTileEntity(%s), world=%s, chunk=%s, this=%s", te, te.getWorldObj(), te.getWorldObj().getChunkFromBlockCoords(te.xCoord, te.zCoord), this);
+
+		if (!(te instanceof IEnergyTile))
+			this.logWarn("EnergyNet.removeTileEntity: " + te + " doesn\'t implement IEnergyTile, aborting");
 		else
 		{
-			if (EnergyNetGlobal.debugTileManagement)
-				IC2.log.debug(LogCategory.EnergyNet, "EnergyNet.removeTileEntity(%s), world=%s, chunk=%s, this=%s", te, te.getWorldObj(), te.getWorldObj().getChunkFromBlockCoords(te.xCoord, te.zCoord), this);
-
-			if (!(te instanceof IEnergyTile))
-				this.logWarn("EnergyNet.removeTileEntity: " + te + " doesn\'t implement IEnergyTile, aborting");
+			List<TileEntity> positions;
+			if (te instanceof IMetaDelegate)
+				positions = ((IMetaDelegate) te).getSubTiles();
 			else
+				positions = Collections.singletonList(te);
+
+			boolean wasPending = this.pendingAdds.remove(te) != null;
+			if (EnergyNetGlobal.debugTileManagement)
 			{
-				List<TileEntity> positions;
-				if (te instanceof IMetaDelegate)
-					positions = ((IMetaDelegate) te).getSubTiles();
-				else
-					positions = Arrays.asList(te);
-
-				boolean wasPending = this.pendingAdds.remove(te) != null;
-				if (EnergyNetGlobal.debugTileManagement)
-				{
-					List<String> posStrings = new ArrayList(positions.size());
-
-					for (TileEntity pos : positions)
-					{
-						posStrings.add(pos + " (" + pos.xCoord + "/" + pos.yCoord + "/" + pos.zCoord + ")");
-					}
-
-					IC2.log.debug(LogCategory.EnergyNet, "positions: %s", posStrings);
-				}
-
-				boolean removed = false;
+				List<String> posStrings = new ArrayList<>(positions.size());
 
 				for (TileEntity pos : positions)
 				{
-					ChunkCoordinates coords = new ChunkCoordinates(pos.xCoord, pos.yCoord, pos.zCoord);
-					Tile tile = this.registeredTiles.get(coords);
-					if (tile == null)
-					{
-						if (!wasPending)
-							this.logDebug("EnergyNet.removeTileEntity: " + pos + " (" + te + ") wasn\'t found (added), skipping");
-					}
-					else if (tile.entity != te)
-						this.logWarn("EnergyNet.removeTileEntity: " + pos + " (" + te + ") doesn\'t match the registered te " + tile.entity + ", skipping");
-					else
-					{
-						if (!removed)
-						{
-							assert new HashSet(positions).equals(new HashSet(tile.positions));
-
-							this.removeTileFromGrids(tile);
-							removed = true;
-							this.removedTiles.add(tile);
-						}
-
-						this.registeredTiles.remove(coords);
-						if (te.getWorldObj().blockExists(pos.xCoord, pos.yCoord, pos.zCoord))
-							for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
-							{
-								int x = pos.xCoord + dir.offsetX;
-								int y = pos.yCoord + dir.offsetY;
-								int z = pos.zCoord + dir.offsetZ;
-								if (te.getWorldObj().blockExists(x, y, z))
-									te.getWorldObj().notifyBlockOfNeighborChange(x, y, z, Blocks.air);
-							}
-					}
+					posStrings.add(pos + " (" + pos.xCoord + "/" + pos.yCoord + "/" + pos.zCoord + ")");
 				}
 
+				IC2.log.debug(LogCategory.EnergyNet, "positions: %s", posStrings);
 			}
+
+			boolean removed = false;
+
+			for (TileEntity pos : positions)
+			{
+				ChunkCoordinates coords = new ChunkCoordinates(pos.xCoord, pos.yCoord, pos.zCoord);
+				Tile tile = this.registeredTiles.get(coords);
+				if (tile == null)
+				{
+					if (!wasPending)
+						this.logDebug("EnergyNet.removeTileEntity: " + pos + " (" + te + ") wasn\'t found (added), skipping");
+				}
+				else if (tile.entity != te)
+					this.logWarn("EnergyNet.removeTileEntity: " + pos + " (" + te + ") doesn\'t match the registered te " + tile.entity + ", skipping");
+				else
+				{
+					if (!removed)
+					{
+						assert new HashSet<>(positions).equals(new HashSet<>(tile.positions));
+
+						this.removeTileFromGrids(tile);
+						removed = true;
+						this.removedTiles.add(tile);
+					}
+
+					this.registeredTiles.remove(coords);
+					if (te.getWorldObj().blockExists(pos.xCoord, pos.yCoord, pos.zCoord))
+						for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
+						{
+							int x = pos.xCoord + dir.offsetX;
+							int y = pos.yCoord + dir.offsetY;
+							int z = pos.zCoord + dir.offsetZ;
+							if (te.getWorldObj().blockExists(x, y, z))
+								te.getWorldObj().notifyBlockOfNeighborChange(x, y, z, Blocks.air);
+						}
+				}
+			}
+
 		}
 	}
 
@@ -244,17 +241,14 @@ public final class EnergyNetLocal
 			this.logWarn("EnergyNet.getTotalEnergyEmitted: " + tileEntity + " is not added to the enet, aborting");
 			return 0.0D;
 		}
-		else
+		double ret = 0.0D;
+
+		for (NodeStats stat : tile.getStats())
 		{
-			double ret = 0.0D;
-
-			for (NodeStats stat : tile.getStats())
-			{
-				ret += stat.getEnergyOut();
-			}
-
-			return ret;
+			ret += stat.getEnergyOut();
 		}
+
+		return ret;
 	}
 
 	protected double getTotalEnergySunken(TileEntity tileEntity)
@@ -266,17 +260,14 @@ public final class EnergyNetLocal
 			this.logWarn("EnergyNet.getTotalEnergySunken: " + tileEntity + " is not added to the enet, aborting");
 			return 0.0D;
 		}
-		else
+		double ret = 0.0D;
+
+		for (NodeStats stat : tile.getStats())
 		{
-			double ret = 0.0D;
-
-			for (NodeStats stat : tile.getStats())
-			{
-				ret += stat.getEnergyIn();
-			}
-
-			return ret;
+			ret += stat.getEnergyIn();
 		}
+
+		return ret;
 	}
 
 	protected NodeStats getNodeStats(TileEntity te)
@@ -288,21 +279,18 @@ public final class EnergyNetLocal
 			this.logWarn("EnergyNet.getTotalEnergySunken: " + te + " is not added to the enet, aborting");
 			return new NodeStats(0.0D, 0.0D, 0.0D);
 		}
-		else
+		double in = 0.0D;
+		double out = 0.0D;
+		double voltage = 0.0D;
+
+		for (NodeStats stat : tile.getStats())
 		{
-			double in = 0.0D;
-			double out = 0.0D;
-			double voltage = 0.0D;
-
-			for (NodeStats stat : tile.getStats())
-			{
-				in += stat.getEnergyIn();
-				out += stat.getEnergyOut();
-				voltage = Math.max(voltage, stat.getVoltage());
-			}
-
-			return new NodeStats(in, out, voltage);
+			in += stat.getEnergyIn();
+			out += stat.getEnergyOut();
+			voltage = Math.max(voltage, stat.getVoltage());
 		}
+
+		return new NodeStats(in, out, voltage);
 	}
 
 	protected TileEntity getTileEntity(int x, int y, int z)
@@ -337,30 +325,28 @@ public final class EnergyNetLocal
 		Tile tile = this.registeredTiles.get(new ChunkCoordinates(x, y, z));
 		if (tile == null)
 			return false;
-		else
+
+		Set<Grid> processedGrids = new HashSet<>();
+
+		for (Node node : tile.nodes)
 		{
-			Set<Grid> processedGrids = new HashSet();
-
-			for (Node node : tile.nodes)
+			Grid grid = node.getGrid();
+			if (processedGrids.add(grid))
 			{
-				Grid grid = node.getGrid();
-				if (processedGrids.add(grid))
-				{
-					grid.dumpNodeInfo(chat, true, node);
-					grid.dumpStats(chat, true);
-					grid.dumpMatrix(console, true, true, true);
-					console.println("dumping graph for " + grid);
-					grid.dumpGraph(true);
-				}
+				grid.dumpNodeInfo(chat, true, node);
+				grid.dumpStats(chat, true);
+				grid.dumpMatrix(console, true, true, true);
+				console.println("dumping graph for " + grid);
+				grid.dumpGraph(true);
 			}
-
-			return true;
 		}
+
+		return true;
 	}
 
 	public List<GridInfo> getGridInfos()
 	{
-		List<GridInfo> ret = new ArrayList();
+		List<GridInfo> ret = new ArrayList<>(this.grids.size());
 
 		for (Grid grid : this.grids)
 		{
@@ -397,7 +383,7 @@ public final class EnergyNetLocal
 			this.locked = false;
 			this.processChanges();
 			Map<TileEntity, Integer> currentPendingAdds = this.pendingAdds;
-			this.pendingAdds = new WeakHashMap();
+			this.pendingAdds = new WeakHashMap<>();
 
 			for (Entry<TileEntity, Integer> entry : currentPendingAdds.entrySet())
 			{
@@ -411,7 +397,7 @@ public final class EnergyNetLocal
 				grid.prepareCalculation();
 			}
 
-			List<Runnable> tasks = new ArrayList();
+			List<Runnable> tasks = new ArrayList<>();
 
 			for (Grid grid : this.grids)
 			{
@@ -442,14 +428,14 @@ public final class EnergyNetLocal
 
 	private void addTileToGrids(Tile tile)
 	{
-		List<Node> extraNodes = new ArrayList();
+		List<Node> extraNodes = new ArrayList<>();
 
 		for (Node node : tile.nodes)
 		{
 			if (EnergyNetGlobal.debugGrid)
 				IC2.log.debug(LogCategory.EnergyNet, "Adding node %s.", node);
 
-			List<Node> neighbors = new ArrayList();
+			List<Node> neighbors = new ArrayList<>();
 
 			for (TileEntity pos : tile.positions)
 			{
@@ -489,13 +475,7 @@ public final class EnergyNetLocal
 			}
 
 			// TODO gamerforEA code start
-			Iterator<Node> iterator = neighbors.iterator();
-			while (iterator.hasNext())
-			{
-				Node neighbor = iterator.next();
-				if (neighbor == null || neighbor.getGrid() == null)
-					iterator.remove();
-			}
+			neighbors.removeIf(neighbor -> neighbor == null || neighbor.getGrid() == null);
 			// TODO gamerforEA code end
 
 			if (neighbors.isEmpty())
@@ -532,7 +512,7 @@ public final class EnergyNetLocal
 							grid = new Grid(this);
 						}
 
-						Map<Node, Node> neighborReplacements = new HashMap();
+						Map<Node, Node> neighborReplacements = new HashMap<>();
 						ListIterator<Node> it = neighbors.listIterator();
 
 						while (it.hasNext())
@@ -607,7 +587,7 @@ public final class EnergyNetLocal
 						break;
 					case Sink:
 					case Source:
-						List<List<Node>> neighborGroups = new ArrayList();
+						List<List<Node>> neighborGroups = new ArrayList<>();
 
 						for (Node neighbor : neighbors)
 						{
@@ -626,7 +606,7 @@ public final class EnergyNetLocal
 
 							if (!found)
 							{
-								List<Node> nodeList = new ArrayList();
+								List<Node> nodeList = new ArrayList<>();
 								nodeList.add(neighbor);
 								neighborGroups.add(nodeList);
 							}
@@ -739,7 +719,7 @@ public final class EnergyNetLocal
 					if (!validReplacement)
 					{
 						it.remove();
-						List<Change> sameGridSourceChanges = new ArrayList();
+						List<Change> sameGridSourceChanges = new ArrayList<>();
 
 						for (Change change2 : this.changes)
 						{
@@ -770,11 +750,11 @@ public final class EnergyNetLocal
 				IEnergySink sink = (IEnergySink) change.node.tile.entity;
 				double returned = sink.injectEnergy(change.dir, change.getAmount(), change.getVoltage());
 				if (EnergyNetGlobal.debugGrid)
-					IC2.log.debug(LogCategory.EnergyNet, "Applied change %s, %f EU returned.", change, Double.valueOf(returned));
+					IC2.log.debug(LogCategory.EnergyNet, "Applied change %s, %f EU returned.", change, returned);
 
 				if (returned > 0.0D)
 				{
-					List<Change> sameGridSourceChanges = new ArrayList();
+					List<Change> sameGridSourceChanges = new ArrayList<>();
 
 					for (Change change2 : this.changes)
 					{
@@ -846,14 +826,11 @@ public final class EnergyNetLocal
 	{
 		if (EnergyNetGlobal.logAll)
 			return true;
-		else
-		{
-			this.cleanRecentLogs();
-			msg = msg.replaceAll("@[0-9a-f]+", "@x");
-			long time = System.nanoTime();
-			Long lastLog = this.recentLogs.put(msg, Long.valueOf(time));
-			return lastLog == null || lastLog < time - 300000000000L;
-		}
+		this.cleanRecentLogs();
+		msg = msg.replaceAll("@[0-9a-f]+", "@x");
+		long time = System.nanoTime();
+		Long lastLog = this.recentLogs.put(msg, time);
+		return lastLog == null || lastLog < time - 300000000000L;
 	}
 
 	private void cleanRecentLogs()
@@ -861,15 +838,7 @@ public final class EnergyNetLocal
 		if (this.recentLogs.size() >= 100)
 		{
 			long minTime = System.nanoTime() - 300000000000L;
-			Iterator<Long> it = this.recentLogs.values().iterator();
-
-			while (it.hasNext())
-			{
-				long recTime = it.next();
-				if (recTime < minTime)
-					it.remove();
-			}
-
+			this.recentLogs.values().removeIf(recTime -> recTime < minTime);
 		}
 	}
 }

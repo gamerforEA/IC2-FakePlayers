@@ -119,17 +119,14 @@ public class BlockReactorChamber extends BlockMultiID
 	{
 		if (entityplayer.isSneaking())
 			return false;
-		else
+
+		TileEntityNuclearReactorElectric reactor = this.getReactorEntity(world, i, j, k);
+		if (reactor == null)
 		{
-			TileEntityNuclearReactorElectric reactor = this.getReactorEntity(world, i, j, k);
-			if (reactor == null)
-			{
-				this.onNeighborBlockChange(world, i, j, k, this);
-				return false;
-			}
-			else
-				return !IC2.platform.isSimulating() || IC2.platform.launchGui(entityplayer, reactor);
+			this.onNeighborBlockChange(world, i, j, k, this);
+			return false;
 		}
+		return !IC2.platform.isSimulating() || IC2.platform.launchGui(entityplayer, reactor);
 	}
 
 	@Override

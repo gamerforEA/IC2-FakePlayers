@@ -127,8 +127,7 @@ public class TileEntitySteamGenerator extends TileEntityInventory
 			this.heatup(this.heatinput);
 			return true;
 		}
-		else
-			return false;
+		return false;
 	}
 
 	private int getoutputtyp(FluidStack fluid)
@@ -141,76 +140,61 @@ public class TileEntitySteamGenerator extends TileEntityInventory
 		boolean cancalcification = true;
 		if (this.WaterTank.getFluid() == null)
 			return null;
-		else
+		Fluid fluidintank = this.WaterTank.getFluid().getFluid();
+		if (fluidintank.equals(BlocksItems.getFluid(InternalName.fluidDistilledWater)))
+			cancalcification = false;
+
+		if (this.systemheat < 100.0F)
 		{
-			Fluid fluidintank = this.WaterTank.getFluid().getFluid();
-			if (fluidintank.equals(BlocksItems.getFluid(InternalName.fluidDistilledWater)))
-				cancalcification = false;
-
-			if (this.systemheat < 100.0F)
-			{
-				this.heatupmax();
-				return this.WaterTank.drain(this.inputmb, true);
-			}
-			else
-			{
-				int hu_need = 100 + Math.round(this.pressurevalve / 220.0F * 100.0F);
-				int TargetTemp = (int) (100L + Math.round(this.pressurevalve / 220.0F * 100.0F * 2.74D));
-				if (Math.round(this.systemheat * 10.0F) / 10.0F == TargetTemp)
-				{
-					int heat = this.requestHeat(this.inputmb * hu_need);
-					this.heatinput = heat;
-					if (heat == this.inputmb * hu_need)
-					{
-						if (this.systemheat >= 374.0F)
-						{
-							if (cancalcification)
-								++this.calcification;
-
-							this.WaterTank.drain(this.inputmb, true);
-							return new FluidStack(BlocksItems.getFluid(InternalName.fluidSuperheatedSteam), this.inputmb * 100);
-						}
-						else
-						{
-							if (cancalcification)
-								++this.calcification;
-
-							this.WaterTank.drain(this.inputmb, true);
-							return new FluidStack(BlocksItems.getFluid(InternalName.fluidSteam), this.inputmb * 100);
-						}
-					}
-					else
-					{
-						this.heatup(heat);
-						return this.WaterTank.drain(this.inputmb, true);
-					}
-				}
-				else if (this.systemheat <= TargetTemp)
-				{
-					this.heatupmax();
-					return this.WaterTank.drain(this.inputmb, true);
-				}
-				else
-				{
-					this.heatinput = 0;
-					int count = this.inputmb;
-
-					while (this.systemheat > TargetTemp)
-					{
-						this.cooldown(0.1F);
-						if (cancalcification)
-							++this.calcification;
-
-						--count;
-						if (count == 0)
-							break;
-					}
-
-					this.WaterTank.drain(this.inputmb - count, true);
-					return new FluidStack(BlocksItems.getFluid(InternalName.fluidSteam), (this.inputmb - count) * 100);
-				}
-			}
+			this.heatupmax();
+			return this.WaterTank.drain(this.inputmb, true);
 		}
+		int hu_need = 100 + Math.round(this.pressurevalve / 220.0F * 100.0F);
+		int TargetTemp = (int) (100L + Math.round(this.pressurevalve / 220.0F * 100.0F * 2.74D));
+		if (Math.round(this.systemheat * 10.0F) / 10.0F == TargetTemp)
+		{
+			int heat = this.requestHeat(this.inputmb * hu_need);
+			this.heatinput = heat;
+			if (heat == this.inputmb * hu_need)
+			{
+				if (this.systemheat >= 374.0F)
+				{
+					if (cancalcification)
+						++this.calcification;
+
+					this.WaterTank.drain(this.inputmb, true);
+					return new FluidStack(BlocksItems.getFluid(InternalName.fluidSuperheatedSteam), this.inputmb * 100);
+				}
+				if (cancalcification)
+					++this.calcification;
+
+				this.WaterTank.drain(this.inputmb, true);
+				return new FluidStack(BlocksItems.getFluid(InternalName.fluidSteam), this.inputmb * 100);
+			}
+			this.heatup(heat);
+			return this.WaterTank.drain(this.inputmb, true);
+		}
+		if (this.systemheat <= TargetTemp)
+		{
+			this.heatupmax();
+			return this.WaterTank.drain(this.inputmb, true);
+		}
+		this.heatinput = 0;
+		int count = this.inputmb;
+
+		while (this.systemheat > TargetTemp)
+		{
+			this.cooldown(0.1F);
+			if (cancalcification)
+				++this.calcification;
+
+			--count;
+			if (count == 0)
+				break;
+		}
+
+		this.WaterTank.drain(this.inputmb - count, true);
+		return new FluidStack(BlocksItems.getFluid(InternalName.fluidSteam), (this.inputmb - count) * 100);
 	}
 
 	private void heatup(int heatinput)
@@ -308,25 +292,18 @@ public class TileEntitySteamGenerator extends TileEntityInventory
 	{
 		if (!this.canFill(from, resource.getFluid()))
 			return 0;
-		else
-		{
-			int amount = this.WaterTank.fill(resource, doFill);
-			return amount;
-		}
+		return this.WaterTank.fill(resource, doFill);
 	}
 
 	public int gaugeLiquidScaled(int i, int tank)
 	{
-		switch (tank)
+		if (tank == 0)
 		{
-			case 0:
-				if (this.WaterTank.getFluidAmount() <= 0)
-					return 0;
-
-				return this.WaterTank.getFluidAmount() * i / this.WaterTank.getCapacity();
-			default:
-				return 0;
+			int fluidAmount = this.WaterTank.getFluidAmount();
+			if (fluidAmount > 0)
+				return fluidAmount * i / this.WaterTank.getCapacity();
 		}
+		return 0;
 	}
 
 	@Override

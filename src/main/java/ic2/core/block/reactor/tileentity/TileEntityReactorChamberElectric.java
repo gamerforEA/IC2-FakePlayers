@@ -6,14 +6,16 @@ import ic2.api.Direction;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.reactor.IReactorChamber;
 import ic2.api.tile.IWrenchable;
-import ic2.core.*;
+import ic2.core.ContainerBase;
+import ic2.core.IC2;
+import ic2.core.IHasGui;
+import ic2.core.Ic2Items;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -37,18 +39,12 @@ public class TileEntityReactorChamberElectric extends TileEntity
 	public void validate()
 	{
 		super.validate();
-		IC2.tickHandler.addSingleTickCallback(this.worldObj, new ITickCallback()
-		{
-			@Override
-			public void tickCallback(World world)
+		IC2.tickHandler.addSingleTickCallback(this.worldObj, world -> {
+			if (!this.isInvalid() && world.blockExists(this.xCoord, this.yCoord, this.zCoord))
 			{
-				if (!TileEntityReactorChamberElectric.this.isInvalid() && world.blockExists(TileEntityReactorChamberElectric.this.xCoord, TileEntityReactorChamberElectric.this.yCoord, TileEntityReactorChamberElectric.this.zCoord))
-				{
-					TileEntityReactorChamberElectric.this.onLoaded();
-					if (TileEntityReactorChamberElectric.this.enableUpdateEntity())
-						world.loadedTileEntityList.add(TileEntityReactorChamberElectric.this);
-
-				}
+				this.onLoaded();
+				if (this.enableUpdateEntity())
+					world.loadedTileEntityList.add(this);
 			}
 		});
 	}
@@ -290,7 +286,7 @@ public class TileEntityReactorChamberElectric extends TileEntity
 				TileEntityNuclearReactorElectric reactor = (TileEntityNuclearReactorElectric) te;
 
 				// TODO gamerforEA code start
-				this.cachedReactor = new WeakReference<TileEntityNuclearReactorElectric>(reactor);
+				this.cachedReactor = new WeakReference<>(reactor);
 				// TODO gamerforEA code end
 
 				return reactor;

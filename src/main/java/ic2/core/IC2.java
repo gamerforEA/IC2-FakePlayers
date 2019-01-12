@@ -424,7 +424,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		GameRegistry.registerFuelHandler(this);
 		MinecraftForge.EVENT_BUS.register(new IC2BucketHandler());
 		initialized = true;
-		log.debug(LogCategory.General, "Finished pre-init after %d ms.", Long.valueOf((System.nanoTime() - startTime) / 1000000L));
+		log.debug(LogCategory.General, "Finished pre-init after %d ms.", (System.nanoTime() - startTime) / 1000000L);
 	}
 
 	@EventHandler
@@ -433,7 +433,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		long startTime = System.nanoTime();
 		log.debug(LogCategory.General, "Starting init.");
 		Rezepte.loadRecipes();
-		log.debug(LogCategory.General, "Finished init after %d ms.", Long.valueOf((System.nanoTime() - startTime) / 1000000L));
+		log.debug(LogCategory.General, "Finished init after %d ms.", (System.nanoTime() - startTime) / 1000000L);
 	}
 
 	@EventHandler
@@ -453,8 +453,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 			log.debug(LogCategory.SubModule, "BuildCraft integration module loaded.");
 		}
 
-		List<IRecipeInput> purgedRecipes = new ArrayList();
-		purgedRecipes.addAll(ConfigUtil.asRecipeInputList(MainConfig.get(), "recipes/purge"));
+		List<IRecipeInput> purgedRecipes = new ArrayList<>(ConfigUtil.asRecipeInputList(MainConfig.get(), "recipes/purge"));
 		if (ConfigUtil.getBool(MainConfig.get(), "balance/disableEnderChest"))
 		{
 			purgedRecipes.add(new RecipeInputItemStack(new ItemStack(Blocks.ender_chest)));
@@ -525,7 +524,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		UuIndex.instance.refresh(true);
 		platform.onPostInit();
 		platform.registerRenderers();
-		log.debug(LogCategory.General, "Finished post-init after %d ms.", Long.valueOf((System.nanoTime() - startTime) / 1000000L));
+		log.debug(LogCategory.General, "Finished post-init after %d ms.", (System.nanoTime() - startTime) / 1000000L);
 		log.info(LogCategory.General, "%s version %s loaded.", "IC2", "2.2.827-experimental");
 	}
 
@@ -536,7 +535,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		try
 		{
 			Class<?> subModuleClass = IC2.class.getClassLoader().loadClass("ic2." + name + ".SubModule");
-			return ((Boolean) subModuleClass.getMethod("init").invoke(null, new Object[0])).booleanValue();
+			return (Boolean) subModuleClass.getMethod("init").invoke(null, new Object[0]);
 		}
 		catch (Throwable var2)
 		{
@@ -753,7 +752,7 @@ public class IC2 implements IWorldGenerator, IFuelHandler
 		}
 		else
 		{
-			valuableOres.put(input, Integer.valueOf(value));
+			valuableOres.put(input, value);
 		}
 	}
 

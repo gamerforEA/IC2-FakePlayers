@@ -166,7 +166,7 @@ public class TileEntityTradeOMat extends TileEntityInventory
 
 						if (transferredIn.stackSize != offer.stackSize)
 						{
-							IC2.log.warn(LogCategory.Block, "The Trade-O-Mat at dim %d, %d/%d/%d received an inconsistent result from an adjacent trade supply inventory, the item stack %s will be lost.", Integer.valueOf(this.getWorldObj().provider.dimensionId), Integer.valueOf(this.xCoord), Integer.valueOf(this.yCoord), Integer.valueOf(this.zCoord), transferredIn);
+							IC2.log.warn(LogCategory.Block, "The Trade-O-Mat at dim %d, %d/%d/%d received an inconsistent result from an adjacent trade supply inventory, the item stack %s will be lost.", this.getWorldObj().provider.dimensionId, this.xCoord, this.yCoord, this.zCoord, transferredIn);
 							return;
 						}
 
@@ -217,25 +217,22 @@ public class TileEntityTradeOMat extends TileEntityInventory
 	{
 		if (profile == null)
 			return this.owner == null;
-		else
+		if (IC2.platform.isSimulating())
 		{
-			if (IC2.platform.isSimulating())
+			if (this.owner == null)
 			{
-				if (this.owner == null)
-				{
-					this.owner = profile;
-					IC2.network.get().updateTileEntityField(this, "owner");
-					return true;
-				}
-
-				if (MinecraftServer.getServer().getConfigurationManager().func_152596_g(profile))
-					return true;
-			}
-			else if (this.owner == null)
+				this.owner = profile;
+				IC2.network.get().updateTileEntityField(this, "owner");
 				return true;
+			}
 
-			return this.owner.equals(profile);
+			if (MinecraftServer.getServer().getConfigurationManager().func_152596_g(profile))
+				return true;
 		}
+		else if (this.owner == null)
+			return true;
+
+		return this.owner.equals(profile);
 	}
 
 	@Override
@@ -271,14 +268,10 @@ public class TileEntityTradeOMat extends TileEntityInventory
 	@Override
 	public void onNetworkEvent(int event)
 	{
-		switch (event)
-		{
-			case 0:
-				IC2.audioManager.playOnce(this, PositionSpec.Center, "Machines/o-mat.ogg", true, IC2.audioManager.getDefaultVolume());
-				break;
-			default:
-				IC2.platform.displayError("An unknown event type was received over multiplayer.\nThis could happen due to corrupted data or a bug.\n\n(Technical information: event ID " + event + ", tile entity below)\n" + "T: " + this + " (" + this.xCoord + ", " + this.yCoord + ", " + this.zCoord + ")");
-		}
+		if (event == 0)
+			IC2.audioManager.playOnce(this, PositionSpec.Center, "Machines/o-mat.ogg", true, IC2.audioManager.getDefaultVolume());
+		else
+			IC2.platform.displayError("An unknown event type was received over multiplayer.\nThis could happen due to corrupted data or a bug.\n\n(Technical information: event ID " + event + ", tile entity below)\n" + "T: " + this + " (" + this.xCoord + ", " + this.yCoord + ", " + this.zCoord + ")");
 
 	}
 
