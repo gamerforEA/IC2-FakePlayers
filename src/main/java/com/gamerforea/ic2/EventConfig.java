@@ -117,7 +117,7 @@ public final class EventConfig
 	public static boolean tradeOMatOnePlayer = true;
 
 	@ConfigString(category = CATEGORY_OTHER,
-				   comment = "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)")
+				  comment = "Permission для доступа к персональным блокам (сейфам, торговым аппаратам и пр.)")
 	public static String safeAccessPermission = "ic2.accesssafe";
 
 	@ConfigBoolean(category = CATEGORY_OTHER,
@@ -128,6 +128,10 @@ public final class EventConfig
 			   comment = "Максимальное количество Ускорителей в механизме (0 - без ограничений)",
 			   min = 0)
 	public static int maxOverclockerCount = 0;
+
+	@ConfigBoolean(category = CATEGORY_OTHER,
+				   comment = "Фикс дропа персональных блоков (Торговые аппараты, Сейфы и т.д.)")
+	public static boolean fixPersonalDrop = false;
 
 	@ConfigInt(category = CATEGORY_WIND_ROTORS, comment = "Урон ветровым роторам в тик", min = 0)
 	public static int windRotorDamage = 1;
@@ -163,10 +167,16 @@ public final class EventConfig
 			   min = 1)
 	public static int skipTicksAmount = 1;
 
+	@ConfigInt(category = CATEGORY_PERFORMANCE, comment = "Количество пропускаемых Ветрогенератором тиков", min = 0)
+	public static int skipWindGeneratorTicksAmount = 0;
+
 	@ConfigBoolean(category = CATEGORY_PERFORMANCE,
 				   comment = "Оптимизация Ветрогенератора",
 				   oldCategory = CATEGORY_OTHER)
 	public static boolean optimizeWindGenerator = false;
+
+	@ConfigBoolean(category = CATEGORY_PERFORMANCE, comment = "Оптимизация Ветрогенератора (проверка высоты блоков)")
+	public static boolean optimizeWindGeneratorByHeight = false;
 
 	@ConfigInt(name = "mining",
 			   category = CATEGORY_LASER_ENERGY,
@@ -224,13 +234,17 @@ public final class EventConfig
 			   oldCategory = CATEGORY_LASER)
 	public static int laserExplosive = 5000;
 
-	@ConfigBoolean(name = "breakBlock", category = CATEGORY_LASER, comment = "Разрушение блоков Шахтёрским лазером", oldName = "laserBreakBlock")
+	@ConfigBoolean(name = "breakBlock",
+				   category = CATEGORY_LASER,
+				   comment = "Разрушение блоков Шахтёрским лазером",
+				   oldName = "laserBreakBlock")
 	public static boolean laserBreakBlock = true;
 
 	@ConfigInt(name = "maxBreakY",
 			   category = CATEGORY_LASER,
 			   comment = "Максимальная высота, на которой может работать Шахтёрский лазер",
-			   min = 1, oldName = "laserMaxBreakY")
+			   min = 1,
+			   oldName = "laserMaxBreakY")
 	public static int laserMaxBreakY = 255;
 
 	@ConfigBoolean(name = "scatterEnabled",

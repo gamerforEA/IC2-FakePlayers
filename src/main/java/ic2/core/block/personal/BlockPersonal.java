@@ -89,14 +89,21 @@ public class BlockPersonal extends BlockMultiID
 	@Override
 	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune)
 	{
-		if (IC2.platform.isSimulating() && IC2.platform.isRendering())
-			return super.getDrops(world, x, y, z, metadata, fortune);
+		boolean fullDrop;
+
+		// TODO gamerforEA code start
+		if (EventConfig.fixPersonalDrop)
+			fullDrop = IC2.platform.isSimulating();
 		else
-		{
-			ArrayList<ItemStack> ret = new ArrayList();
-			ret.add(new ItemStack(this, 1, metadata));
-			return ret;
-		}
+			// TODO gamerforEA code end
+			fullDrop = IC2.platform.isSimulating() && IC2.platform.isRendering();
+
+		if (fullDrop)
+			return super.getDrops(world, x, y, z, metadata, fortune);
+
+		ArrayList<ItemStack> ret = new ArrayList();
+		ret.add(new ItemStack(this, 1, metadata));
+		return ret;
 	}
 
 	@Override
@@ -127,30 +134,24 @@ public class BlockPersonal extends BlockMultiID
 	{
 		if (player.isSneaking())
 			return false;
-		else
+		int meta = world.getBlockMetadata(x, y, z);
+		TileEntityBlock te = (TileEntityBlock) this.getOwnTe(world, x, y, z);
+		if (te == null)
+			return false;
+		if (IC2.platform.isSimulating() && meta != 1 && meta != 2 && te instanceof IPersonalBlock && !((IPersonalBlock) te).permitsAccess(player.getGameProfile()))
 		{
-			int meta = world.getBlockMetadata(x, y, z);
-			TileEntityBlock te = (TileEntityBlock) this.getOwnTe(world, x, y, z);
-			if (te == null)
-				return false;
-			else if (IC2.platform.isSimulating() && meta != 1 && meta != 2 && te instanceof IPersonalBlock && !((IPersonalBlock) te).permitsAccess(player.getGameProfile()))
-			{
-				IC2.platform.messagePlayer(player, "This safe is owned by " + ((IPersonalBlock) te).getOwner().getName());
-				return false;
-			}
-			else
-			{
-				// TODO gamerforEA code start
-				if (EventConfig.tradeOMatOnePlayer && te instanceof TileEntityTradeOMat && ((TileEntityTradeOMat) te).isOpened)
-				{
-					player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Данный торговый аппарат уже кем-то открыт"));
-					return false;
-				}
-				// TODO gamerforEA code end
-
-				return super.onBlockActivated(world, x, y, z, player, side, xOffset, yOffset, zOffset);
-			}
+			IC2.platform.messagePlayer(player, "This safe is owned by " + ((IPersonalBlock) te).getOwner().getName());
+			return false;
 		}
+		// TODO gamerforEA code start
+		if (EventConfig.tradeOMatOnePlayer && te instanceof TileEntityTradeOMat && ((TileEntityTradeOMat) te).isOpened)
+		{
+			player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Данный торговый аппарат уже кем-то открыт"));
+			return false;
+		}
+		// TODO gamerforEA code end
+
+		return super.onBlockActivated(world, x, y, z, player, side, xOffset, yOffset, zOffset);
 	}
 
 	@Override

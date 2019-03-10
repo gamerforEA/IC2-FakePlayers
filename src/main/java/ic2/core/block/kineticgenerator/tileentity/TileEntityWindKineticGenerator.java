@@ -28,8 +28,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.Vector;
 
@@ -45,12 +47,37 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 	private static final int nominalRotationPeriod = 500;
 	public static final float outputModifier = 10.0F * ConfigUtil.getFloat(MainConfig.get(), "balance/energy/kineticgenerator/wind");
 
+	// TODO gamerforEA code start
+	private int ticksSkipped;
+
+	private boolean tryTick()
+	{
+		int skipTicksAmount = EventConfig.skipWindGeneratorTicksAmount;
+		if (skipTicksAmount <= 0)
+			return true;
+
+		this.ticksSkipped++;
+		if (this.ticksSkipped > skipTicksAmount)
+		{
+			this.ticksSkipped = 0;
+			return true;
+		}
+
+		return false;
+	}
+	// TODO gamerforEA code end
+
 	@Override
 	protected void updateEntityServer()
 	{
 		super.updateEntityServer();
 		if (this.updateTicker++ % this.getTickRate() == 0)
 		{
+			// TODO gamerforEA code start
+			if (!this.tryTick())
+				return;
+			// TODO gamerforEA code end
+
 			boolean needsInvUpdate;
 			if (!this.rotorSlot.isEmpty())
 				// TODO gamerforEA code replace, old code:
@@ -194,13 +221,29 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 	}
 
 	// TODO gamerforEA code end
+	private static final ThreadLocal<BitSet> VALID_HEIGHT_SET = new ThreadLocal<>();
+
 	public int checkSpace(int length, boolean onlyrotor)
 	{
 		return this.checkSpace(length, onlyrotor, Integer.MAX_VALUE);
 	}
+
+	private static BitSet provideValidHeightSet(int size)
+	{
+		BitSet bitSet = VALID_HEIGHT_SET.get();
+		if (bitSet != null && size <= bitSet.length())
+		{
+			bitSet.clear();
+			return bitSet;
+		}
+
+		bitSet = new BitSet(size);
+		VALID_HEIGHT_SET.set(bitSet);
+		return bitSet;
+	}
 	// TODO gamerforEA code end
 
-	// TODO gamerforEA add
+	// TODO gamerforEA add maxOccupiedCount:int parameter
 	public int checkSpace(int length, boolean onlyrotor, int maxOccupiedCount)
 	{
 		// TODO gamerforEA code start
@@ -227,15 +270,55 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 		// TODO gamerforEA code replace, old code:
 		// ChunkCache chunkCache = new ChunkCache(this.worldObj, this.xCoord - xMaxDist, this.yCoord - box, this.zCoord - zMaxDist, this.xCoord + xMaxDist, this.yCoord + box, this.zCoord + zMaxDist, 0);
 		IBlockAccess chunkCache;
-		if (EventConfig.optimizeWindGenerator)
+		boolean optimize = EventConfig.optimizeWindGenerator;
+		if (optimize)
 			chunkCache = new LazyChunkCache(this.worldObj, this.xCoord - xMaxDist, this.yCoord - box, this.zCoord - zMaxDist, this.xCoord + xMaxDist, this.yCoord + box, this.zCoord + zMaxDist, false);
 		else
 			chunkCache = new ChunkCache(this.worldObj, this.xCoord - xMaxDist, this.yCoord - box, this.zCoord - zMaxDist, this.xCoord + xMaxDist, this.yCoord + box, this.zCoord + zMaxDist, 0);
+
+		int minX = this.xCoord - xMaxDist;
+		int maxX = this.xCoord + xMaxDist;
+		int minZ = this.zCoord - zMaxDist;
+		int maxZ = this.zCoord + zMaxDist;
+		int xSize = maxX - minX + 1;
+		int zSize = maxZ - minZ + 1;
+		boolean optimizeByHeight = optimize && EventConfig.optimizeWindGeneratorByHeight && maxOccupiedCount > 1;
+		BitSet validHeightSet = optimizeByHeight ? provideValidHeightSet(xSize * zSize) : null;
+		if (validHeightSet != null)
+		{
+			int minY = this.yCoord - box;
+			for (int right = -box; right <= box; ++right)
+			{
+				for (int fwd = lentemp - length; fwd <= length; ++fwd)
+				{
+					int x = this.xCoord + fwd * fwdDir.offsetX + right * rightDir.offsetX;
+					int z = this.zCoord + fwd * fwdDir.offsetZ + right * rightDir.offsetZ;
+
+					assert Math.abs(x - this.xCoord) <= xMaxDist;
+					assert Math.abs(z - this.zCoord) <= zMaxDist;
+
+					Chunk chunk = ((LazyChunkCache) chunkCache).getChunkFromBlockCoords(x, z);
+					boolean isValidHeight = chunk != null && chunk.getHeightValue(x & 15, z & 15) >= minY;
+					if (isValidHeight)
+					{
+						int localX = x - minX;
+						int localZ = z - minZ;
+						int index = localX * xSize + localZ;
+						validHeightSet.set(index, true);
+					}
+				}
+			}
+		}
 		// TODO gamerforEA code end
 
 		for (int up = -box; up <= box; ++up)
 		{
 			int y = this.yCoord + up;
+
+			// TODO gamerforEA code start
+			if (y < 0 || y > 255)
+				continue;
+			// TODO gamerforEA code end
 
 			for (int right = -box; right <= box; ++right)
 			{
@@ -248,6 +331,17 @@ public class TileEntityWindKineticGenerator extends TileEntityInventory implemen
 
 					assert Math.abs(x - this.xCoord) <= xMaxDist;
 					assert Math.abs(z - this.zCoord) <= zMaxDist;
+
+					// TODO gamerforEA code start
+					if (validHeightSet != null)
+					{
+						int localX = x - minX;
+						int localZ = z - minZ;
+						int index = localX * xSize + localZ;
+						if (!validHeightSet.get(index))
+							continue;
+					}
+					// TODO gamerforEA code end
 
 					Block block = chunkCache.getBlock(x, y, z);
 					if (!block.isAir(chunkCache, x, y, z))

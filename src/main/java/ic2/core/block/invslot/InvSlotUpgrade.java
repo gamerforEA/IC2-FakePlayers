@@ -33,26 +33,30 @@ public class InvSlotUpgrade extends InvSlot
 		this.resetRates();
 	}
 
-	@Override
-	public boolean accepts(ItemStack stack)
+	// TODO gamerforEA add ignoreLimits:boolean parameter
+	public boolean accepts(ItemStack stack, boolean ignoreLimits)
 	{
 		Item rawItem = stack.getItem();
 		if (!(rawItem instanceof IUpgradeItem))
 			return false;
+
 		IUpgradeItem item = (IUpgradeItem) rawItem;
 
 		// TODO gamerforEA code start
-		int maxOverclockerCount = EventConfig.maxOverclockerCount;
-		if (maxOverclockerCount > 0 && stack.isItemEqual(Ic2Items.overclockerUpgrade))
+		if (!ignoreLimits)
 		{
-			for (int slot = 0, count = 0; slot < this.size(); slot++)
+			int maxCount = this.getMaxUpgradeCount(stack);
+			if (maxCount > 0)
 			{
-				ItemStack stackInSlot = this.get(slot);
-				if (stackInSlot != null && stackInSlot.stackSize > 0 && stackInSlot.isItemEqual(Ic2Items.overclockerUpgrade))
+				for (int slot = 0, count = 0; slot < this.size(); slot++)
 				{
-					count += stackInSlot.stackSize;
-					if (count >= maxOverclockerCount)
-						return false;
+					ItemStack stackInSlot = this.get(slot);
+					if (stackInSlot != null && stackInSlot.stackSize > 0 && stackInSlot.isItemEqual(Ic2Items.overclockerUpgrade))
+					{
+						count += stackInSlot.stackSize;
+						if (count >= maxCount)
+							return false;
+					}
 				}
 			}
 		}
@@ -63,6 +67,24 @@ public class InvSlotUpgrade extends InvSlot
 
 	// TODO gamerforEA code start
 	private final ThreadLocal<Boolean> onChangedLock = new ThreadLocal<>();
+
+	@Override
+	public boolean accepts(ItemStack stack)
+	{
+		return this.accepts(stack, false);
+	}
+
+	protected int getMaxUpgradeCount(ItemStack stack)
+	{
+		if (stack == null || stack.getItem() == null)
+			return 0;
+
+		int maxOverclockerCount = EventConfig.maxOverclockerCount;
+		if (maxOverclockerCount > 0 && stack.isItemEqual(Ic2Items.overclockerUpgrade))
+			return maxOverclockerCount;
+
+		return 0;
+	}
 	// TODO gamerforEA code end
 
 	@Override
@@ -77,8 +99,9 @@ public class InvSlotUpgrade extends InvSlot
 		this.resetRates();
 
 		// TODO gamerforEA code start
-		if (maxOverclockerCount > 0)
+		if (maxOverclockerCount > 0 && this.base.hasWorldObj())
 		{
+			// TODO Use getMaxUpgradeCount method for all upgrades
 			this.onChangedLock.set(true);
 			try
 			{
@@ -123,26 +146,45 @@ public class InvSlotUpgrade extends InvSlot
 
 		for (int i = 0; i < this.size(); ++i)
 		{
-			final ItemStack stack = this.get(i);
+			ItemStack stack = this.get(i);
 
-			// TODO gamerforEA add condition [2]
-			if (stack != null && stack.stackSize > 0 && this.accepts(stack))
+			if (stack == null)
+				continue;
+
+			int stackSize = stack.stackSize;
+
+			/* TODO gamerforEA code replace, old code:
+			if (!this.accepts(stack))
+				continue; */
+			if (stackSize <= 0)
+				continue;
+
+			if (!this.accepts(stack, true))
+				continue;
+
+			int maxCount = this.getMaxUpgradeCount(stack);
+			if (maxCount > stackSize)
 			{
-				final IUpgradeItem upgrade = (IUpgradeItem) stack.getItem();
-				this.augmentation += upgrade.getAugmentation(stack, block) * stack.stackSize;
-				this.extraProcessTime += upgrade.getExtraProcessTime(stack, block) * stack.stackSize;
-				this.processTimeMultiplier *= Math.pow(upgrade.getProcessTimeMultiplier(stack, block), (double) stack.stackSize);
-				this.extraEnergyDemand += upgrade.getExtraEnergyDemand(stack, block) * stack.stackSize;
-				this.energyDemandMultiplier *= Math.pow(upgrade.getEnergyDemandMultiplier(stack, block), (double) stack.stackSize);
-				this.extraEnergyStorage += upgrade.getExtraEnergyStorage(stack, block) * stack.stackSize;
-				this.energyStorageMultiplier *= Math.pow(upgrade.getEnergyStorageMultiplier(stack, block), (double) stack.stackSize);
-				this.extraTier += upgrade.getExtraTier(stack, block) * stack.stackSize;
-				if (upgrade.modifiesRedstoneInput(stack, block))
-				{
-					if (redstoneModifiers == null)
-						redstoneModifiers = new ArrayList<>(this.size());
-					redstoneModifiers.add(redstoneInput -> upgrade.getRedstoneInput(stack, block, redstoneInput));
-				}
+				stackSize = maxCount;
+				stack = StackUtil.copyWithSize(stack, stackSize);
+			}
+			// TODO gamerforEA code end
+
+			final IUpgradeItem upgrade = (IUpgradeItem) stack.getItem();
+			this.augmentation += upgrade.getAugmentation(stack, block) * stackSize;
+			this.extraProcessTime += upgrade.getExtraProcessTime(stack, block) * stackSize;
+			this.processTimeMultiplier *= Math.pow(upgrade.getProcessTimeMultiplier(stack, block), (double) stackSize);
+			this.extraEnergyDemand += upgrade.getExtraEnergyDemand(stack, block) * stackSize;
+			this.energyDemandMultiplier *= Math.pow(upgrade.getEnergyDemandMultiplier(stack, block), (double) stackSize);
+			this.extraEnergyStorage += upgrade.getExtraEnergyStorage(stack, block) * stackSize;
+			this.energyStorageMultiplier *= Math.pow(upgrade.getEnergyStorageMultiplier(stack, block), (double) stackSize);
+			this.extraTier += upgrade.getExtraTier(stack, block) * stackSize;
+			if (upgrade.modifiesRedstoneInput(stack, block))
+			{
+				if (redstoneModifiers == null)
+					redstoneModifiers = new ArrayList<>(this.size());
+				ItemStack finalStack = stack;
+				redstoneModifiers.add(redstoneInput -> upgrade.getRedstoneInput(finalStack, block, redstoneInput));
 			}
 		}
 
