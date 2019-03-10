@@ -78,6 +78,11 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 	public boolean addedToEnergyNet = false;
 	private static final float huOutputModifier = 2.0F * ConfigUtil.getFloat(MainConfig.get(), "balance/energy/FluidReactor/outputModifier");
 
+	// TODO gamerforEA code start
+	private final float nuclearOutputModifier = ConfigUtil.getFloat(MainConfig.get(), "balance/energy/generator/nuclear");
+	private final float generatorOutputModifier = ConfigUtil.getFloat(MainConfig.get(), "balance/energy/generator/generator");
+	// TODO gamerforEA code end
+
 	public TileEntityNuclearReactorElectric()
 	{
 		this.hotcoolinputSlot = new InvSlotConsumableLiquidByTank(this, "hotcoolinputSlot", 56, InvSlot.Access.I, 1, InvSlot.InvSide.ANY, InvSlotConsumableLiquid.OpType.Fill, this.outputTank);
@@ -176,7 +181,10 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 	@Override
 	public double getOfferedEnergy()
 	{
-		return this.getReactorEnergyOutput() * 5.0F * ConfigUtil.getFloat(MainConfig.get(), "balance/energy/generator/nuclear");
+		// TODO gamerforEA code replace, old code:
+		// return this.getReactorEnergyOutput() * 5 * ConfigUtil.getFloat(MainConfig.get(), "balance/energy/generator/nuclear");
+		return this.getReactorEnergyOutput() * 5 * this.nuclearOutputModifier;
+		// TODO gamerforEA code end
 	}
 
 	@Override
@@ -492,7 +500,10 @@ public class TileEntityNuclearReactorElectric extends TileEntityInventory
 	@Override
 	public boolean produceEnergy()
 	{
-		return this.receiveredstone() && ConfigUtil.getFloat(MainConfig.get(), "balance/energy/generator/generator") > 0.0F;
+		// TODO gamerforEA code replace, old code:
+		// return this.receiveredstone() && ConfigUtil.getFloat(MainConfig.get(), "balance/energy/generator/generator") > 0;
+		return this.receiveredstone() && this.generatorOutputModifier > 0;
+		// TODO gamerforEA code end
 	}
 
 	public boolean receiveredstone()
